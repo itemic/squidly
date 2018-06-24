@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-
+    
 	<Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
@@ -15,7 +15,7 @@
 			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
 
-        <CommandBar RequestedTheme="Dark" DefaultLabelPosition="Right">
+        <CommandBar RequestedTheme="Light" DefaultLabelPosition="Right">
             <CommandBar.Content>
                 <InkToolbar x:Name="inkToolbar"
 					TargetInkCanvas="{x:Bind inkCanvas}">
@@ -23,17 +23,38 @@
             </CommandBar.Content>
             <AppBarButton Icon="Save" Label="Save" Click="saveInk_ClickAsync"/>
             <AppBarButton Icon="OpenFile" Label="Load" Click="loadInk_ClickAsync"/>
+            <AppBarSeparator/>
             <AppBarButton Icon="Undo" Label="Undo"/>
             <AppBarButton Icon="Redo" Label="Redo"/>
+            <AppBarSeparator/>
+            <AppBarButton Icon="Pin" Label="TEST Comment">
+                <AppBarButton.Flyout>
+                    <Flyout>
+                        <StackPanel>
+                            <TextBlock Text="Test Comment"/>
+                            <InkToolbar x:Name="inkToolbar2"
+					        TargetInkCanvas="{x:Bind Canvas2}">
+                            </InkToolbar>
+                            <Canvas x:Name="c2"/>
+                            <InkCanvas x:Name="Canvas2" Width="250" Height="250"/>
+                            <Button Content="Does Nothing This Is A Test"/>
+
+                        </StackPanel>
+
+                    </Flyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+            <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
         </CommandBar>
 
-		<StackPanel x:Name="ToolPanel" Orientation="Horizontal" Grid.Row="1">
-			
-		</StackPanel>
 
 		<Grid x:Name="drawingCanvas" Grid.Row="2">
-			<Canvas x:Name="canvas"/>
-			<InkCanvas x:Name="inkCanvas"/>
+            <Grid>
+
+                <Canvas x:Name="canvas"/>
+                <InkCanvas x:Name="inkCanvas"/>
+            </Grid>
+            
 		</Grid>
 
 		

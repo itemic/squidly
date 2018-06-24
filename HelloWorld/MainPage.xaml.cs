@@ -40,6 +40,11 @@ namespace HelloWorld
                 Windows.UI.Core.CoreInputDeviceTypes.Mouse |
                 Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
+
+            Canvas2.InkPresenter.InputDeviceTypes =
+               Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+               Windows.UI.Core.CoreInputDeviceTypes.Touch |
+               Windows.UI.Core.CoreInputDeviceTypes.Pen;
         }
 
         private async void saveInk_ClickAsync(object sender, RoutedEventArgs e)
