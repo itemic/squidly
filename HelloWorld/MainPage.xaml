@@ -22,7 +22,7 @@
                 </InkToolbar>
             </CommandBar.Content>
             <AppBarButton Icon="Save" Label="Save" Click="saveInk_ClickAsync"/>
-            <AppBarButton Icon="OpenFile" Label="Load"/>
+            <AppBarButton Icon="OpenFile" Label="Load" Click="loadInk_ClickAsync"/>
             <AppBarButton Icon="Undo" Label="Undo"/>
             <AppBarButton Icon="Redo" Label="Redo"/>
         </CommandBar>

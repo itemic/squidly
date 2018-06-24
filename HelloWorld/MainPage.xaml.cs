@@ -61,6 +61,25 @@ namespace HelloWorld
             }
         }
 
+        private async void loadInk_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
+            openPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+            openPicker.FileTypeFilter.Add(".gif");
+
+            var file = await openPicker.PickSingleFileAsync();
+
+            if (file != null)
+            {
+                IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
+                using (var inputStream = stream.GetInputStreamAt(0))
+                {
+                    await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                }
+                stream.Dispose();
+            }
+        }
+
         private async void recogniseShape_ClickAsync(object sender, RoutedEventArgs e)
         {
             strokesShape = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
