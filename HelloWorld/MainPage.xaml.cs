@@ -16,6 +16,7 @@ using Windows.UI.Input.Inking;
 using Windows.UI.Input.Inking.Analysis;
 using Windows.UI.Xaml.Shapes;
 using Windows.Storage.Streams;
+using System.Threading.Tasks;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -39,6 +40,25 @@ namespace HelloWorld
                 Windows.UI.Core.CoreInputDeviceTypes.Mouse |
                 Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
+        }
+
+        private async void saveInk_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Count > 0) {
+                var savePicker = new Windows.Storage.Pickers.FileSavePicker();
+                savePicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+                savePicker.FileTypeChoices.Add("Gif with embedded ISF", new List<string> { ".gif" });
+
+                var file = await savePicker.PickSaveFileAsync();
+
+                if (null != file)
+                {
+                    using (IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite))
+                    {
+                        await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(stream);
+                    }
+                }
+            }
         }
 
         private async void recogniseShape_ClickAsync(object sender, RoutedEventArgs e)
@@ -131,5 +151,6 @@ namespace HelloWorld
             canvas.Children.Add(polygon);
         }
 
+        
     }
 }
