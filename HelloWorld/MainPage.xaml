@@ -25,8 +25,8 @@
             <AppBarButton Icon="OpenFile" Label="Load" Click="loadInk_ClickAsync"/>
             <AppBarButton Icon="Back" Label="Back" Click="backToMenu"/>
             <AppBarSeparator/>
-            <AppBarButton Icon="Undo" Label="Undo"/>
-            <AppBarButton Icon="Redo" Label="Redo"/>
+            <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
+            <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
             <AppBarSeparator/>
             <AppBarButton Icon="Pin" Label="TEST Comment">
                 <AppBarButton.Flyout>

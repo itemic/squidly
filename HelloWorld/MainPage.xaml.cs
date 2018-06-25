@@ -28,6 +28,8 @@ namespace HelloWorld
     public sealed partial class MainPage : Page
     {
 
+        private Stack<InkStroke> undoStack { get; set; }
+
         InkAnalyzer analyzerShape = new InkAnalyzer();
         IReadOnlyList<InkStroke> strokesShape = null;
         InkAnalysisResult resultShape = null;
@@ -45,6 +47,16 @@ namespace HelloWorld
                Windows.UI.Core.CoreInputDeviceTypes.Mouse |
                Windows.UI.Core.CoreInputDeviceTypes.Touch |
                Windows.UI.Core.CoreInputDeviceTypes.Pen;
+
+            undoStack = new Stack<InkStroke>();
+
+            inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
+        }
+
+        private void ClearStack(InkStrokeInput sender, Windows.UI.Core.PointerEventArgs args)
+        {
+            // clear the stack if a new stroke has been added
+            undoStack.Clear();
         }
 
         private async void saveInk_ClickAsync(object sender, RoutedEventArgs e)
@@ -132,6 +144,34 @@ namespace HelloWorld
         private void backToMenu(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(Home));
+        }
+
+        private void Undo_Click(object sender, RoutedEventArgs e)
+        {
+            //Source: http://edi.wang/post/2017/7/25/uwp-ink-undo-redo
+            IReadOnlyList<InkStroke> strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+            if (strokes.Count > 0)
+            {
+                strokes[strokes.Count - 1].Selected = true;
+                undoStack.Push(strokes[strokes.Count - 1]);
+                inkCanvas.InkPresenter.StrokeContainer.DeleteSelected();
+            }
+
+        }
+
+        private void Redo_Click(object sender, RoutedEventArgs e)
+        {
+            if (undoStack.Count > 0)
+            {
+                var stroke = undoStack.Pop();
+
+                var strokeBuilder = new InkStrokeBuilder();
+                strokeBuilder.SetDefaultDrawingAttributes(stroke.DrawingAttributes);
+                System.Numerics.Matrix3x2 matrix = stroke.PointTransform;
+                IReadOnlyList<InkPoint> inkPoints = stroke.GetInkPoints();
+                InkStroke inkStroke = strokeBuilder.CreateStrokeFromInkPoints(inkPoints, matrix);
+                inkCanvas.InkPresenter.StrokeContainer.AddStroke(inkStroke);
+            }
         }
 
         private void DrawEllipse(InkAnalysisInkDrawing shape)
