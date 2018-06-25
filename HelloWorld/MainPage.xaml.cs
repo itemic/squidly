@@ -129,6 +129,11 @@ namespace HelloWorld
             }
         }
 
+        private void backToMenu(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Home));
+        }
+
         private void DrawEllipse(InkAnalysisInkDrawing shape)
         {
             var points = shape.Points;
@@ -175,6 +180,20 @@ namespace HelloWorld
             canvas.Children.Add(polygon);
         }
 
-        
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
+            if (e.Parameter is IRandomAccessStream)
+            {
+                var stream = (IRandomAccessStream)e.Parameter;
+                using (var inputStream = stream.GetInputStreamAt(0))
+                {
+                    await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                }
+                stream.Dispose();
+            }
+            base.OnNavigatedTo(e);
+        }
+
+
     }
 }
