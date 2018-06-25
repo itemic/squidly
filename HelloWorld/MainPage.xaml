@@ -54,7 +54,7 @@
             <Grid>
 
                 <Canvas x:Name="canvas"/>
-                <InkCanvas x:Name="inkCanvas" IsHitTestVisible="False"/>
+                <InkCanvas x:Name="inkCanvas"/>
             </Grid>
             
 		</Grid>
