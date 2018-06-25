@@ -15,7 +15,7 @@
 			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
 
-        <CommandBar RequestedTheme="Light" DefaultLabelPosition="Right">
+        <CommandBar RequestedTheme="Dark" DefaultLabelPosition="Right">
             <CommandBar.Content>
                 <InkToolbar x:Name="inkToolbar"
 					TargetInkCanvas="{x:Bind inkCanvas}">
@@ -23,6 +23,7 @@
             </CommandBar.Content>
             <AppBarButton Icon="Save" Label="Save" Click="saveInk_ClickAsync"/>
             <AppBarButton Icon="OpenFile" Label="Load" Click="loadInk_ClickAsync"/>
+            
             <AppBarButton Icon="Back" Label="Back" Click="backToMenu"/>
             <AppBarSeparator/>
             <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
@@ -30,7 +31,7 @@
             <AppBarSeparator/>
             <AppBarButton Icon="Pin" Label="TEST Comment">
                 <AppBarButton.Flyout>
-                    <Flyout>
+                    <Flyout LightDismissOverlayMode="On">
                         <StackPanel>
                             <TextBlock Text="Test Comment"/>
                             <InkToolbar x:Name="inkToolbar2"
@@ -53,7 +54,7 @@
             <Grid>
 
                 <Canvas x:Name="canvas"/>
-                <InkCanvas x:Name="inkCanvas"/>
+                <InkCanvas x:Name="inkCanvas" IsHitTestVisible="False"/>
             </Grid>
             
 		</Grid>

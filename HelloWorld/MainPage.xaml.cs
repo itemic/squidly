@@ -17,6 +17,7 @@ using Windows.UI.Input.Inking.Analysis;
 using Windows.UI.Xaml.Shapes;
 using Windows.Storage.Streams;
 using System.Threading.Tasks;
+using Windows.UI.Input;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -39,7 +40,8 @@ namespace HelloWorld
             this.InitializeComponent();
 
             inkCanvas.InkPresenter.InputDeviceTypes =
-                Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+
+                //Windows.UI.Core.CoreInputDeviceTypes.Mouse |
                 Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
@@ -51,6 +53,62 @@ namespace HelloWorld
             undoStack = new Stack<InkStroke>();
 
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
+
+            inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
+        }
+
+        private async void CreatePopup(object sender, RightTappedRoutedEventArgs e)
+        {
+            Point point = e.GetPosition(inkCanvas);
+            
+
+            var rectangle = new Rectangle();
+            rectangle.Fill = new SolidColorBrush(Windows.UI.Colors.SteelBlue);
+            rectangle.Width = 25;
+            rectangle.Height = 25;
+
+            Canvas.SetLeft(rectangle, point.X - 12.5);
+            Canvas.SetTop(rectangle, point.Y -12.5);
+
+
+            Flyout flyout = new Flyout();
+
+            TextBlock tb = new TextBlock();
+            tb.Text = "New Comment";
+
+            InkCanvas ic = new InkCanvas();
+            ic.Width = 250;
+            ic.Height = 250;
+
+            InkToolbar it = new InkToolbar();
+            it.TargetInkCanvas = ic;
+            ic.InkPresenter.InputDeviceTypes =
+              Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+              Windows.UI.Core.CoreInputDeviceTypes.Touch |
+              Windows.UI.Core.CoreInputDeviceTypes.Pen;
+
+            StackPanel sp = new StackPanel();
+            sp.Children.Add(tb);
+            sp.Children.Add(it);
+            sp.Children.Add(ic);
+
+            flyout.Content = sp;
+
+            rectangle.PointerReleased += async delegate (object s, PointerRoutedEventArgs evt)
+            {
+                ContentDialog noWifiDialog = new ContentDialog
+                {
+                    Title = "No wifi connection",
+                    Content = "Check your connection and try again.",
+                    CloseButtonText = "Ok"
+                };
+
+                ContentDialogResult result = await noWifiDialog.ShowAsync();
+            };
+
+            canvas.Children.Add(rectangle);
+
+            flyout.ShowAt(rectangle);
         }
 
         private void ClearStack(InkStrokeInput sender, Windows.UI.Core.PointerEventArgs args)
