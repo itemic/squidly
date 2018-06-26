@@ -42,7 +42,9 @@ namespace HelloWorld
             inkCanvas.InkPresenter.InputDeviceTypes =
 
                 //Windows.UI.Core.CoreInputDeviceTypes.Mouse |
-                Windows.UI.Core.CoreInputDeviceTypes.Touch |
+                // Uncomment the line below if you want to draw with touch
+                // When commented out, long touch to create comment
+                // Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
             Canvas2.InkPresenter.InputDeviceTypes =
