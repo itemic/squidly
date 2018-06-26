@@ -16,6 +16,8 @@ using Windows.UI.Input.Inking;
 using Windows.UI.Input.Inking.Analysis;
 using Windows.UI.Xaml.Shapes;
 using Windows.Storage.Streams;
+using System.Threading.Tasks;
+using Windows.UI.Input;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -27,6 +29,8 @@ namespace HelloWorld
     public sealed partial class MainPage : Page
     {
 
+        private Stack<InkStroke> undoStack { get; set; }
+
         InkAnalyzer analyzerShape = new InkAnalyzer();
         IReadOnlyList<InkStroke> strokesShape = null;
         InkAnalysisResult resultShape = null;
@@ -36,9 +40,121 @@ namespace HelloWorld
             this.InitializeComponent();
 
             inkCanvas.InkPresenter.InputDeviceTypes =
-                Windows.UI.Core.CoreInputDeviceTypes.Mouse |
-                Windows.UI.Core.CoreInputDeviceTypes.Touch |
+
+                //Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+                // Uncomment the line below if you want to draw with touch
+                // When commented out, long touch to create comment
+                // Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
+
+            Canvas2.InkPresenter.InputDeviceTypes =
+               Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+               Windows.UI.Core.CoreInputDeviceTypes.Touch |
+               Windows.UI.Core.CoreInputDeviceTypes.Pen;
+
+            undoStack = new Stack<InkStroke>();
+
+            inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
+
+            inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
+        }
+
+        private async void CreatePopup(object sender, RightTappedRoutedEventArgs e)
+        {
+            Point point = e.GetPosition(inkCanvas);
+            
+
+            var rectangle = new Rectangle();
+            rectangle.Fill = new SolidColorBrush(Windows.UI.Colors.SteelBlue);
+            rectangle.Width = 25;
+            rectangle.Height = 25;
+
+            Canvas.SetLeft(rectangle, point.X - 12.5);
+            Canvas.SetTop(rectangle, point.Y -12.5);
+
+
+            Flyout flyout = new Flyout();
+
+            TextBlock tb = new TextBlock();
+            tb.Text = "New Comment";
+
+            InkCanvas ic = new InkCanvas();
+            ic.Width = 250;
+            ic.Height = 250;
+
+            InkToolbar it = new InkToolbar();
+            it.TargetInkCanvas = ic;
+            ic.InkPresenter.InputDeviceTypes =
+              Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+              Windows.UI.Core.CoreInputDeviceTypes.Touch |
+              Windows.UI.Core.CoreInputDeviceTypes.Pen;
+
+            StackPanel sp = new StackPanel();
+            sp.Children.Add(tb);
+            sp.Children.Add(it);
+            sp.Children.Add(ic);
+
+            flyout.Content = sp;
+
+            rectangle.PointerReleased += async delegate (object s, PointerRoutedEventArgs evt)
+            {
+                ContentDialog noWifiDialog = new ContentDialog
+                {
+                    Title = "No wifi connection",
+                    Content = "Check your connection and try again.",
+                    CloseButtonText = "Ok"
+                };
+
+                ContentDialogResult result = await noWifiDialog.ShowAsync();
+            };
+
+            canvas.Children.Add(rectangle);
+
+            flyout.ShowAt(rectangle);
+        }
+
+        private void ClearStack(InkStrokeInput sender, Windows.UI.Core.PointerEventArgs args)
+        {
+            // clear the stack if a new stroke has been added
+            undoStack.Clear();
+        }
+
+        private async void saveInk_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Count > 0) {
+                var savePicker = new Windows.Storage.Pickers.FileSavePicker();
+                savePicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+                savePicker.FileTypeChoices.Add("Gif with embedded ISF", new List<string> { ".gif" });
+
+                var file = await savePicker.PickSaveFileAsync();
+
+                if (null != file)
+                {
+                    using (IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite))
+                    {
+                        await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(stream);
+                    }
+                }
+            }
+        }
+
+        private async void loadInk_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
+            openPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+            openPicker.FileTypeFilter.Add(".gif");
+
+            var file = await openPicker.PickSingleFileAsync();
+
+            if (file != null)
+            {
+                IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
+                using (var inputStream = stream.GetInputStreamAt(0))
+                {
+                    await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                }
+                stream.Dispose();
+            }
         }
 
         private async void recogniseShape_ClickAsync(object sender, RoutedEventArgs e)
@@ -82,6 +198,39 @@ namespace HelloWorld
                     }
                     inkCanvas.InkPresenter.StrokeContainer.DeleteSelected();
                 }
+            }
+        }
+
+        private void backToMenu(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Home));
+        }
+
+        private void Undo_Click(object sender, RoutedEventArgs e)
+        {
+            //Source: http://edi.wang/post/2017/7/25/uwp-ink-undo-redo
+            IReadOnlyList<InkStroke> strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+            if (strokes.Count > 0)
+            {
+                strokes[strokes.Count - 1].Selected = true;
+                undoStack.Push(strokes[strokes.Count - 1]);
+                inkCanvas.InkPresenter.StrokeContainer.DeleteSelected();
+            }
+
+        }
+
+        private void Redo_Click(object sender, RoutedEventArgs e)
+        {
+            if (undoStack.Count > 0)
+            {
+                var stroke = undoStack.Pop();
+
+                var strokeBuilder = new InkStrokeBuilder();
+                strokeBuilder.SetDefaultDrawingAttributes(stroke.DrawingAttributes);
+                System.Numerics.Matrix3x2 matrix = stroke.PointTransform;
+                IReadOnlyList<InkPoint> inkPoints = stroke.GetInkPoints();
+                InkStroke inkStroke = strokeBuilder.CreateStrokeFromInkPoints(inkPoints, matrix);
+                inkCanvas.InkPresenter.StrokeContainer.AddStroke(inkStroke);
             }
         }
 
@@ -130,6 +279,21 @@ namespace HelloWorld
             polygon.StrokeThickness = 2;
             canvas.Children.Add(polygon);
         }
+
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
+            if (e.Parameter is IRandomAccessStream)
+            {
+                var stream = (IRandomAccessStream)e.Parameter;
+                using (var inputStream = stream.GetInputStreamAt(0))
+                {
+                    await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                }
+                stream.Dispose();
+            }
+            base.OnNavigatedTo(e);
+        }
+
 
     }
 }
