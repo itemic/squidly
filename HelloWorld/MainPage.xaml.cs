@@ -36,6 +36,7 @@ namespace HelloWorld
         IReadOnlyList<InkStroke> strokesShape = null;
         InkAnalysisResult resultShape = null;
         private Random rng = new Random();
+        List<Rectangle> postits = null;
 
         public MainPage()
         {
@@ -48,12 +49,10 @@ namespace HelloWorld
                 Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
-            Canvas2.InkPresenter.InputDeviceTypes =
-               Windows.UI.Core.CoreInputDeviceTypes.Mouse |
-               Windows.UI.Core.CoreInputDeviceTypes.Touch |
-               Windows.UI.Core.CoreInputDeviceTypes.Pen;
+            
 
             undoStack = new Stack<InkStroke>();
+            postits = new List<Rectangle>();
 
             colorArray = new List<SolidColorBrush>();
 
@@ -77,8 +76,8 @@ namespace HelloWorld
             PointerPoint point = args.CurrentPoint;
 
             var rectangle = new Rectangle();
-
-            rectangle.Fill = colorArray[rng.Next(0,colorArray.Count)];
+            SolidColorBrush colorDecision = colorArray[rng.Next(0, colorArray.Count)];
+            rectangle.Fill = colorDecision;
             rectangle.Width = 25;
             rectangle.Height = 25;
             rectangle.Opacity = 0.8;
@@ -92,8 +91,24 @@ namespace HelloWorld
 
             Flyout flyout = new Flyout();
 
-            TextBlock tb = new TextBlock();
-            tb.Text = "New Comment";
+            FlyoutPresenter fp = new FlyoutPresenter();
+
+            Style fps = new Style();
+            fps.TargetType = typeof(FlyoutPresenter);
+            fps.Setters.Add(new Setter(BackgroundProperty, colorDecision));
+            fp.Style = fps;
+            flyout.FlyoutPresenterStyle = fps;
+
+            Button deleteButton = new Button();
+
+            SymbolIcon deleteSymbol = new SymbolIcon();
+            deleteSymbol.Symbol = Symbol.Delete;
+            deleteButton.Content = deleteSymbol;
+            deleteButton.Click += async delegate (object e, RoutedEventArgs evt)
+            {
+                canvas.Children.Remove(rectangle);
+                postits.Remove(rectangle);
+            };
 
             InkCanvas ic = new InkCanvas();
             ic.Width = 250;
@@ -101,41 +116,40 @@ namespace HelloWorld
 
             InkToolbar it = new InkToolbar();
             it.TargetInkCanvas = ic;
+            
+
+
             ic.InkPresenter.InputDeviceTypes =
               Windows.UI.Core.CoreInputDeviceTypes.Mouse |
               Windows.UI.Core.CoreInputDeviceTypes.Touch |
               Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
             StackPanel sp = new StackPanel();
-            sp.Children.Add(tb);
-            sp.Children.Add(it);
+            sp.VerticalAlignment = VerticalAlignment.Center;
+            sp.HorizontalAlignment = HorizontalAlignment.Center;
+
+            StackPanel rightAlign = new StackPanel();
+            rightAlign.HorizontalAlignment = HorizontalAlignment.Right;
+            rightAlign.Children.Add(deleteButton);
+            sp.Children.Add(rightAlign);
             sp.Children.Add(ic);
+            sp.Children.Add(it);
 
             flyout.Content = sp;
+            flyout.LightDismissOverlayMode = LightDismissOverlayMode.On;
+            rectangle.ContextFlyout = flyout;
+            
 
-            rectangle.PointerReleased += async delegate (object s, PointerRoutedEventArgs evt)
-            {
-                flyout.ShowAt(rectangle);
-            };
+        //    rectangle.PointerReleased += async delegate (object s, PointerRoutedEventArgs evt)
+      //      {
+      //          flyout.ShowAt(rectangle);
+      //      };
 
             canvas.Children.Add(rectangle);
-
+            postits.Add(rectangle);
             flyout.ShowAt(rectangle);
         }
 
-        private void CommentMode(object sender, RoutedEventArgs e)
-        {
-            var inputs = inkCanvas.InkPresenter.InputDeviceTypes;
-            if (inputs == (Windows.UI.Core.CoreInputDeviceTypes.Mouse | Windows.UI.Core.CoreInputDeviceTypes.Touch | Windows.UI.Core.CoreInputDeviceTypes.Pen))
-            {
-               inputs = Windows.UI.Core.CoreInputDeviceTypes.None;
-            } else
-            {
-                inputs = Windows.UI.Core.CoreInputDeviceTypes.Mouse | Windows.UI.Core.CoreInputDeviceTypes.Touch | Windows.UI.Core.CoreInputDeviceTypes.Pen;
-            }
-
-            inkCanvas.InkPresenter.InputDeviceTypes = inputs;
-        }
 
        
         

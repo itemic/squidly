@@ -29,24 +29,6 @@
             <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
             <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
             <AppBarSeparator/>
-            <AppBarButton Icon="Pin" Label="TEST Comment">
-                <AppBarButton.Flyout>
-                    <Flyout LightDismissOverlayMode="On">
-                        <StackPanel>
-                            <TextBlock Text="Test Comment"/>
-                            <InkToolbar x:Name="inkToolbar2"
-					        TargetInkCanvas="{x:Bind Canvas2}">
-                            </InkToolbar>
-                            <Canvas x:Name="c2"/>
-                            <InkCanvas x:Name="Canvas2" Width="250" Height="250"/>
-                            <Button Content="Does Nothing This Is A Test"/>
-
-                        </StackPanel>
-
-                    </Flyout>
-                </AppBarButton.Flyout>
-            </AppBarButton>
-            <AppBarToggleButton Icon="MapPin" Label="Comment Mode" Click="CommentMode"/>
         </CommandBar>
 
 
