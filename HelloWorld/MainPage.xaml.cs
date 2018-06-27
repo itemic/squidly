@@ -55,10 +55,61 @@ namespace HelloWorld
             undoStack = new Stack<InkStroke>();
 
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
+            inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
 
+            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
             inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
         }
 
+        private void OtherMakePopup(InkUnprocessedInput sender, Windows.UI.Core.PointerEventArgs args)
+        {
+            PointerPoint point = args.CurrentPoint;
+
+            var rectangle = new Rectangle();
+            rectangle.Fill = new SolidColorBrush(Windows.UI.Colors.Goldenrod);
+            rectangle.Width = 25;
+            rectangle.Height = 25;
+            rectangle.Opacity = 0.8;
+            var rotation = new RotateTransform();
+            rotation.Angle = -25;
+            rectangle.RenderTransform = rotation;
+
+            Canvas.SetLeft(rectangle, point.Position.X - 12.5);
+            Canvas.SetTop(rectangle, point.Position.Y - 12.5);
+
+
+            Flyout flyout = new Flyout();
+
+            TextBlock tb = new TextBlock();
+            tb.Text = "New Comment";
+
+            InkCanvas ic = new InkCanvas();
+            ic.Width = 250;
+            ic.Height = 250;
+
+            InkToolbar it = new InkToolbar();
+            it.TargetInkCanvas = ic;
+            ic.InkPresenter.InputDeviceTypes =
+              Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+              Windows.UI.Core.CoreInputDeviceTypes.Touch |
+              Windows.UI.Core.CoreInputDeviceTypes.Pen;
+
+            StackPanel sp = new StackPanel();
+            sp.Children.Add(tb);
+            sp.Children.Add(it);
+            sp.Children.Add(ic);
+
+            flyout.Content = sp;
+
+            rectangle.PointerReleased += async delegate (object s, PointerRoutedEventArgs evt)
+            {
+                flyout.ShowAt(rectangle);
+            };
+
+            canvas.Children.Add(rectangle);
+
+            flyout.ShowAt(rectangle);
+        }
 
         private void CommentMode(object sender, RoutedEventArgs e)
         {
