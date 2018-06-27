@@ -30,15 +30,16 @@ namespace HelloWorld
     {
 
         private Stack<InkStroke> undoStack { get; set; }
+        private List<SolidColorBrush> colorArray = null;
 
         InkAnalyzer analyzerShape = new InkAnalyzer();
         IReadOnlyList<InkStroke> strokesShape = null;
         InkAnalysisResult resultShape = null;
+        private Random rng = new Random();
 
         public MainPage()
         {
             this.InitializeComponent();
-
             inkCanvas.InkPresenter.InputDeviceTypes =
 
                 Windows.UI.Core.CoreInputDeviceTypes.Mouse |
@@ -54,24 +55,35 @@ namespace HelloWorld
 
             undoStack = new Stack<InkStroke>();
 
+            colorArray = new List<SolidColorBrush>();
+
+            colorArray.Add(new SolidColorBrush(Windows.UI.Colors.Goldenrod));
+            colorArray.Add(new SolidColorBrush(Windows.UI.Colors.LightSkyBlue));
+            colorArray.Add(new SolidColorBrush(Windows.UI.Colors.Plum));
+            colorArray.Add(new SolidColorBrush(Windows.UI.Colors.PaleGreen));
+
+            
+
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
+            
+            // enable adding comments with right click (how in hub??)
             inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
 
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
-            inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
         }
 
-        private void OtherMakePopup(InkUnprocessedInput sender, Windows.UI.Core.PointerEventArgs args)
+        private async void OtherMakePopup(InkUnprocessedInput sender, Windows.UI.Core.PointerEventArgs args)
         {
             PointerPoint point = args.CurrentPoint;
 
             var rectangle = new Rectangle();
-            rectangle.Fill = new SolidColorBrush(Windows.UI.Colors.Goldenrod);
+
+            rectangle.Fill = colorArray[rng.Next(0,colorArray.Count)];
             rectangle.Width = 25;
             rectangle.Height = 25;
             rectangle.Opacity = 0.8;
             var rotation = new RotateTransform();
-            rotation.Angle = -25;
+            rotation.Angle = -30 + rng.Next(60);
             rectangle.RenderTransform = rotation;
 
             Canvas.SetLeft(rectangle, point.Position.X - 12.5);
@@ -126,56 +138,7 @@ namespace HelloWorld
         }
 
        
-        private async void CreatePopup(object sender, RightTappedRoutedEventArgs e)
-        {
-
-            Point point = e.GetPosition(inkCanvas);
-
-            var rectangle = new Rectangle();
-            rectangle.Fill = new SolidColorBrush(Windows.UI.Colors.Goldenrod);
-            rectangle.Width = 25;
-            rectangle.Height = 25;
-            rectangle.Opacity = 0.8;
-            var rotation = new RotateTransform();
-            rotation.Angle = -25;
-            rectangle.RenderTransform = rotation;
-
-            Canvas.SetLeft(rectangle, point.X - 12.5);
-            Canvas.SetTop(rectangle, point.Y -12.5);
-
-
-            Flyout flyout = new Flyout();
-
-            TextBlock tb = new TextBlock();
-            tb.Text = "New Comment";
-
-            InkCanvas ic = new InkCanvas();
-            ic.Width = 250;
-            ic.Height = 250;
-
-            InkToolbar it = new InkToolbar();
-            it.TargetInkCanvas = ic;
-            ic.InkPresenter.InputDeviceTypes =
-              Windows.UI.Core.CoreInputDeviceTypes.Mouse |
-              Windows.UI.Core.CoreInputDeviceTypes.Touch |
-              Windows.UI.Core.CoreInputDeviceTypes.Pen;
-
-            StackPanel sp = new StackPanel();
-            sp.Children.Add(tb);
-            sp.Children.Add(it);
-            sp.Children.Add(ic);
-
-            flyout.Content = sp;
-
-            rectangle.PointerReleased += async delegate (object s, PointerRoutedEventArgs evt)
-            {
-                flyout.ShowAt(rectangle);
-            };
-
-            canvas.Children.Add(rectangle);
-
-            flyout.ShowAt(rectangle);
-        }
+        
 
         private void ClearStack(InkStrokeInput sender, Windows.UI.Core.PointerEventArgs args)
         {
