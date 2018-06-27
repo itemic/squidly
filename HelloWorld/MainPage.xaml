@@ -46,20 +46,21 @@
                     </Flyout>
                 </AppBarButton.Flyout>
             </AppBarButton>
-            <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
+            <AppBarToggleButton Icon="MapPin" Label="Comment Mode" Click="CommentMode"/>
         </CommandBar>
 
 
 		<Grid x:Name="drawingCanvas" Grid.Row="2">
             <Grid>
+                <InkCanvas x:Name="inkCanvas"/>
 
                 <Canvas x:Name="canvas"/>
-                <InkCanvas x:Name="inkCanvas"/>
             </Grid>
+            
             
 		</Grid>
 
 		
         
-	</Grid>
+	</Grid> 
 </Page>

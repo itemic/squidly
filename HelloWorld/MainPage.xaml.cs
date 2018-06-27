@@ -41,10 +41,10 @@ namespace HelloWorld
 
             inkCanvas.InkPresenter.InputDeviceTypes =
 
-                //Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+                Windows.UI.Core.CoreInputDeviceTypes.Mouse |
                 // Uncomment the line below if you want to draw with touch
                 // When commented out, long touch to create comment
-                // Windows.UI.Core.CoreInputDeviceTypes.Touch |
+                Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
             Canvas2.InkPresenter.InputDeviceTypes =
@@ -59,15 +59,35 @@ namespace HelloWorld
             inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
         }
 
+
+        private void CommentMode(object sender, RoutedEventArgs e)
+        {
+            var inputs = inkCanvas.InkPresenter.InputDeviceTypes;
+            if (inputs == (Windows.UI.Core.CoreInputDeviceTypes.Mouse | Windows.UI.Core.CoreInputDeviceTypes.Touch | Windows.UI.Core.CoreInputDeviceTypes.Pen))
+            {
+               inputs = Windows.UI.Core.CoreInputDeviceTypes.None;
+            } else
+            {
+                inputs = Windows.UI.Core.CoreInputDeviceTypes.Mouse | Windows.UI.Core.CoreInputDeviceTypes.Touch | Windows.UI.Core.CoreInputDeviceTypes.Pen;
+            }
+
+            inkCanvas.InkPresenter.InputDeviceTypes = inputs;
+        }
+
+       
         private async void CreatePopup(object sender, RightTappedRoutedEventArgs e)
         {
+
             Point point = e.GetPosition(inkCanvas);
-            
 
             var rectangle = new Rectangle();
-            rectangle.Fill = new SolidColorBrush(Windows.UI.Colors.SteelBlue);
+            rectangle.Fill = new SolidColorBrush(Windows.UI.Colors.Goldenrod);
             rectangle.Width = 25;
             rectangle.Height = 25;
+            rectangle.Opacity = 0.8;
+            var rotation = new RotateTransform();
+            rotation.Angle = -25;
+            rectangle.RenderTransform = rotation;
 
             Canvas.SetLeft(rectangle, point.X - 12.5);
             Canvas.SetTop(rectangle, point.Y -12.5);
@@ -98,14 +118,7 @@ namespace HelloWorld
 
             rectangle.PointerReleased += async delegate (object s, PointerRoutedEventArgs evt)
             {
-                ContentDialog noWifiDialog = new ContentDialog
-                {
-                    Title = "No wifi connection",
-                    Content = "Check your connection and try again.",
-                    CloseButtonText = "Ok"
-                };
-
-                ContentDialogResult result = await noWifiDialog.ShowAsync();
+                flyout.ShowAt(rectangle);
             };
 
             canvas.Children.Add(rectangle);
