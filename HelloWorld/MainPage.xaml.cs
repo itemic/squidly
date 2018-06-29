@@ -18,6 +18,7 @@ using Windows.UI.Xaml.Shapes;
 using Windows.Storage.Streams;
 using System.Threading.Tasks;
 using Windows.UI.Input;
+using HelloWorld.Utils;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -74,7 +75,7 @@ namespace HelloWorld
 
         }
 
-        private async void TouchMakePopup(object sender, RightTappedRoutedEventArgs args)
+        private void TouchMakePopup(object sender, RightTappedRoutedEventArgs args)
         {
             Point point = args.GetPosition(inkCanvas);
 
@@ -141,12 +142,6 @@ namespace HelloWorld
             flyout.Content = sp;
             flyout.LightDismissOverlayMode = LightDismissOverlayMode.On;
             rectangle.ContextFlyout = flyout;
-
-
-            //    rectangle.PointerReleased += async delegate (object s, PointerRoutedEventArgs evt)
-            //      {
-            //          flyout.ShowAt(rectangle);
-            //      };
 
             canvas.Children.Add(rectangle);
             postits.Add(rectangle);
@@ -220,12 +215,7 @@ namespace HelloWorld
             flyout.Content = sp;
             flyout.LightDismissOverlayMode = LightDismissOverlayMode.On;
             rectangle.ContextFlyout = flyout;
-            
 
-        //    rectangle.PointerReleased += async delegate (object s, PointerRoutedEventArgs evt)
-      //      {
-      //          flyout.ShowAt(rectangle);
-      //      };
 
             canvas.Children.Add(rectangle);
             postits.Add(rectangle);
@@ -242,42 +232,14 @@ namespace HelloWorld
             undoStack.Clear();
         }
 
-        private async void saveInk_ClickAsync(object sender, RoutedEventArgs e)
+        private void saveInk_ClickAsync(object sender, RoutedEventArgs e)
         {
-            if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Count > 0) {
-                var savePicker = new Windows.Storage.Pickers.FileSavePicker();
-                savePicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
-                savePicker.FileTypeChoices.Add("Gif with embedded ISF", new List<string> { ".gif" });
-
-                var file = await savePicker.PickSaveFileAsync();
-
-                if (null != file)
-                {
-                    using (IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite))
-                    {
-                        await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(stream);
-                    }
-                }
-            }
+            Save.SaveInk(inkCanvas);
         }
 
-        private async void loadInk_ClickAsync(object sender, RoutedEventArgs e)
+        private void loadInk_ClickAsync(object sender, RoutedEventArgs e)
         {
-            var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
-            openPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
-            openPicker.FileTypeFilter.Add(".gif");
-
-            var file = await openPicker.PickSingleFileAsync();
-
-            if (file != null)
-            {
-                IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
-                using (var inputStream = stream.GetInputStreamAt(0))
-                {
-                    await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
-                }
-                stream.Dispose();
-            }
+            Save.LoadInk(inkCanvas);
         }
 
         private async void recogniseShape_ClickAsync(object sender, RoutedEventArgs e)
