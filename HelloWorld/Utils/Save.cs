@@ -17,7 +17,7 @@ using Windows.UI.Xaml.Shapes;
 
 namespace HelloWorld.Utils
 {
-    public class Save
+    public static class Save
     {
         public async static void SaveInk(InkCanvas inkCanvas)
         {
@@ -39,7 +39,7 @@ namespace HelloWorld.Utils
             }
         }
 
-        public async static void SaveComments(Canvas canvas)
+        public static async void SaveComments(Canvas canvas, List<Comment> comments)
         {
             var folderPicker = new FolderPicker();
             folderPicker.FileTypeFilter.Add("*");
@@ -51,23 +51,40 @@ namespace HelloWorld.Utils
                 var file = await folder.CreateFileAsync("comment", Windows.Storage.CreationCollisionOption.ReplaceExisting);
                 var stream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite);
                 string buffer = "";
-                foreach (UIElement comment in canvas.Children)
-                {
-                    buffer += Canvas.GetTop(comment).ToString() + ";" + Canvas.GetLeft(comment).ToString() + "\n";
-                    
-                }
 
                 using (var outputStream = stream.GetOutputStreamAt(0))
                 {
                     using (var dataWriter = new DataWriter(outputStream))
                     {
-                        dataWriter.WriteString(buffer);
+                        foreach (Comment comment in comments)
+                        {
+                            
+                            dataWriter.WriteString($"{Serialize(comment)}\n");
+                        }
                         await dataWriter.StoreAsync();
                         await outputStream.FlushAsync();
                     }
+                }           
+                stream.Dispose();
+                
+            }
+        }
 
+        public static string Serialize<T>(this T obj)
 
-                }
+        {
+            var ms = new MemoryStream();
+            // Write an object to the Stream and leave it opened
+            using (var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, ownsStream: false))
+            {
+                var ser = new DataContractSerializer(typeof(T));
+                ser.WriteObject(writer, obj);
+            }
+            // Read serialized string from Stream and close it
+            using (var reader = new StreamReader(ms, Encoding.UTF8))
+            {
+                ms.Position = 0;
+                return reader.ReadToEnd();
             }
         }
 
@@ -82,21 +99,52 @@ namespace HelloWorld.Utils
                 var files = await folder.GetFilesAsync();
                 foreach (StorageFile file in files)
                 {
-                    string text = await FileIO.ReadTextAsync(file);
-                    string[] components = text.Split(';');
+                    if (file.Name.Equals("comment"))
+                    {
+                        string text = await FileIO.ReadTextAsync(file);
+                        string[] components = text.Split('\n');
 
-                    var rectangle = new Rectangle();
-                    rectangle.Width = 25;
-                    rectangle.Height = 25;
-                    double top = double.Parse(components[0]);
-                    double left = double.Parse(components[1]);
-                    Canvas.SetTop(rectangle, top);
-                    Canvas.SetLeft(rectangle, left);
-                    rectangle.Fill = new SolidColorBrush(Windows.UI.Colors.SteelBlue);
-                    Debug.WriteLine("hey");
+                        foreach (string component in components)
+                        {
+                            if (component.Length > 0)
+                            {
+                                Comment c = Deserialize<Comment>(component);
+                                var rectangle = new Rectangle();
+                                rectangle.Width = c.width;
+                                rectangle.Height = c.height;
+                                Canvas.SetTop(rectangle, c.top);
+                                Canvas.SetLeft(rectangle, c.left);
+                                rectangle.Fill = new SolidColorBrush(c.fill);
 
-                    canvas.Children.Add(rectangle);
+                                var rotation = new RotateTransform();
+                                rotation.Angle = c.angle;
+                                rectangle.RenderTransform = rotation;
+                                canvas.Children.Add(rectangle);
+                            }
+                        }
+                    }
+                    
+
+                   
                 }
+            }
+        }
+
+        public static T Deserialize<T>(this string xml)
+        {
+            var ms = new MemoryStream();
+            // Write xml content to the Stream and leave it opened
+            using (var writer = new StreamWriter(ms, Encoding.UTF8, 512, leaveOpen: true))
+            {
+                writer.Write(xml);
+                writer.Flush();
+                ms.Position = 0;
+            }
+            // Read Stream to the Serializer and Deserialize and close it
+            using (var reader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, new XmlDictionaryReaderQuotas(), null))
+            {
+                var ser = new DataContractSerializer(typeof(T));
+                return (T)ser.ReadObject(reader);
             }
         }
 

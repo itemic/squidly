@@ -19,6 +19,7 @@ using Windows.Storage.Streams;
 using System.Threading.Tasks;
 using Windows.UI.Input;
 using HelloWorld.Utils;
+using System.Diagnostics;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -31,6 +32,7 @@ namespace HelloWorld
     {
 
         private Stack<InkStroke> undoStack { get; set; }
+
         private List<SolidColorBrush> colorArray = null;
 
         InkAnalyzer analyzerShape = new InkAnalyzer();
@@ -38,6 +40,7 @@ namespace HelloWorld
         InkAnalysisResult resultShape = null;
         private Random rng = new Random();
         List<Rectangle> postits = null;
+        public List<Comment> comments;
 
         public MainPage()
         {
@@ -56,6 +59,7 @@ namespace HelloWorld
 
             undoStack = new Stack<InkStroke>();
             postits = new List<Rectangle>();
+            comments = new List<Comment>();
 
             colorArray = new List<SolidColorBrush>();
 
@@ -79,7 +83,7 @@ namespace HelloWorld
 
 
 
-        private void makeComment(double x, double y) 
+        public void makeComment(double x, double y) 
         {
             var rectangle = new Rectangle();
             SolidColorBrush colorDecision = colorArray[rng.Next(0, colorArray.Count)];
@@ -93,6 +97,20 @@ namespace HelloWorld
 
             Canvas.SetLeft(rectangle, x - 12.5);
             Canvas.SetTop(rectangle, y - 12.5);
+
+            // testing 
+
+            Comment comment = new Comment();
+            comment.left = x - 12.5;
+            comment.top = y - 12.5;
+            comment.width = 25;
+            comment.height = 25;
+            comment.fill = colorDecision.Color;
+            comment.angle = rotation.Angle;
+            comments.Add(comment);
+            Debug.WriteLine(comments.Count);
+
+            // end testing
 
             Flyout flyout = new Flyout();
 
@@ -157,7 +175,7 @@ namespace HelloWorld
             
         }
 
-        private async void OtherMakePopup(InkUnprocessedInput sender, Windows.UI.Core.PointerEventArgs args)
+        private void OtherMakePopup(InkUnprocessedInput sender, Windows.UI.Core.PointerEventArgs args)
         {
             PointerPoint point = args.CurrentPoint;
 
@@ -165,12 +183,12 @@ namespace HelloWorld
         }
 
 
-       private void saveAll(object sender, RoutedEventArgs e)
+        public void saveAll(object sender, RoutedEventArgs e)
         {
-            Save.SaveComments(canvas);
+            Save.SaveComments(canvas, comments);
         }
 
-        private void loadAll(object sender, RoutedEventArgs e)
+        public void loadAll(object sender, RoutedEventArgs e)
         {
             Save.LoadComments(canvas);
         }

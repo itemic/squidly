@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
@@ -11,7 +12,7 @@ using Windows.UI.Xaml.Shapes;
 namespace HelloWorld.Utils
 {
     [DataContract]
-    class Comment
+    public class Comment
     {
         [DataMember]
         public double left { get; set; }
@@ -26,10 +27,11 @@ namespace HelloWorld.Utils
         public int height { get; set; }
 
         [DataMember]
-        public SolidColorBrush fill { get; set; }
+        public Color fill { get; set; }
+
 
         [DataMember]
-        public int angle { get; set; }
+        public double angle { get; set; }
 
 
     }
