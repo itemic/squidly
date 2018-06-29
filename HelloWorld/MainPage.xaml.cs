@@ -18,6 +18,8 @@ using Windows.UI.Xaml.Shapes;
 using Windows.Storage.Streams;
 using System.Threading.Tasks;
 using Windows.UI.Input;
+using Windows.UI.Core;
+using System.Diagnostics;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -28,23 +30,24 @@ namespace HelloWorld
     /// </summary>
     public sealed partial class MainPage : Page
     {
-
+  
         private Stack<InkStroke> undoStack { get; set; }
 
         InkAnalyzer analyzerShape = new InkAnalyzer();
-        IReadOnlyList<InkStroke> strokesShape = null;
-        InkAnalysisResult resultShape = null;
+        //IReadOnlyList<InkStroke> strokesShape = null;
+        //InkAnalysisResult resultShape = null;
+
+        //Stroke selection field
+        private Polyline lasso;
+        //Stroke selection area
+        private Rect boundingRect;
 
         public MainPage()
         {
             this.InitializeComponent();
 
             inkCanvas.InkPresenter.InputDeviceTypes =
-
-                //Windows.UI.Core.CoreInputDeviceTypes.Mouse |
-                // Uncomment the line below if you want to draw with touch
-                // When commented out, long touch to create comment
-                // Windows.UI.Core.CoreInputDeviceTypes.Touch |
+                Windows.UI.Core.CoreInputDeviceTypes.Mouse |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
             Canvas2.InkPresenter.InputDeviceTypes =
@@ -56,7 +59,19 @@ namespace HelloWorld
 
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
 
-            inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
+            //inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
+            Debug.WriteLine("yes");
+            //for passing modified input to the app for custom processing
+            inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
+
+            //Listeners for unprocessed pointer events from the modified input
+            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += UnprocessedInput_PointerPressed;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += UnprocessedInput_PointerMoved;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += UnprocessedInput_PointerReleased;
+
+            //Listeners for new ink or erase strokes
+            inkCanvas.InkPresenter.StrokeInput.StrokeStarted += StrokeInput_StrokeStarted;
+            inkCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
         }
 
         private async void CreatePopup(object sender, RightTappedRoutedEventArgs e)
@@ -157,49 +172,49 @@ namespace HelloWorld
             }
         }
 
-        private async void recogniseShape_ClickAsync(object sender, RoutedEventArgs e)
-        {
-            strokesShape = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+        //private async void recogniseShape_ClickAsync(object sender, RoutedEventArgs e)
+        //{
+        //    strokesShape = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
 
-            if (strokesShape.Count > 0)
-            {
-                analyzerShape.AddDataForStrokes(strokesShape);
-                resultShape = await analyzerShape.AnalyzeAsync();
+        //    if (strokesShape.Count > 0)
+        //    {
+        //        analyzerShape.AddDataForStrokes(strokesShape);
+        //        resultShape = await analyzerShape.AnalyzeAsync();
 
-                if (resultShape.Status == InkAnalysisStatus.Updated)
-                {
-                    var drawings = analyzerShape.AnalysisRoot.FindNodes(InkAnalysisNodeKind.InkDrawing);
+        //        if (resultShape.Status == InkAnalysisStatus.Updated)
+        //        {
+        //            var drawings = analyzerShape.AnalysisRoot.FindNodes(InkAnalysisNodeKind.InkDrawing);
 
-                    foreach (var drawing in drawings)
-                    {
-                        var shape = (InkAnalysisInkDrawing)drawing;
-                        if (shape.DrawingKind == InkAnalysisDrawingKind.Drawing)
-                        {
-                            // Catch and process unsupported shapes (lines and so on) here.
-                        }
-                        else
-                        {
-                            // Process recognized shapes here.
-                            if (shape.DrawingKind == InkAnalysisDrawingKind.Circle || shape.DrawingKind == InkAnalysisDrawingKind.Ellipse)
-                            {
-                                DrawEllipse(shape);
-                            }
-                            else
-                            {
-                                DrawPolygon(shape);
-                            }
-                            foreach (var strokeId in shape.GetStrokeIds())
-                            {
-                                var stroke = inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(strokeId);
-                                stroke.Selected = true;
-                            }
-                        }
-                        analyzerShape.RemoveDataForStrokes(shape.GetStrokeIds());
-                    }
-                    inkCanvas.InkPresenter.StrokeContainer.DeleteSelected();
-                }
-            }
-        }
+        //            foreach (var drawing in drawings)
+        //            {
+        //                var shape = (InkAnalysisInkDrawing)drawing;
+        //                if (shape.DrawingKind == InkAnalysisDrawingKind.Drawing)
+        //                {
+        //                    // Catch and process unsupported shapes (lines and so on) here.
+        //                }
+        //                else
+        //                {
+        //                    // Process recognized shapes here.
+        //                    if (shape.DrawingKind == InkAnalysisDrawingKind.Circle || shape.DrawingKind == InkAnalysisDrawingKind.Ellipse)
+        //                    {
+        //                        DrawEllipse(shape);
+        //                    }
+        //                    else
+        //                    {
+        //                        DrawPolygon(shape);
+        //                    }
+        //                    foreach (var strokeId in shape.GetStrokeIds())
+        //                    {
+        //                        var stroke = inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(strokeId);
+        //                        stroke.Selected = true;
+        //                    }
+        //                }
+        //                analyzerShape.RemoveDataForStrokes(shape.GetStrokeIds());
+        //            }
+        //            inkCanvas.InkPresenter.StrokeContainer.DeleteSelected();
+        //        }
+        //    }
+        //}
 
         private void backToMenu(object sender, RoutedEventArgs e)
         {
@@ -234,51 +249,51 @@ namespace HelloWorld
             }
         }
 
-        private void DrawEllipse(InkAnalysisInkDrawing shape)
-        {
-            var points = shape.Points;
-            Ellipse ellipse = new Ellipse();
-            ellipse.Width = Math.Sqrt((points[0].X - points[2].X) * (points[0].X - points[2].X) +
-                 (points[0].Y - points[2].Y) * (points[0].Y - points[2].Y));
-            ellipse.Height = Math.Sqrt((points[1].X - points[3].X) * (points[1].X - points[3].X) +
-                 (points[1].Y - points[3].Y) * (points[1].Y - points[3].Y));
+        //private void DrawEllipse(InkAnalysisInkDrawing shape)
+        //{
+        //    var points = shape.Points;
+        //    Ellipse ellipse = new Ellipse();
+        //    ellipse.Width = Math.Sqrt((points[0].X - points[2].X) * (points[0].X - points[2].X) +
+        //         (points[0].Y - points[2].Y) * (points[0].Y - points[2].Y));
+        //    ellipse.Height = Math.Sqrt((points[1].X - points[3].X) * (points[1].X - points[3].X) +
+        //         (points[1].Y - points[3].Y) * (points[1].Y - points[3].Y));
 
-            var rotAngle = Math.Atan2(points[2].Y - points[0].Y, points[2].X - points[0].X);
-            RotateTransform rotateTransform = new RotateTransform();
-            rotateTransform.Angle = rotAngle * 180 / Math.PI;
-            rotateTransform.CenterX = ellipse.Width / 2.0;
-            rotateTransform.CenterY = ellipse.Height / 2.0;
+        //    var rotAngle = Math.Atan2(points[2].Y - points[0].Y, points[2].X - points[0].X);
+        //    RotateTransform rotateTransform = new RotateTransform();
+        //    rotateTransform.Angle = rotAngle * 180 / Math.PI;
+        //    rotateTransform.CenterX = ellipse.Width / 2.0;
+        //    rotateTransform.CenterY = ellipse.Height / 2.0;
 
-            TranslateTransform translateTransform = new TranslateTransform();
-            translateTransform.X = shape.Center.X - ellipse.Width / 2.0;
-            translateTransform.Y = shape.Center.Y - ellipse.Height / 2.0;
+        //    TranslateTransform translateTransform = new TranslateTransform();
+        //    translateTransform.X = shape.Center.X - ellipse.Width / 2.0;
+        //    translateTransform.Y = shape.Center.Y - ellipse.Height / 2.0;
 
-            TransformGroup transformGroup = new TransformGroup();
-            transformGroup.Children.Add(rotateTransform);
-            transformGroup.Children.Add(translateTransform);
-            ellipse.RenderTransform = transformGroup;
+        //    TransformGroup transformGroup = new TransformGroup();
+        //    transformGroup.Children.Add(rotateTransform);
+        //    transformGroup.Children.Add(translateTransform);
+        //    ellipse.RenderTransform = transformGroup;
 
-            var brush = new SolidColorBrush(Windows.UI.ColorHelper.FromArgb(255, 0, 0, 255));
-            ellipse.Stroke = brush;
-            ellipse.StrokeThickness = 2;
-            canvas.Children.Add(ellipse);
-        }
+        //    var brush = new SolidColorBrush(Windows.UI.ColorHelper.FromArgb(255, 0, 0, 255));
+        //    ellipse.Stroke = brush;
+        //    ellipse.StrokeThickness = 2;
+        //    canvas.Children.Add(ellipse);
+        //}
 
-        private void DrawPolygon(InkAnalysisInkDrawing shape)
-        {
-            var points = shape.Points;
-            Polygon polygon = new Polygon();
+        //private void DrawPolygon(InkAnalysisInkDrawing shape)
+        //{
+        //    var points = shape.Points;
+        //    Polygon polygon = new Polygon();
 
-            foreach (var point in points)
-            {
-                polygon.Points.Add(point);
-            }
+        //    foreach (var point in points)
+        //    {
+        //        polygon.Points.Add(point);
+        //    }
 
-            var brush = new SolidColorBrush(Windows.UI.ColorHelper.FromArgb(255, 0, 0, 255));
-            polygon.Stroke = brush;
-            polygon.StrokeThickness = 2;
-            canvas.Children.Add(polygon);
-        }
+        //    var brush = new SolidColorBrush(Windows.UI.ColorHelper.FromArgb(255, 0, 0, 255));
+        //    polygon.Stroke = brush;
+        //    polygon.StrokeThickness = 2;
+        //    canvas.Children.Add(polygon);
+        //}
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -294,6 +309,96 @@ namespace HelloWorld
             base.OnNavigatedTo(e);
         }
 
+
+        //Listeners for the lasso selection functionality
+
+        private void UnprocessedInput_PointerPressed(InkUnprocessedInput sender, PointerEventArgs args)
+        {
+            Debug.WriteLine("PointerPressed");
+            //polyline draws a series of connected straight lines - going to pass it points where the pen is
+            lasso = new Polyline()
+            {
+                Stroke = new SolidColorBrush(Windows.UI.Colors.Blue),
+                StrokeThickness = 1,
+                StrokeDashArray = new DoubleCollection() { 5, 2 },
+            };
+
+            lasso.Points.Add(args.CurrentPoint.RawPosition);
+            selectionCanvas.Children.Add(lasso);
+        }
+
+        private void UnprocessedInput_PointerMoved(InkUnprocessedInput sender, PointerEventArgs args)
+        {
+            Debug.WriteLine("PointerMoved");
+            lasso.Points.Add(args.CurrentPoint.RawPosition);
+        }
+
+        private void UnprocessedInput_PointerReleased(InkUnprocessedInput sender, PointerEventArgs args)
+        {
+
+            Debug.WriteLine("PointerReleased");
+            //add final point to the Polyline object
+            lasso.Points.Add(args.CurrentPoint.RawPosition);
+
+            boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithPolyLine(lasso.Points);
+
+            DrawBoundingRect();
+        }
+
+
+        //handle new ink or erase strokes to clean up Selection UI 
+        private void StrokeInput_StrokeStarted(InkStrokeInput sender, PointerEventArgs args)
+        {
+            ClearSelection();
+        }
+
+        private void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
+        {
+            ClearSelection();
+        }
+
+        //clear existing content from the selection layer and draw a single bounding rectangle around the ink strokes encompassed by the lasso area
+        private void DrawBoundingRect()
+        {
+            selectionCanvas.Children.Clear();
+
+            //draw bounding box only if there are ink strokes within the lasso
+            if (!((boundingRect.Width == 0) || (boundingRect.Height == 0) || boundingRect.IsEmpty))
+            {
+                var rectangle = new Rectangle()
+                {
+                    Stroke = new SolidColorBrush(Windows.UI.Colors.Blue),
+                    StrokeThickness = 1,
+                    StrokeDashArray = new DoubleCollection() { 5, 2 },
+                    Width = boundingRect.Width,
+                    Height = boundingRect.Height
+                };
+
+                Canvas.SetLeft(rectangle, boundingRect.X);
+                Canvas.SetTop(rectangle, boundingRect.Y);
+
+                selectionCanvas.Children.Add(rectangle);
+            }
+        }
+
+        private void ClearSelection()
+        {
+            var strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+            foreach (var stroke in strokes)
+            {
+                stroke.Selected = false;
+            }
+            ClearDrawnBoundingRect();
+        }
+
+        private void ClearDrawnBoundingRect()
+        {
+            if (selectionCanvas.Children.Any())
+            {
+                selectionCanvas.Children.Clear();
+                boundingRect = Rect.Empty;
+            }
+        }
 
     }
 }

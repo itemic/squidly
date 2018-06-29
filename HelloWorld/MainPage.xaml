@@ -47,17 +47,16 @@
                 </AppBarButton.Flyout>
             </AppBarButton>
             <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
+            <AppBarToggleButton Icon="SelectAll" Label="Select Mode"/>
         </CommandBar>
 
 
-		<Grid x:Name="drawingCanvas" Grid.Row="2">
-            <Grid>
+        <Grid Grid.Row="2">
+            <Canvas x:Name="canvas"/>
+            <Canvas x:Name="selectionCanvas"/>
+            <InkCanvas x:Name="inkCanvas"/>
 
-                <Canvas x:Name="canvas"/>
-                <InkCanvas x:Name="inkCanvas"/>
-            </Grid>
-            
-		</Grid>
+        </Grid>
 
 		
         
