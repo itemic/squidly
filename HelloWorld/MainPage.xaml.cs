@@ -46,7 +46,7 @@ namespace HelloWorld
                 Windows.UI.Core.CoreInputDeviceTypes.Mouse |
                 // Uncomment the line below if you want to draw with touch
                 // When commented out, long touch to create comment
-                Windows.UI.Core.CoreInputDeviceTypes.Touch |
+                // Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
             
@@ -69,6 +69,88 @@ namespace HelloWorld
             inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
 
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
+
+            inkCanvas.RightTapped += TouchMakePopup;
+
+        }
+
+        private async void TouchMakePopup(object sender, RightTappedRoutedEventArgs args)
+        {
+            Point point = args.GetPosition(inkCanvas);
+
+            var rectangle = new Rectangle();
+            SolidColorBrush colorDecision = colorArray[rng.Next(0, colorArray.Count)];
+            rectangle.Fill = colorDecision;
+            rectangle.Width = 25;
+            rectangle.Height = 25;
+            rectangle.Opacity = 0.8;
+            var rotation = new RotateTransform();
+            rotation.Angle = -30 + rng.Next(60);
+            rectangle.RenderTransform = rotation;
+
+            Canvas.SetLeft(rectangle, point.X - 12.5);
+            Canvas.SetTop(rectangle, point.Y - 12.5);
+
+
+            Flyout flyout = new Flyout();
+
+            FlyoutPresenter fp = new FlyoutPresenter();
+
+            Style fps = new Style();
+            fps.TargetType = typeof(FlyoutPresenter);
+            fps.Setters.Add(new Setter(BackgroundProperty, colorDecision));
+            fp.Style = fps;
+            flyout.FlyoutPresenterStyle = fps;
+
+            Button deleteButton = new Button();
+
+            SymbolIcon deleteSymbol = new SymbolIcon();
+            deleteSymbol.Symbol = Symbol.Delete;
+            deleteButton.Content = deleteSymbol;
+            deleteButton.Click += async delegate (object e, RoutedEventArgs evt)
+            {
+                canvas.Children.Remove(rectangle);
+                postits.Remove(rectangle);
+            };
+
+            InkCanvas ic = new InkCanvas();
+            ic.Width = 250;
+            ic.Height = 250;
+
+            InkToolbar it = new InkToolbar();
+            it.TargetInkCanvas = ic;
+
+
+
+            ic.InkPresenter.InputDeviceTypes =
+              Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+              Windows.UI.Core.CoreInputDeviceTypes.Touch |
+              Windows.UI.Core.CoreInputDeviceTypes.Pen;
+
+            StackPanel sp = new StackPanel();
+            sp.VerticalAlignment = VerticalAlignment.Center;
+            sp.HorizontalAlignment = HorizontalAlignment.Center;
+
+            StackPanel rightAlign = new StackPanel();
+            rightAlign.HorizontalAlignment = HorizontalAlignment.Right;
+            rightAlign.Children.Add(deleteButton);
+            sp.Children.Add(rightAlign);
+            sp.Children.Add(ic);
+            sp.Children.Add(it);
+
+            flyout.Content = sp;
+            flyout.LightDismissOverlayMode = LightDismissOverlayMode.On;
+            rectangle.ContextFlyout = flyout;
+
+
+            //    rectangle.PointerReleased += async delegate (object s, PointerRoutedEventArgs evt)
+            //      {
+            //          flyout.ShowAt(rectangle);
+            //      };
+
+            canvas.Children.Add(rectangle);
+            postits.Add(rectangle);
+            flyout.ShowAt(rectangle);
         }
 
         private async void OtherMakePopup(InkUnprocessedInput sender, Windows.UI.Core.PointerEventArgs args)
