@@ -23,7 +23,9 @@
             </CommandBar.Content>
             <AppBarButton Icon="Save" Label="Save" Click="saveInk_ClickAsync"/>
             <AppBarButton Icon="OpenFile" Label="Load" Click="loadInk_ClickAsync"/>
-            
+            <AppBarButton Icon="Save" Label="Save All" Click="saveAll"/>
+            <AppBarButton Icon="OpenFile" Label="Load All" Click="loadAll"/>
+
             <AppBarButton Icon="Back" Label="Back" Click="backToMenu"/>
             <AppBarSeparator/>
             <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
