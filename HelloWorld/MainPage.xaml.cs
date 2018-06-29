@@ -50,7 +50,9 @@ namespace HelloWorld
                 // Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
-            
+            //Multiple pen input, breaks undo!
+            //inkCanvas.InkPresenter.ActivateCustomDrying();
+            //inkCanvas.InkPresenter.SetPredefinedConfiguration(InkPresenterPredefinedConfiguration.SimpleMultiplePointer);
 
             undoStack = new Stack<InkStroke>();
             postits = new List<Rectangle>();
