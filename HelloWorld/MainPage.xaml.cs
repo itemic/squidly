@@ -121,6 +121,12 @@ namespace HelloWorld
               Windows.UI.Core.CoreInputDeviceTypes.Mouse |
               Windows.UI.Core.CoreInputDeviceTypes.Touch |
               Windows.UI.Core.CoreInputDeviceTypes.Pen;
+
+            if (comment.ic != null)
+            {
+                flyoutInkCanvas.InkPresenter.StrokeContainer = comment.ic;
+            }
+            comment.ic = flyoutInkCanvas.InkPresenter.StrokeContainer;
         
             InkToolbar flyoutInkToolbar = new InkToolbar();
             flyoutInkToolbar.TargetInkCanvas = flyoutInkCanvas;
@@ -181,12 +187,12 @@ namespace HelloWorld
 
         public async void loadAll(object sender, RoutedEventArgs e)
         {
-            CommentModel loadedComments = await Save.LoadComments(canvas);
-            if (loadedComments != null)
+            await Save.LoadComments(comments);
+            if (comments != null)
             {
-                comments = loadedComments; // update model
                 canvas.Children.Clear(); // probably better way than this...
-                foreach(Comment c in loadedComments.GetComments())
+                Debug.WriteLine(comments.GetComments().Count);
+                foreach(Comment c in comments.GetComments())
                 {
                     DrawRectangle(c);
                 }

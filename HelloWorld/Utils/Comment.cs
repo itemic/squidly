@@ -36,8 +36,7 @@ namespace HelloWorld.Utils
         [DataMember]
         public double angle { get; set; }
 
-        [DataMember]
-        public InkStrokeContainer isc { get; set; }
+        public InkStrokeContainer ic { get; set; }
 
 
     }

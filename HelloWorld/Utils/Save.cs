@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using Windows.Storage;
@@ -57,17 +58,29 @@ namespace HelloWorld.Utils
                     {
                         foreach (Comment comment in comments.GetComments())
                         {
-                            Debug.WriteLine("hey" + comments.GetComments().Count);
                             dataWriter.WriteString($"{Serialize(comment)}\n");
+                            
                         }
                         await dataWriter.StoreAsync();
                         await outputStream.FlushAsync();
                     }
                 }           
                 stream.Dispose();
-                
+
+                var iterator = 0;
+
+                foreach (Comment comment in comments.GetComments())
+                {
+                    var inkComment = await folder.CreateFileAsync("ink" + iterator + ".gif", CreationCollisionOption.ReplaceExisting);
+                    using (IRandomAccessStream s = await inkComment.OpenAsync(FileAccessMode.ReadWrite))
+                    {
+                        await comment.ic.SaveAsync(s);
+                    }
+                    iterator++;
+                }           
             }
         }
+
 
         public static string Serialize<T>(this T obj)
 
@@ -87,15 +100,18 @@ namespace HelloWorld.Utils
             }
         }
 
-        public async static Task<CommentModel> LoadComments(Canvas canvas)
+        public async static Task LoadComments(CommentModel model)
         {
+
+            //clear
+            model.GetComments().Clear();
+
             var folderPicker = new FolderPicker();
             folderPicker.FileTypeFilter.Add("*");
-
+            
             var folder = await folderPicker.PickSingleFolderAsync();
             if (folder != null)
             {
-                var commentModel = new CommentModel();
                 var files = await folder.GetFilesAsync();
                 foreach (StorageFile file in files)
                 {
@@ -110,31 +126,46 @@ namespace HelloWorld.Utils
                             if (component.Length > 0)
                             {
                                 Comment c = Deserialize<Comment>(component);
-                                commentModel.Add(c);
+                                Debug.WriteLine("eee");
+                                model.Add(c);
+                                Debug.WriteLine(model.GetComments().Count());
 
-                                /*var rectangle = new Rectangle();
-                                rectangle.Width = c.width;
-                                rectangle.Height = c.height;
-                                Canvas.SetTop(rectangle, c.top);
-                                Canvas.SetLeft(rectangle, c.left);
-                                rectangle.Fill = new SolidColorBrush(c.fill);
-
-                                var rotation = new RotateTransform();
-                                rotation.Angle = c.angle;
-                                rectangle.RenderTransform = rotation;
-                                canvas.Children.Add(rectangle);*/
+                                
                             }
                         }
 
-                        return commentModel;
                     }
-                    
 
-                   
+                  
+                         
                 }
-            } 
 
-            return null;
+
+                foreach(StorageFile file in files)
+                {
+                    if (file.Name.StartsWith("ink"))
+                    {
+                        IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
+                        using (var inputStream = stream.GetInputStreamAt(0))
+                        {
+                            // first get the # of the ink
+                            Regex re = new Regex(@"\d+");
+                            Match m = re.Match(file.Name);
+                            int inkPos = int.Parse(m.Value); // we will need to have better error handling
+
+                            // then set it
+                            model.GetComments()[inkPos].ic = new Windows.UI.Input.Inking.InkStrokeContainer();
+
+                            await model.GetComments()[inkPos].ic.LoadAsync(inputStream);
+
+                        }
+                    }
+                }
+                
+
+
+            }
+
         }
 
         public static T Deserialize<T>(this string xml)
