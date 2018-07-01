@@ -48,7 +48,7 @@ namespace HelloWorld.Utils
 
         private static Random rng = new Random();
 
-        public static void CreateComment(double x, double y)
+        public static Comment CreateComment(double x, double y)
         {
             Comment comment = new Comment();
 
@@ -60,6 +60,7 @@ namespace HelloWorld.Utils
             comment.angle = -30 + rng.Next(60);
             comment.opacity = 0.8;
 
+            return comment;
         }
     }
 

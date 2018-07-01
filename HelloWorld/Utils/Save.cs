@@ -55,9 +55,9 @@ namespace HelloWorld.Utils
                 {
                     using (var dataWriter = new DataWriter(outputStream))
                     {
-                        foreach (Comment comment in comments.comments)
+                        foreach (Comment comment in comments.GetComments())
                         {
-                            Debug.WriteLine("hey" + comments.comments.Count);
+                            Debug.WriteLine("hey" + comments.GetComments().Count);
                             dataWriter.WriteString($"{Serialize(comment)}\n");
                         }
                         await dataWriter.StoreAsync();
@@ -87,7 +87,7 @@ namespace HelloWorld.Utils
             }
         }
 
-        public async static void LoadComments(Canvas canvas)
+        public async static Task<CommentModel> LoadComments(Canvas canvas)
         {
             var folderPicker = new FolderPicker();
             folderPicker.FileTypeFilter.Add("*");
@@ -95,6 +95,7 @@ namespace HelloWorld.Utils
             var folder = await folderPicker.PickSingleFolderAsync();
             if (folder != null)
             {
+                var commentModel = new CommentModel();
                 var files = await folder.GetFilesAsync();
                 foreach (StorageFile file in files)
                 {
@@ -103,12 +104,15 @@ namespace HelloWorld.Utils
                         string text = await FileIO.ReadTextAsync(file);
                         string[] components = text.Split('\n');
 
+
                         foreach (string component in components)
                         {
                             if (component.Length > 0)
                             {
                                 Comment c = Deserialize<Comment>(component);
-                                var rectangle = new Rectangle();
+                                commentModel.Add(c);
+
+                                /*var rectangle = new Rectangle();
                                 rectangle.Width = c.width;
                                 rectangle.Height = c.height;
                                 Canvas.SetTop(rectangle, c.top);
@@ -118,15 +122,19 @@ namespace HelloWorld.Utils
                                 var rotation = new RotateTransform();
                                 rotation.Angle = c.angle;
                                 rectangle.RenderTransform = rotation;
-                                canvas.Children.Add(rectangle);
+                                canvas.Children.Add(rectangle);*/
                             }
                         }
+
+                        return commentModel;
                     }
                     
 
                    
                 }
-            }
+            } 
+
+            return null;
         }
 
         public static T Deserialize<T>(this string xml)

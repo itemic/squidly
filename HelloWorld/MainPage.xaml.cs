@@ -83,91 +83,79 @@ namespace HelloWorld
         }
 
 
-
-        public void makeComment(double x, double y) 
+        public Rectangle DrawRectangle(Comment comment)
         {
-            var rectangle = new Rectangle();
-            SolidColorBrush colorDecision = new SolidColorBrush(colorArray[rng.Next(0, colorArray.Count)]);
-            rectangle.Fill = colorDecision;
-            rectangle.Width = 25;
-            rectangle.Height = 25;
-            rectangle.Opacity = 0.8;
+            Rectangle rectangle = new Rectangle();
+            rectangle.Fill = new SolidColorBrush(comment.fill);
+            rectangle.Width = comment.width;
+            rectangle.Height = comment.height;
+            rectangle.Opacity = comment.opacity;
+            Canvas.SetLeft(rectangle, comment.left);
+            Canvas.SetTop(rectangle, comment.top);
+
             var rotation = new RotateTransform();
-            rotation.Angle = -30 + rng.Next(60);
+            rotation.Angle = comment.angle;
             rectangle.RenderTransform = rotation;
 
-            Canvas.SetLeft(rectangle, x - 12.5);
-            Canvas.SetTop(rectangle, y - 12.5);
+            // Add flyout
+            var flyout = new Flyout();
+            Style flyoutStyle = new Style();
+            flyoutStyle.TargetType = typeof(FlyoutPresenter);
+            flyoutStyle.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(comment.fill)));
+            flyout.FlyoutPresenterStyle = flyoutStyle;
 
-            // testing 
-
-            Comment comment = new Comment();
-            comment.left = x - 12.5;
-            comment.top = y - 12.5;
-            comment.width = 25;
-            comment.height = 25;
-            comment.fill = colorDecision.Color;
-            comment.angle = rotation.Angle;
-            comment.opacity = 0.8;
-
-            Debug.WriteLine("writing...");
-            comments.Add(comment);
-
-            // end testing
-
-            Flyout flyout = new Flyout();
-
-            FlyoutPresenter fp = new FlyoutPresenter();
-
-            Style fps = new Style();
-            fps.TargetType = typeof(FlyoutPresenter);
-            fps.Setters.Add(new Setter(BackgroundProperty, colorDecision));
-            fp.Style = fps;
-            flyout.FlyoutPresenterStyle = fps;
-
+            // Add delete button
             Button deleteButton = new Button();
-
-            SymbolIcon deleteSymbol = new SymbolIcon();
-            deleteSymbol.Symbol = Symbol.Delete;
-            deleteButton.Content = deleteSymbol;
+            deleteButton.Content = new SymbolIcon(Symbol.Delete);
             deleteButton.Click += async delegate (object e, RoutedEventArgs evt)
             {
                 canvas.Children.Remove(rectangle);
-                postits.Remove(rectangle);
+                comments.Remove(comment);
             };
 
-            InkCanvas ic = new InkCanvas();
-            ic.Width = 250;
-            ic.Height = 250;
-
-            InkToolbar it = new InkToolbar();
-            it.TargetInkCanvas = ic;
-
-
-
-            ic.InkPresenter.InputDeviceTypes =
+            // Add canvas
+            InkCanvas flyoutInkCanvas = new InkCanvas();
+            flyoutInkCanvas.Width = 250;
+            flyoutInkCanvas.Height = 250;
+            flyoutInkCanvas.InkPresenter.InputDeviceTypes = 
               Windows.UI.Core.CoreInputDeviceTypes.Mouse |
               Windows.UI.Core.CoreInputDeviceTypes.Touch |
               Windows.UI.Core.CoreInputDeviceTypes.Pen;
+        
+            InkToolbar flyoutInkToolbar = new InkToolbar();
+            flyoutInkToolbar.TargetInkCanvas = flyoutInkCanvas;
 
-            StackPanel sp = new StackPanel();
-            sp.VerticalAlignment = VerticalAlignment.Center;
-            sp.HorizontalAlignment = HorizontalAlignment.Center;
+            // Add panels
+            StackPanel stackPanel = new StackPanel();
+            stackPanel.HorizontalAlignment = HorizontalAlignment.Center;
+            stackPanel.VerticalAlignment = VerticalAlignment.Center;
 
-            StackPanel rightAlign = new StackPanel();
-            rightAlign.HorizontalAlignment = HorizontalAlignment.Right;
-            rightAlign.Children.Add(deleteButton);
-            sp.Children.Add(rightAlign);
-            sp.Children.Add(ic);
-            sp.Children.Add(it);
+            StackPanel rightAlignment = new StackPanel();
+            rightAlignment.HorizontalAlignment = HorizontalAlignment.Right;
+            rightAlignment.Children.Add(deleteButton);
 
-            flyout.Content = sp;
+            stackPanel.Children.Add(rightAlignment);
+            stackPanel.Children.Add(flyoutInkCanvas);
+            stackPanel.Children.Add(flyoutInkToolbar);
+
+            // Additional settings
+            flyout.Content = stackPanel;
             flyout.LightDismissOverlayMode = LightDismissOverlayMode.On;
             rectangle.ContextFlyout = flyout;
-
+            
             canvas.Children.Add(rectangle);
-            postits.Add(rectangle);
-            flyout.ShowAt(rectangle);
+            return rectangle;
+        }
+
+
+        public void makeComment(double x, double y) 
+        {
+            
+            var newComment = comments.CreateComment(x, y);
+            var rect = DrawRectangle(newComment);
+            rect.ContextFlyout.ShowAt(rect);
+            
+
         }
 
         private void TouchMakePopup(object sender, RightTappedRoutedEventArgs args)
@@ -191,9 +179,18 @@ namespace HelloWorld
             Save.SaveComments(canvas, comments);
         }
 
-        public void loadAll(object sender, RoutedEventArgs e)
+        public async void loadAll(object sender, RoutedEventArgs e)
         {
-            Save.LoadComments(canvas);
+            CommentModel loadedComments = await Save.LoadComments(canvas);
+            if (loadedComments != null)
+            {
+                comments = loadedComments; // update model
+                canvas.Children.Clear(); // probably better way than this...
+                foreach(Comment c in loadedComments.GetComments())
+                {
+                    DrawRectangle(c);
+                }
+            }
         }
 
 
