@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI;
+using Windows.UI.Input.Inking;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
@@ -34,6 +35,9 @@ namespace HelloWorld.Utils
 
         [DataMember]
         public double angle { get; set; }
+
+        [DataMember]
+        public InkStrokeContainer isc { get; set; }
 
 
     }
