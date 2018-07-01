@@ -39,7 +39,7 @@ namespace HelloWorld.Utils
             }
         }
 
-        public static async void SaveComments(Canvas canvas, List<Comment> comments)
+        public static async void SaveComments(Canvas canvas, CommentModel comments)
         {
             var folderPicker = new FolderPicker();
             folderPicker.FileTypeFilter.Add("*");
@@ -50,15 +50,14 @@ namespace HelloWorld.Utils
             {
                 var file = await folder.CreateFileAsync("comment", Windows.Storage.CreationCollisionOption.ReplaceExisting);
                 var stream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite);
-                string buffer = "";
 
                 using (var outputStream = stream.GetOutputStreamAt(0))
                 {
                     using (var dataWriter = new DataWriter(outputStream))
                     {
-                        foreach (Comment comment in comments)
+                        foreach (Comment comment in comments.comments)
                         {
-                            
+                            Debug.WriteLine("hey" + comments.comments.Count);
                             dataWriter.WriteString($"{Serialize(comment)}\n");
                         }
                         await dataWriter.StoreAsync();

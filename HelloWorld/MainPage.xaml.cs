@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using Windows.UI.Input;
 using HelloWorld.Utils;
 using System.Diagnostics;
+using Windows.UI;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -33,14 +34,14 @@ namespace HelloWorld
 
         private Stack<InkStroke> undoStack { get; set; }
 
-        private List<SolidColorBrush> colorArray = null;
+        private List<Color> colorArray = null;
 
         InkAnalyzer analyzerShape = new InkAnalyzer();
         IReadOnlyList<InkStroke> strokesShape = null;
         InkAnalysisResult resultShape = null;
         private Random rng = new Random();
         List<Rectangle> postits = null;
-        public List<Comment> comments;
+        public CommentModel comments;
 
         public MainPage()
         {
@@ -59,14 +60,14 @@ namespace HelloWorld
 
             undoStack = new Stack<InkStroke>();
             postits = new List<Rectangle>();
-            comments = new List<Comment>();
+            comments = new CommentModel();
 
-            colorArray = new List<SolidColorBrush>();
+            colorArray = new List<Color>();
 
-            colorArray.Add(new SolidColorBrush(Windows.UI.Colors.Goldenrod));
-            colorArray.Add(new SolidColorBrush(Windows.UI.Colors.LightSkyBlue));
-            colorArray.Add(new SolidColorBrush(Windows.UI.Colors.Plum));
-            colorArray.Add(new SolidColorBrush(Windows.UI.Colors.PaleGreen));
+            colorArray.Add((Windows.UI.Colors.Goldenrod));
+            colorArray.Add((Windows.UI.Colors.LightSkyBlue));
+            colorArray.Add((Windows.UI.Colors.Plum));
+            colorArray.Add((Windows.UI.Colors.PaleGreen));
 
             
 
@@ -86,7 +87,7 @@ namespace HelloWorld
         public void makeComment(double x, double y) 
         {
             var rectangle = new Rectangle();
-            SolidColorBrush colorDecision = colorArray[rng.Next(0, colorArray.Count)];
+            SolidColorBrush colorDecision = new SolidColorBrush(colorArray[rng.Next(0, colorArray.Count)]);
             rectangle.Fill = colorDecision;
             rectangle.Width = 25;
             rectangle.Height = 25;
@@ -107,8 +108,10 @@ namespace HelloWorld
             comment.height = 25;
             comment.fill = colorDecision.Color;
             comment.angle = rotation.Angle;
+            comment.opacity = 0.8;
+
+            Debug.WriteLine("writing...");
             comments.Add(comment);
-            Debug.WriteLine(comments.Count);
 
             // end testing
 

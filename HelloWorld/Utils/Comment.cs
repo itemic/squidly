@@ -29,10 +29,39 @@ namespace HelloWorld.Utils
         [DataMember]
         public Color fill { get; set; }
 
+        [DataMember]
+        public double opacity { get; set; }
 
         [DataMember]
         public double angle { get; set; }
 
 
     }
+
+    public class CommentUtils
+    {
+        private static List<Color> colorArray = new List<Color> {
+            Colors.Goldenrod,
+            Colors.LightSkyBlue,
+            Colors.Plum,
+            Colors.PaleGreen};
+
+        private static Random rng = new Random();
+
+        public static void CreateComment(double x, double y)
+        {
+            Comment comment = new Comment();
+
+            comment.width = 25;
+            comment.height = 25;
+            comment.left = x - 12.5;
+            comment.top = y - 12.5;
+            comment.fill = colorArray[(rng.Next(0, colorArray.Count))];
+            comment.angle = -30 + rng.Next(60);
+            comment.opacity = 0.8;
+
+        }
+    }
+
+
 }
