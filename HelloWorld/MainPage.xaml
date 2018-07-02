@@ -31,6 +31,42 @@
             <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
             <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
             <AppBarSeparator/>
+            <AppBarButton Icon="Comment" Label="Comments"> <!-- TODO: COMMENT COLOR SELECTION -->
+                    <AppBarButton.Flyout>
+                    <Flyout>
+                        <StackPanel>
+                            <Ellipse Margin="8,8,8,8"
+                                                     UseLayoutRounding="false"
+                                                     HorizontalAlignment="Stretch"
+                                                     VerticalAlignment="Stretch"
+                                                     Height="36"
+                                                     Width="36"
+                                                     Fill="Goldenrod"/>
+                            <Ellipse Margin="8,8,8,8"
+                                                     UseLayoutRounding="false"
+                                                     HorizontalAlignment="Stretch"
+                                                     VerticalAlignment="Stretch"
+                                                     Height="36"
+                                                     Width="36"
+                                                     Fill="LightSkyBlue"/>
+                            <Ellipse Margin="8,8,8,8"
+                                                     UseLayoutRounding="false"
+                                                     HorizontalAlignment="Stretch"
+                                                     VerticalAlignment="Stretch"
+                                                     Height="36"
+                                                     Width="36"
+                                                     Fill="Plum"/>
+                            <Ellipse Margin="8,8,8,8"
+                                                     UseLayoutRounding="false"
+                                                     HorizontalAlignment="Stretch"
+                                                     VerticalAlignment="Stretch"
+                                                     Height="36"
+                                                     Width="36"
+                                                     Fill="PaleGreen"/>
+                        </StackPanel>
+                    </Flyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
         </CommandBar>
 
 

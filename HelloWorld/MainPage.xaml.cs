@@ -46,6 +46,7 @@ namespace HelloWorld
         public MainPage()
         {
             this.InitializeComponent();
+            canvas.RenderTransform = new TranslateTransform();
             inkCanvas.InkPresenter.InputDeviceTypes =
 
                 Windows.UI.Core.CoreInputDeviceTypes.Mouse |
@@ -148,10 +149,39 @@ namespace HelloWorld
             flyout.Content = stackPanel;
             flyout.LightDismissOverlayMode = LightDismissOverlayMode.On;
             rectangle.ContextFlyout = flyout;
-            
+
+
+            // Add draggable (test)
+            /*
+            Point dragPoint;
+            bool inMotion = false;
+            rectangle.RenderTransform = new TranslateTransform();
+            rectangle.PointerPressed += delegate (object sender, PointerRoutedEventArgs e)
+            {
+                inMotion = true;
+            };
+
+            rectangle.PointerMoved += delegate (object sender, PointerRoutedEventArgs e)
+            {
+                if (!e.Pointer.IsInContact) { return; }
+
+                var point = e.GetCurrentPoint(canvas).Position;
+                Canvas.SetLeft(rectangle, point.X - (rectangle.Height/2));
+                Canvas.SetTop(rectangle, point.Y - (rectangle.Width/2));
+
+            };
+
+            rectangle.PointerReleased += delegate (object sender, PointerRoutedEventArgs e)
+            {
+                inMotion = false;
+            };
+            */
+            // Return
             canvas.Children.Add(rectangle);
             return rectangle;
         }
+
+        
 
 
         public void makeComment(double x, double y) 
