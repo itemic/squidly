@@ -30,23 +30,15 @@ namespace HelloWorld
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            this.Frame.Navigate(typeof(MainPage));
+            this.Frame.Navigate(typeof(MainPage), false);
         }
 
         private async void LoadClick(object sender, RoutedEventArgs e)
         {
-            var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
-            openPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
-            openPicker.FileTypeFilter.Add(".gif");
-
-            var file = await openPicker.PickSingleFileAsync();
-
-            if (file != null)
-            {
-                IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
-
-                this.Frame.Navigate(typeof(MainPage), stream);
-            }
+            // really should use some view model thing
+            
+                this.Frame.Navigate(typeof(MainPage), true);
+            
         }
     }
 }

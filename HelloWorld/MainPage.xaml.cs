@@ -34,14 +34,12 @@ namespace HelloWorld
 
         private Stack<InkStroke> undoStack { get; set; }
 
-        private List<Color> colorArray = null;
-
         InkAnalyzer analyzerShape = new InkAnalyzer();
         IReadOnlyList<InkStroke> strokesShape = null;
         InkAnalysisResult resultShape = null;
         private Random rng = new Random();
-        List<Rectangle> postits = null;
         public CommentModel comments;
+        private Save save = null;
 
         public MainPage()
         {
@@ -60,16 +58,9 @@ namespace HelloWorld
             //inkCanvas.InkPresenter.SetPredefinedConfiguration(InkPresenterPredefinedConfiguration.SimpleMultiplePointer);
 
             undoStack = new Stack<InkStroke>();
-            postits = new List<Rectangle>();
             comments = new CommentModel();
 
-            colorArray = new List<Color>();
-
-            colorArray.Add((Windows.UI.Colors.Goldenrod));
-            colorArray.Add((Windows.UI.Colors.LightSkyBlue));
-            colorArray.Add((Windows.UI.Colors.Plum));
-            colorArray.Add((Windows.UI.Colors.PaleGreen));
-
+            
             
 
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
@@ -210,14 +201,28 @@ namespace HelloWorld
         }
 
 
-        public void saveAll(object sender, RoutedEventArgs e)
+        public async void saveAll(object sender, RoutedEventArgs e)
         {
-            Save.SaveComments(canvas, comments);
+            if (save == null)
+            {
+                save = new Save();
+                // display some sort of selection screen
+                await save.CreateFolder();
+            
+            }
+     
+            await save.SaveAll(inkCanvas, comments);
+
         }
 
         public async void loadAll(object sender, RoutedEventArgs e)
         {
-            await Save.LoadComments(comments);
+            if (save == null)
+            {
+                save = new Save();
+            }
+
+            await save.LoadAll(inkCanvas, comments);
             if (comments != null)
             {
                 canvas.Children.Clear(); // probably better way than this...
@@ -238,12 +243,12 @@ namespace HelloWorld
 
         private void saveInk_ClickAsync(object sender, RoutedEventArgs e)
         {
-            Save.SaveInk(inkCanvas);
+           // Save.SaveInk(inkCanvas);
         }
 
         private void loadInk_ClickAsync(object sender, RoutedEventArgs e)
         {
-            Save.LoadInk(inkCanvas);
+            //Save.LoadInk(inkCanvas);
         }
 
         private async void recogniseShape_ClickAsync(object sender, RoutedEventArgs e)
@@ -371,15 +376,26 @@ namespace HelloWorld
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is IRandomAccessStream)
+            if (e.Parameter is bool & (bool)e.Parameter == true)
             {
-                var stream = (IRandomAccessStream)e.Parameter;
-                using (var inputStream = stream.GetInputStreamAt(0))
+                if (save == null)
                 {
-                    await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                    save = new Save();
                 }
-                stream.Dispose();
+
+                await save.LoadAll(inkCanvas, comments);
+                if (comments != null)
+                {
+                    canvas.Children.Clear(); // probably better way than this...
+                    Debug.WriteLine(comments.GetComments().Count);
+                    foreach (Comment c in comments.GetComments())
+                    {
+                        DrawRectangle(c);
+                    }
+                }
             }
+            
+
             base.OnNavigatedTo(e);
         }
 

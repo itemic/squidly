@@ -18,71 +18,63 @@ using Windows.UI.Xaml.Shapes;
 
 namespace HelloWorld.Utils
 {
-    public static class Save
+    public class Save
     {
-        public async static void SaveInk(InkCanvas inkCanvas)
-        {
-            if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Count > 0)
-            {
-                var savePicker = new Windows.Storage.Pickers.FileSavePicker();
-                savePicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
-                savePicker.FileTypeChoices.Add("Gif with embedded ISF", new List<string> { ".gif" });
+        private StorageFolder projectFolder;
 
-                var file = await savePicker.PickSaveFileAsync();
 
-                if (null != file)
-                {
-                    using (IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite))
-                    {
-                        await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(stream);
-                    }
-                }
-            }
-        }
-
-        public static async void SaveComments(Canvas canvas, CommentModel comments)
+        public async Task CreateFolder(/*StorageFolder topLevel*/)
         {
             var folderPicker = new FolderPicker();
             folderPicker.FileTypeFilter.Add("*");
 
-            var folder = await folderPicker.PickSingleFolderAsync();
+            var topLevel = await folderPicker.PickSingleFolderAsync();
 
-            if (folder != null)
+            projectFolder = await topLevel.CreateFolderAsync("PROJECTNAME", CreationCollisionOption.ReplaceExisting);
+        }
+
+        public async Task SaveAll(InkCanvas inkCanvas, CommentModel comments)
+        {
+            // save ink
+            var inkFile = await projectFolder.CreateFileAsync("InkFile.gif", CreationCollisionOption.ReplaceExisting);
+            using (IRandomAccessStream streamX = await inkFile.OpenAsync(FileAccessMode.ReadWrite))
             {
-                var file = await folder.CreateFileAsync("comment", Windows.Storage.CreationCollisionOption.ReplaceExisting);
-                var stream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite);
+                await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(streamX);
+            }
 
-                using (var outputStream = stream.GetOutputStreamAt(0))
+            // save comments
+            var commentsFile = await projectFolder.CreateFileAsync("comments.txt", CreationCollisionOption.ReplaceExisting);
+            var stream = await commentsFile.OpenAsync(FileAccessMode.ReadWrite);
+
+            using (var outputStream = stream.GetOutputStreamAt(0))
+            {
+                using (var dataWriter = new DataWriter(outputStream))
                 {
-                    using (var dataWriter = new DataWriter(outputStream))
+                    foreach (Comment comment in comments.GetComments())
                     {
-                        foreach (Comment comment in comments.GetComments())
-                        {
-                            dataWriter.WriteString($"{Serialize(comment)}\n");
-                            
-                        }
-                        await dataWriter.StoreAsync();
-                        await outputStream.FlushAsync();
+                        dataWriter.WriteString($"{Serialize(comment)}\n");
                     }
-                }           
-                stream.Dispose();
+                    await dataWriter.StoreAsync();
+                    await outputStream.FlushAsync();
+                }
+            }
+            stream.Dispose();
 
-                var iterator = 0;
+            var iterator = 0;
 
-                foreach (Comment comment in comments.GetComments())
+            foreach (Comment comment in comments.GetComments())
+            {
+                var inkComment = await projectFolder.CreateFileAsync("CommentInk" + iterator + ".gif", CreationCollisionOption.ReplaceExisting);
+                using (IRandomAccessStream s = await inkComment.OpenAsync(FileAccessMode.ReadWrite))
                 {
-                    var inkComment = await folder.CreateFileAsync("ink" + iterator + ".gif", CreationCollisionOption.ReplaceExisting);
-                    using (IRandomAccessStream s = await inkComment.OpenAsync(FileAccessMode.ReadWrite))
-                    {
-                        await comment.ic.SaveAsync(s);
-                    }
-                    iterator++;
-                }           
+                    await comment.ic.SaveAsync(s);
+                }
+                iterator++;
             }
         }
 
-
-        public static string Serialize<T>(this T obj)
+   
+        public string Serialize<T>(T obj)
 
         {
             var ms = new MemoryStream();
@@ -100,50 +92,47 @@ namespace HelloWorld.Utils
             }
         }
 
-        public async static Task LoadComments(CommentModel model)
+        public async Task LoadAll(InkCanvas inkCanvas, CommentModel commentModel)
         {
-
-            //clear
-            model.GetComments().Clear();
+            commentModel.GetComments().Clear();
 
             var folderPicker = new FolderPicker();
             folderPicker.FileTypeFilter.Add("*");
-            
-            var folder = await folderPicker.PickSingleFolderAsync();
-            if (folder != null)
+
+            projectFolder = await folderPicker.PickSingleFolderAsync();
+            if (projectFolder != null)
             {
-                var files = await folder.GetFilesAsync();
+                var files = await projectFolder.GetFilesAsync();
                 foreach (StorageFile file in files)
                 {
-                    if (file.Name.Equals("comment"))
+                    if (file.Name.Equals("InkFile.gif"))
+                    {
+                        IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
+                        using (var inputStream = stream.GetInputStreamAt(0))
+                        {
+                            await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                        }
+                        stream.Dispose();
+                    }
+                    else if (file.Name.Equals("comments.txt"))
                     {
                         string text = await FileIO.ReadTextAsync(file);
                         string[] components = text.Split('\n');
-
-
                         foreach (string component in components)
                         {
                             if (component.Length > 0)
                             {
                                 Comment c = Deserialize<Comment>(component);
-                                Debug.WriteLine("eee");
-                                model.Add(c);
-                                Debug.WriteLine(model.GetComments().Count());
-
-                                
+                                commentModel.Add(c);
+                                Debug.WriteLine(commentModel.GetComments().Count());
                             }
                         }
-
                     }
-
-                  
-                         
                 }
 
-
-                foreach(StorageFile file in files)
+                foreach (StorageFile file in files)
                 {
-                    if (file.Name.StartsWith("ink"))
+                    if (file.Name.StartsWith("CommentInk"))
                     {
                         IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
                         using (var inputStream = stream.GetInputStreamAt(0))
@@ -154,21 +143,19 @@ namespace HelloWorld.Utils
                             int inkPos = int.Parse(m.Value); // we will need to have better error handling
 
                             // then set it
-                            model.GetComments()[inkPos].ic = new Windows.UI.Input.Inking.InkStrokeContainer();
+                            commentModel.GetComments()[inkPos].ic = new Windows.UI.Input.Inking.InkStrokeContainer();
 
-                            await model.GetComments()[inkPos].ic.LoadAsync(inputStream);
+                            await commentModel.GetComments()[inkPos].ic.LoadAsync(inputStream);
 
                         }
                     }
                 }
-                
 
 
             }
-
         }
-
-        public static T Deserialize<T>(this string xml)
+        
+        public T Deserialize<T>(string xml)
         {
             var ms = new MemoryStream();
             // Write xml content to the Stream and leave it opened
@@ -186,23 +173,7 @@ namespace HelloWorld.Utils
             }
         }
 
-        public async static void LoadInk(InkCanvas inkCanvas)
-        {
-            var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
-            openPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
-            openPicker.FileTypeFilter.Add(".gif");
-
-            var file = await openPicker.PickSingleFileAsync();
-
-            if (file != null)
-            {
-                IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
-                using (var inputStream = stream.GetInputStreamAt(0))
-                {
-                    await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
-                }
-                stream.Dispose();
-            }
-        }
+        
+        
     }
 }
