@@ -1,0 +1,33 @@
+﻿<ContentDialog
+    x:Class="HelloWorld.Views.NewProject"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:HelloWorld.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="newProjectDialog"
+    Height="350"
+    Width="450"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel Margin="15,0,15,0">
+            <TextBlock Text="New Prototype" FontSize="36" Margin="0,0,0,10"/>
+            <TextBlock TextWrapping="Wrap" Text="PROJECT NAME" FontFamily="Segoe UI" FontSize="12"/>
+            <TextBox x:Name="projectName" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+            <TextBlock  TextWrapping="Wrap" Text="DIRECTORY" FontSize="12"/>
+
+            <StackPanel Orientation="Horizontal">
+
+                <TextBox x:Name="filePath" TextWrapping="Wrap" Margin="0,0,5,0" Width="275" HorizontalAlignment="Stretch"/>
+                <Button x:Name="chooseDirButton" Background="LightGray" Content="Browse" Click="ChooseDirectory"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,20,0,0">
+                <Button MinWidth="128" Background="RoyalBlue" Foreground="White" Content="New Project" Margin="20,0,20,0" Click="SaveButtonClick"/>
+                <Button MinWidth="128" Content="Cancel" Margin="20,0,20,0" Click="CancelClick"/>
+            </StackPanel>
+        </StackPanel>
+
+    </Grid>
+</ContentDialog>

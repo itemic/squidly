@@ -1,4 +1,6 @@
-﻿using System;
+﻿using HelloWorld.Utils;
+using HelloWorld.Views;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -24,10 +26,12 @@ namespace HelloWorld
     /// </summary>
     public sealed partial class Home : Page
     {
+        public RecentsViewModel vm { get; set; }
+
         public Home()
         {
             this.InitializeComponent();
-            AsyncTest();
+            this.vm = new RecentsViewModel();
             
         }
 
@@ -55,6 +59,12 @@ namespace HelloWorld
             
                 this.Frame.Navigate(typeof(MainPage), true);
             
+        }
+
+        private async void TestSaveShow(object sender, RoutedEventArgs e)
+        {
+            NewProject newProject = new NewProject();
+            await newProject.ShowAsync();
         }
     }
 }
