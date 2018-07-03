@@ -43,6 +43,8 @@ namespace HelloWorld
         private Rect boundingRect;
         private bool isBoundRect;
 
+        Symbol LassoSelect = (Symbol)0xEF20;
+
         public MainPage()
         {
             this.InitializeComponent();

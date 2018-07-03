@@ -19,6 +19,9 @@
             <CommandBar.Content>
                 <InkToolbar x:Name="inkToolbar"
 					TargetInkCanvas="{x:Bind inkCanvas}">
+                    <InkToolbarCustomToolButton x:Name="toolButtonLasso" Click="ToolButton_Lasso" ToolTipService.ToolTip="Select Strokes">
+                        <SymbolIcon Symbol="{x:Bind LassoSelect}"/>
+                    </InkToolbarCustomToolButton>
                 </InkToolbar>
             </CommandBar.Content>
             <AppBarButton Icon="Save" Label="Save" Click="saveInk_ClickAsync"/>
@@ -47,7 +50,6 @@
                 </AppBarButton.Flyout>
             </AppBarButton>
             <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
-            <AppBarToggleButton Icon="SelectAll" Label="Select Mode" Click="ToolButton_Lasso"/>
         </CommandBar>
 
 
