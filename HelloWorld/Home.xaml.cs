@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -56,8 +57,16 @@ namespace Protocol2
         private async void LoadClick(object sender, RoutedEventArgs e)
         {
             // really should use some view model thing
-            
-                this.Frame.Navigate(typeof(MainPage), true);
+            var folderPicker = new FolderPicker();
+            folderPicker.FileTypeFilter.Add("*");
+
+            var project = await folderPicker.PickSingleFolderAsync();
+
+            Save save = new Save();
+            save.SetFolder(project);
+
+
+            this.Frame.Navigate(typeof(MainPage), save);
             
         }
 
@@ -69,8 +78,6 @@ namespace Protocol2
             save.SetFolder(clickedItem.Folder);
 
             this.Frame.Navigate(typeof(MainPage), save);
-
-            Debug.WriteLine(clickedItem.Name);
         }
 
         private async void NewProject(object sender, RoutedEventArgs e)
