@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -26,8 +27,23 @@ namespace HelloWorld
         public Home()
         {
             this.InitializeComponent();
+            AsyncTest();
+            
         }
 
+        private async void AsyncTest()
+        {
+            var local = Windows.Storage.ApplicationData.Current.LocalSettings;
+            var mruToken = local.Values["mru"];
+            var mru = Windows.Storage.AccessCache.StorageApplicationPermissions.MostRecentlyUsedList;
+
+            foreach (Windows.Storage.AccessCache.AccessListEntry entry in mru.Entries)
+            {
+                string token = entry.Token;
+                Windows.Storage.IStorageItem item = await mru.GetItemAsync(token);
+                Debug.WriteLine(item.Path);
+            }
+        }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(MainPage), false);

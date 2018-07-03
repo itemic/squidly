@@ -31,6 +31,12 @@ namespace HelloWorld.Utils
             var topLevel = await folderPicker.PickSingleFolderAsync();
 
             projectFolder = await topLevel.CreateFolderAsync("PROJECTNAME", CreationCollisionOption.ReplaceExisting);
+
+            var mru = Windows.Storage.AccessCache.StorageApplicationPermissions.MostRecentlyUsedList;
+            var token = mru.Add(projectFolder);
+
+            var local = Windows.Storage.ApplicationData.Current.LocalSettings;
+            local.Values["mru"] = token;
         }
 
         public async Task SaveAll(InkCanvas inkCanvas, CommentModel comments)
