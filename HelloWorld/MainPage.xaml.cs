@@ -18,13 +18,13 @@ using Windows.UI.Xaml.Shapes;
 using Windows.Storage.Streams;
 using System.Threading.Tasks;
 using Windows.UI.Input;
-using HelloWorld.Utils;
+using Protocol2.Utils;
 using System.Diagnostics;
 using Windows.UI;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-namespace HelloWorld
+namespace Protocol2
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.

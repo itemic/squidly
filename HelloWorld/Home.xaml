@@ -1,11 +1,11 @@
 ﻿<Page
-    x:Class="HelloWorld.Home"
+    x:Class="Protocol2.Home"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:HelloWorld"
+    xmlns:local="using:Protocol2"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local1="using:HelloWorld.Utils"
+    xmlns:local1="using:Protocol2.Utils"
     mc:Ignorable="d" Margin="0,0,0,-4">
 
     <Pivot x:Name="rootPivot" Title="Protocol 2">

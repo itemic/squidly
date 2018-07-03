@@ -16,7 +16,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 
-namespace HelloWorld.Utils
+namespace Protocol2.Utils
 {
     public class Save
     {

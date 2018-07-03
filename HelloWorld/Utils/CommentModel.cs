@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.UI;
 
-namespace HelloWorld.Utils
+namespace Protocol2.Utils
 {
     public class CommentModel
     {
