@@ -11,25 +11,20 @@
     <Pivot x:Name="rootPivot" Title="Protocol 2">
         <Pivot.RightHeader>
             <CommandBar OverflowButtonVisibility="Collapsed" Background="Transparent">
-                <AppBarButton Icon="Add" Click="Button_Click"/>
+                <AppBarButton Icon="Add" Click="NewProject"/>
                 <AppBarButton Icon="OpenLocal" Click="LoadClick"/>
-                <AppBarSeparator/>
-                <AppBarButton Icon="Edit"/>
-                <AppBarButton Icon="Delete"/>
-                <AppBarSeparator/>
-                <AppBarButton Icon="Save" Click="TestSaveShow"/>
             </CommandBar>
 
         </Pivot.RightHeader>
         
         
         <PivotItem Header="Recents">
-            <GridView ItemsSource="{x:Bind vm.Recents}">
+            <GridView ItemsSource="{x:Bind vm.Recents}" ItemClick="LoadItem" IsItemClickEnabled="True">
                 <GridView.ItemTemplate>
                     <DataTemplate x:DataType="local1:Recents">
 
                         <StackPanel Height="280" Width="320" Margin="12">
-                            <Rectangle Height="180" Width="320" Fill="ForestGreen" Stretch="UniformToFill"/>
+                            <Rectangle Height="180" Width="320" Fill="LightSteelBlue" Stretch="UniformToFill"/>
                             <StackPanel Margin="0,12">
                                 <TextBlock Text="{x:Bind Name}"/>
                                 <TextBlock Text="{x:Bind Path}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"/>
@@ -42,7 +37,6 @@
                 </GridView.ItemTemplate>
 
                 <GridView.Items>
-                    <x:String>Bepis</x:String>
                 </GridView.Items>
 
 

@@ -376,7 +376,7 @@ namespace HelloWorld
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is bool & (bool)e.Parameter == true)
+            if (e.Parameter is bool && (bool)e.Parameter == true)
             {
                 if (save == null)
                 {
@@ -384,6 +384,19 @@ namespace HelloWorld
                 }
 
                 await save.LoadAll(inkCanvas, comments);
+                if (comments != null)
+                {
+                    canvas.Children.Clear(); // probably better way than this...
+                    Debug.WriteLine(comments.GetComments().Count);
+                    foreach (Comment c in comments.GetComments())
+                    {
+                        DrawRectangle(c);
+                    }
+                }
+            } else if (e.Parameter is Save)
+            {
+                save = e.Parameter as Save;
+                await save.LoadNew(inkCanvas, comments);
                 if (comments != null)
                 {
                     canvas.Children.Clear(); // probably better way than this...

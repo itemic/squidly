@@ -27,6 +27,7 @@ namespace HelloWorld.Views
 
         public ContentDialogResult result { get; set; }
         public StorageFolder selectedFolder;
+        public string fileName;
 
         public NewProject()
         {
@@ -40,6 +41,7 @@ namespace HelloWorld.Views
             {
                 if (selectedFolder != null)
                 {
+                    fileName = projectName.Text;
                     newProjectDialog.Hide();
                 } else
                 {

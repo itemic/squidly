@@ -61,10 +61,32 @@ namespace HelloWorld
             
         }
 
-        private async void TestSaveShow(object sender, RoutedEventArgs e)
+        private async void LoadItem(object sender, ItemClickEventArgs e)
+        {
+            var clickedItem = e.ClickedItem as Recents;
+
+            Save save = new Save();
+            save.SetFolder(clickedItem.Folder);
+
+            this.Frame.Navigate(typeof(MainPage), save);
+
+            Debug.WriteLine(clickedItem.Name);
+        }
+
+        private async void NewProject(object sender, RoutedEventArgs e)
         {
             NewProject newProject = new NewProject();
             await newProject.ShowAsync();
+
+            if (newProject.result == ContentDialogResult.Primary)
+            {
+                // make a new save!
+                Save save = new Save();
+                await save.CreateFolder(newProject.selectedFolder, newProject.fileName);
+
+                this.Frame.Navigate(typeof(MainPage), save);
+            }
+
         }
     }
 }

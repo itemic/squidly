@@ -23,20 +23,43 @@ namespace HelloWorld.Utils
         private StorageFolder projectFolder;
 
 
-        public async Task CreateFolder(/*StorageFolder topLevel*/)
+        public void SetFolder(StorageFolder topLevel)
         {
-            var folderPicker = new FolderPicker();
-            folderPicker.FileTypeFilter.Add("*");
+            projectFolder = topLevel;
+        }
 
-            var topLevel = await folderPicker.PickSingleFolderAsync();
+        public async Task CreateFolder(StorageFolder topLevel, String fileName)
+        {
+           
 
-            projectFolder = await topLevel.CreateFolderAsync("PROJECTNAME", CreationCollisionOption.ReplaceExisting);
+            projectFolder = await topLevel.CreateFolderAsync(fileName, CreationCollisionOption.ReplaceExisting);
 
             var mru = Windows.Storage.AccessCache.StorageApplicationPermissions.MostRecentlyUsedList;
             var token = mru.Add(projectFolder);
 
             var local = Windows.Storage.ApplicationData.Current.LocalSettings;
             local.Values["mru"] = token;
+        }
+
+        public async Task CreateFolder(String toplevelName)
+        {
+            var folderPicker = new FolderPicker();
+            folderPicker.FileTypeFilter.Add("*");
+
+            var topLevel = await folderPicker.PickSingleFolderAsync();
+
+            projectFolder = await topLevel.CreateFolderAsync(toplevelName, CreationCollisionOption.ReplaceExisting);
+
+            var mru = Windows.Storage.AccessCache.StorageApplicationPermissions.MostRecentlyUsedList;
+            var token = mru.Add(projectFolder);
+
+            var local = Windows.Storage.ApplicationData.Current.LocalSettings;
+            local.Values["mru"] = token;
+        }
+
+        public async Task CreateFolder(/*StorageFolder topLevel*/)
+        {
+            await CreateFolder("DefaultProject");
         }
 
         public async Task SaveAll(InkCanvas inkCanvas, CommentModel comments)
@@ -98,14 +121,8 @@ namespace HelloWorld.Utils
             }
         }
 
-        public async Task LoadAll(InkCanvas inkCanvas, CommentModel commentModel)
+        public async Task LoadNew(InkCanvas inkCanvas, CommentModel commentModel)
         {
-            commentModel.GetComments().Clear();
-
-            var folderPicker = new FolderPicker();
-            folderPicker.FileTypeFilter.Add("*");
-
-            projectFolder = await folderPicker.PickSingleFolderAsync();
             if (projectFolder != null)
             {
                 var files = await projectFolder.GetFilesAsync();
@@ -159,6 +176,19 @@ namespace HelloWorld.Utils
 
 
             }
+        }
+
+        public async Task LoadAll(InkCanvas inkCanvas, CommentModel commentModel)
+        {
+            commentModel.GetComments().Clear();
+
+            var folderPicker = new FolderPicker();
+            folderPicker.FileTypeFilter.Add("*");
+
+            projectFolder = await folderPicker.PickSingleFolderAsync();
+
+            await LoadNew(inkCanvas, commentModel);
+            
         }
         
         public T Deserialize<T>(string xml)

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace HelloWorld.Utils
 {
@@ -11,6 +12,7 @@ namespace HelloWorld.Utils
     {
         public string Name { get; set; }
         public string Path { get; set; }
+        public StorageFolder Folder { get; set; }
 
         public Recents()
         {
@@ -37,9 +39,19 @@ namespace HelloWorld.Utils
             foreach (Windows.Storage.AccessCache.AccessListEntry entry in mru.Entries)
             {
                 string token = entry.Token;
-                Windows.Storage.IStorageItem item = await mru.GetItemAsync(token);
 
-                this.recents.Add(new Recents() { Name = item.Name, Path = item.Path });
+                try
+                {
+                    Windows.Storage.StorageFolder folder = await mru.GetFolderAsync(token);
+                    this.recents.Add(new Recents() { Name = folder.Name, Path = folder.Path, Folder = folder});
+
+                }
+                catch (System.IO.FileNotFoundException fe)
+                {
+                    
+                    // do nothing?
+
+                }
             }
 
 
