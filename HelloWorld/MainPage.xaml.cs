@@ -41,6 +41,7 @@ namespace HelloWorld
         private Polyline lasso;
         //Stroke selection area
         private Rect boundingRect;
+        private bool isBoundRect;
 
         public MainPage()
         {
@@ -61,15 +62,8 @@ namespace HelloWorld
 
             //inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
             Debug.WriteLine("yes");
-            //for passing modified input to the app for custom processing
-            inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
 
-            //Listeners for unprocessed pointer events from the modified input
-            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += UnprocessedInput_PointerPressed;
-            inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += UnprocessedInput_PointerMoved;
-            inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += UnprocessedInput_PointerReleased;
-
-            //Listeners for new ink or erase strokes
+            //Listeners for new ink or erase strokes so that selection could be cleared when inking or erasing is detected
             inkCanvas.InkPresenter.StrokeInput.StrokeStarted += StrokeInput_StrokeStarted;
             inkCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
         }
@@ -325,12 +319,15 @@ namespace HelloWorld
 
             lasso.Points.Add(args.CurrentPoint.RawPosition);
             selectionCanvas.Children.Add(lasso);
+            isBoundRect = true;
         }
 
         private void UnprocessedInput_PointerMoved(InkUnprocessedInput sender, PointerEventArgs args)
         {
-            Debug.WriteLine("PointerMoved");
-            lasso.Points.Add(args.CurrentPoint.RawPosition);
+            if (isBoundRect)
+            {
+                lasso.Points.Add(args.CurrentPoint.RawPosition);
+            }
         }
 
         private void UnprocessedInput_PointerReleased(InkUnprocessedInput sender, PointerEventArgs args)
@@ -341,7 +338,7 @@ namespace HelloWorld
             lasso.Points.Add(args.CurrentPoint.RawPosition);
 
             boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithPolyLine(lasso.Points);
-
+            isBoundRect = false;
             DrawBoundingRect();
         }
 
@@ -398,6 +395,17 @@ namespace HelloWorld
                 selectionCanvas.Children.Clear();
                 boundingRect = Rect.Empty;
             }
+        }
+
+        private void ToolButton_Lasso(object sender, RoutedEventArgs e)
+        {
+            //for passing modified input to the app for custom processing
+            inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
+
+            //Listeners for unprocessed pointer events from the modified input
+            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += UnprocessedInput_PointerPressed;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += UnprocessedInput_PointerMoved;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += UnprocessedInput_PointerReleased;
         }
 
     }

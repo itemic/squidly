@@ -47,7 +47,7 @@
                 </AppBarButton.Flyout>
             </AppBarButton>
             <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
-            <AppBarToggleButton Icon="SelectAll" Label="Select Mode"/>
+            <AppBarToggleButton Icon="SelectAll" Label="Select Mode" Click="ToolButton_Lasso"/>
         </CommandBar>
 
 
