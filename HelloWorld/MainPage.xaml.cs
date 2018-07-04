@@ -63,7 +63,6 @@ namespace HelloWorld
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
 
             //inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
-            Debug.WriteLine("yes");
 
             //Listeners for new ink or erase strokes so that selection could be cleared when inking or erasing is detected
             inkCanvas.InkPresenter.StrokeInput.StrokeStarted += StrokeInput_StrokeStarted;
@@ -310,7 +309,6 @@ namespace HelloWorld
 
         private void UnprocessedInput_PointerPressed(InkUnprocessedInput sender, PointerEventArgs args)
         {
-            Debug.WriteLine("PointerPressed");
             //polyline draws a series of connected straight lines - going to pass it points where the pen is
             lasso = new Polyline()
             {
@@ -334,8 +332,6 @@ namespace HelloWorld
 
         private void UnprocessedInput_PointerReleased(InkUnprocessedInput sender, PointerEventArgs args)
         {
-
-            Debug.WriteLine("PointerReleased");
             //add final point to the Polyline object
             lasso.Points.Add(args.CurrentPoint.RawPosition);
 
@@ -398,9 +394,17 @@ namespace HelloWorld
                 boundingRect = Rect.Empty;
             }
         }
+        
+        private void Click_Select(object sender, RightTappedRoutedEventArgs args)
+        {
+            Debug.WriteLine("its innnnn");
+            boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithLine(args.GetPosition(null), args.GetPosition(null));
+        }
 
         private void ToolButton_Lasso(object sender, RoutedEventArgs e)
         {
+
+            inkCanvas.RightTapped += new RightTappedEventHandler(Click_Select);
             //for passing modified input to the app for custom processing
             inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
 
