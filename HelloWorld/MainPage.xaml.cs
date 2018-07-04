@@ -357,9 +357,12 @@ namespace HelloWorld
         {
             selectionCanvas.Children.Clear();
 
+            Debug.WriteLine("drawing");
+
             //draw bounding box only if there are ink strokes within the lasso
             if (!((boundingRect.Width == 0) || (boundingRect.Height == 0) || boundingRect.IsEmpty))
             {
+                Debug.WriteLine("there is bounding rect");
                 var rectangle = new Rectangle()
                 {
                     Stroke = new SolidColorBrush(Windows.UI.Colors.Blue),
@@ -398,7 +401,10 @@ namespace HelloWorld
         private void Click_Select(object sender, RightTappedRoutedEventArgs args)
         {
             Debug.WriteLine("its innnnn");
-            boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithLine(args.GetPosition(null), args.GetPosition(null));
+            Point clickedPoint = args.GetPosition(inkCanvas);
+            //need to adjust it so that it works for different thickness strokes
+            boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithLine(new Point(clickedPoint.X -1, clickedPoint.Y - 1), new Point(clickedPoint.X, clickedPoint.Y + 3));
+            DrawBoundingRect();
         }
 
         private void ToolButton_Lasso(object sender, RoutedEventArgs e)
