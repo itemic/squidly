@@ -50,6 +50,7 @@
                 </AppBarButton.Flyout>
             </AppBarButton>
             <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
+            <AppBarButton Label="Combine Strokes" Click="Combine_Strokes"/>
         </CommandBar>
 
 

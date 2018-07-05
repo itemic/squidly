@@ -37,6 +37,8 @@ namespace HelloWorld
         //IReadOnlyList<InkStroke> strokesShape = null;
         //InkAnalysisResult resultShape = null;
 
+        Dictionary<InkStroke, StrokeGroup> groups = new Dictionary<InkStroke, StrokeGroup>();
+
         //Stroke selection field
         private Polyline lasso;
         //Stroke selection area
@@ -336,9 +338,22 @@ namespace HelloWorld
             lasso.Points.Add(args.CurrentPoint.RawPosition);
 
             boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithPolyLine(lasso.Points);
+
+            var strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+            StrokeGroup strokeGroup;
+            foreach(var stroke in strokes)
+            {
+                if (groups.TryGetValue(stroke, out strokeGroup))
+                {
+                    strokeGroup.selectStrokesInGroup();
+                }
+            }
+
             isBoundRect = false;
             DrawBoundingRect();
         }
+
+        private void 
 
 
         //handle new ink or erase strokes to clean up Selection UI 
@@ -418,6 +433,45 @@ namespace HelloWorld
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += UnprocessedInput_PointerPressed;
             inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += UnprocessedInput_PointerMoved;
             inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += UnprocessedInput_PointerReleased;
+        }
+
+        private void Combine_Strokes(object sender, RoutedEventArgs e)
+        {
+            bool selectedExists = false;
+            var strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+            //InkStrokeBuilder strokeBuilder = new InkStrokeBuilder();
+            //IReadOnlyList<InkPoint> inkPoints = null;
+            List<InkStroke> selectedStrokes = new List<InkStroke>();
+            StrokeGroup strokeGroup = new StrokeGroup();
+            foreach (var stroke in strokes)
+            {
+                if (stroke.Selected)
+                {
+                    selectedExists = true;
+                    selectedStrokes.Add(stroke);
+
+                    if (groups.ContainsKey(stroke))
+                    {
+                        groups.TryGetValue(stroke, out strokeGroup);
+                        strokeGroup.AddStroke(stroke);
+                    } else
+                    {
+                        strokeGroup.AddStroke(stroke);
+                        groups.Add(stroke, strokeGroup);
+                    }
+                }
+            }
+
+            if (selectedExists)
+            {
+                ClearDrawnBoundingRect();
+            }
+
+            var check = strokeGroup.getStrokes();
+            foreach(var stroke in check)
+            {
+                Debug.WriteLine(stroke);
+            }
         }
 
     }
