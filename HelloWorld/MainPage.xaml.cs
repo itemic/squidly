@@ -62,7 +62,7 @@ namespace HelloWorld
 
             undoStack = new Stack<InkStroke>();
 
-            inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
+            inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;                                                                                                                                                                                                                                 
 
             //inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
 
