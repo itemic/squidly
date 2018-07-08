@@ -335,15 +335,21 @@ namespace HelloWorld
 
             boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithPolyLine(lasso.Points);
 
-            updateBoundingRect(inkCanvas.InkPresenter.StrokeContainer.GetStrokes());
+            updateSelected(inkCanvas.InkPresenter.StrokeContainer.GetStrokes());
 
             isBoundRect = false;
             DrawBoundingRect();
         }
 
-        private void updateBoundingRect(IReadOnlyList<InkStroke> strokes)
+        private void updateSelected(IReadOnlyList<InkStroke> strokes)
         {
             StrokeGroup strokeGroup;
+            Rect updatedBoundingBox = boundingRect;
+            var updatedLeftX = updatedBoundingBox.X;
+            var updatedRightX = updatedBoundingBox.X + updatedBoundingBox.Width;
+            var updatedTopY = updatedBoundingBox.Y;
+            var updatedBottomY = updatedBoundingBox.Y + updatedBoundingBox.Height;
+
             foreach (var stroke in strokes)
             {
                 if (stroke.Selected)
@@ -351,10 +357,34 @@ namespace HelloWorld
                     if (groups.TryGetValue(stroke, out strokeGroup))
                     {
                         strokeGroup.selectStrokesInGroup();
-                        boundingRect = strokeGroup.findBoundingBox();
+                        Rect groupBoundingBox = strokeGroup.findBoundingBox();
+
+                        if (groupBoundingBox.X < updatedBoundingBox.X)
+                        {
+                            updatedLeftX = groupBoundingBox.X;
+                        }
+
+                        if (groupBoundingBox.Y < updatedBoundingBox.Y)
+                        {
+                            updatedTopY = groupBoundingBox.Y;
+                        }
+
+                        if (groupBoundingBox.X + groupBoundingBox.Width > updatedBoundingBox.X + updatedBoundingBox.Width)
+                        {
+                            updatedRightX = groupBoundingBox.X + groupBoundingBox.Width;
+                        }
+
+                        if (groupBoundingBox.Y + groupBoundingBox.Height > updatedBoundingBox.Y + updatedBoundingBox.Height)
+                        {
+                            updatedBottomY = groupBoundingBox.Y + groupBoundingBox.Height;
+                        }
                     }
                 }
+
+                updatedBoundingBox = new Rect(updatedLeftX, updatedTopY, updatedRightX - updatedLeftX, updatedBottomY - updatedTopY);
             }
+
+            boundingRect = updatedBoundingBox;
         }
 
 
@@ -417,7 +447,7 @@ namespace HelloWorld
             Point clickedPoint = args.GetPosition(inkCanvas);
             //need to adjust it so that it works for different thickness strokes
             boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithLine(new Point(clickedPoint.X -1, clickedPoint.Y - 1), new Point(clickedPoint.X, clickedPoint.Y + 3));
-            updateBoundingRect(inkCanvas.InkPresenter.StrokeContainer.GetStrokes());
+            updateSelected(inkCanvas.InkPresenter.StrokeContainer.GetStrokes());
             DrawBoundingRect();
         }
 
