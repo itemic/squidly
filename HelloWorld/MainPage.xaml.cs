@@ -14,12 +14,14 @@ using Windows.UI.Input.Inking.Analysis;
 using Windows.UI.Xaml.Shapes;
 using Windows.Storage.Streams;
 using Windows.UI.Input;
-using Windows.UI.Core;
 using System.Diagnostics;
+using Protocol2.Utils;
+using Windows.UI;
+using Windows.UI.Core;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-namespace HelloWorld
+namespace Protocol2
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -30,8 +32,6 @@ namespace HelloWorld
         private Stack<InkStroke> undoStack { get; set; }
 
         InkAnalyzer analyzerShape = new InkAnalyzer();
-        //IReadOnlyList<InkStroke> strokesShape = null;
-        //InkAnalysisResult resultShape = null;
 
         Dictionary<InkStroke, StrokeGroup> groups = new Dictionary<InkStroke, StrokeGroup>();
 
@@ -42,21 +42,30 @@ namespace HelloWorld
         private bool isBoundRect;
 
         Symbol LassoSelect = (Symbol)0xEF20;
+        IReadOnlyList<InkStroke> strokesShape = null;
+        InkAnalysisResult resultShape = null;
+        private Random rng = new Random();
+        public CommentModel comments;
+        private Save save = null;
 
         public MainPage()
         {
             this.InitializeComponent();
-
+            canvas.RenderTransform = new TranslateTransform();
             inkCanvas.InkPresenter.InputDeviceTypes =
+
                 Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+                // Uncomment the line below if you want to draw with touch
+                // When commented out, long touch to create comment
+                // Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
-            Canvas2.InkPresenter.InputDeviceTypes =
-               Windows.UI.Core.CoreInputDeviceTypes.Mouse |
-               Windows.UI.Core.CoreInputDeviceTypes.Touch |
-               Windows.UI.Core.CoreInputDeviceTypes.Pen;
+            //Multiple pen input, breaks undo!
+            //inkCanvas.InkPresenter.ActivateCustomDrying();
+            //inkCanvas.InkPresenter.SetPredefinedConfiguration(InkPresenterPredefinedConfiguration.SimpleMultiplePointer);
 
             undoStack = new Stack<InkStroke>();
+            comments = new CommentModel();
 
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;                                                                                                                                                                                                                                 
 
@@ -70,56 +79,180 @@ namespace HelloWorld
         private async void CreatePopup(object sender, RightTappedRoutedEventArgs e)
         {
             Point point = e.GetPosition(inkCanvas);
+
+
+            inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
             
+            // enable adding comments with right click (how in hub??)
+            inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
 
-            var rectangle = new Rectangle();
-            rectangle.Fill = new SolidColorBrush(Windows.UI.Colors.SteelBlue);
-            rectangle.Width = 25;
-            rectangle.Height = 25;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
 
-            Canvas.SetLeft(rectangle, point.X - 12.5);
-            Canvas.SetTop(rectangle, point.Y -12.5);
+            inkCanvas.RightTapped += TouchMakePopup;
+
+        }
 
 
-            Flyout flyout = new Flyout();
+        public Rectangle DrawRectangle(Comment comment)
+        {
+            Rectangle rectangle = new Rectangle();
+            rectangle.Fill = new SolidColorBrush(comment.fill);
+            rectangle.Width = comment.width;
+            rectangle.Height = comment.height;
+            rectangle.Opacity = comment.opacity;
+            Canvas.SetLeft(rectangle, comment.left);
+            Canvas.SetTop(rectangle, comment.top);
 
-            TextBlock tb = new TextBlock();
-            tb.Text = "New Comment";
+            var rotation = new RotateTransform();
+            rotation.Angle = comment.angle;
+            rectangle.RenderTransform = rotation;
 
-            InkCanvas ic = new InkCanvas();
-            ic.Width = 250;
-            ic.Height = 250;
+            // Add flyout
+            var flyout = new Flyout();
+            Style flyoutStyle = new Style();
+            flyoutStyle.TargetType = typeof(FlyoutPresenter);
+            flyoutStyle.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(comment.fill)));
+            flyout.FlyoutPresenterStyle = flyoutStyle;
 
-            InkToolbar it = new InkToolbar();
-            it.TargetInkCanvas = ic;
-            ic.InkPresenter.InputDeviceTypes =
+            // Add delete button
+            Button deleteButton = new Button();
+            deleteButton.Content = new SymbolIcon(Symbol.Delete);
+            deleteButton.Click += async delegate (object e, RoutedEventArgs evt)
+            {
+                canvas.Children.Remove(rectangle);
+                comments.Remove(comment);
+            };
+
+            // Add canvas
+            InkCanvas flyoutInkCanvas = new InkCanvas();
+            flyoutInkCanvas.Width = 250;
+            flyoutInkCanvas.Height = 250;
+            flyoutInkCanvas.InkPresenter.InputDeviceTypes = 
               Windows.UI.Core.CoreInputDeviceTypes.Mouse |
               Windows.UI.Core.CoreInputDeviceTypes.Touch |
               Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
-            StackPanel sp = new StackPanel();
-            sp.Children.Add(tb);
-            sp.Children.Add(it);
-            sp.Children.Add(ic);
-
-            flyout.Content = sp;
-
-            rectangle.PointerReleased += async delegate (object s, PointerRoutedEventArgs evt)
+            if (comment.ic != null)
             {
-                ContentDialog noWifiDialog = new ContentDialog
-                {
-                    Title = "No wifi connection",
-                    Content = "Check your connection and try again.",
-                    CloseButtonText = "Ok"
-                };
+                flyoutInkCanvas.InkPresenter.StrokeContainer = comment.ic;
+            }
+            comment.ic = flyoutInkCanvas.InkPresenter.StrokeContainer;
+        
+            InkToolbar flyoutInkToolbar = new InkToolbar();
+            flyoutInkToolbar.TargetInkCanvas = flyoutInkCanvas;
 
-                ContentDialogResult result = await noWifiDialog.ShowAsync();
+            // Add panels
+            StackPanel stackPanel = new StackPanel();
+            stackPanel.HorizontalAlignment = HorizontalAlignment.Center;
+            stackPanel.VerticalAlignment = VerticalAlignment.Center;
+
+            StackPanel rightAlignment = new StackPanel();
+            rightAlignment.HorizontalAlignment = HorizontalAlignment.Right;
+            rightAlignment.Children.Add(deleteButton);
+
+            stackPanel.Children.Add(rightAlignment);
+            stackPanel.Children.Add(flyoutInkCanvas);
+            stackPanel.Children.Add(flyoutInkToolbar);
+
+            // Additional settings
+            flyout.Content = stackPanel;
+            flyout.LightDismissOverlayMode = LightDismissOverlayMode.On;
+            rectangle.ContextFlyout = flyout;
+
+
+            // Add draggable (test)
+            /*
+            Point dragPoint;
+            bool inMotion = false;
+            rectangle.RenderTransform = new TranslateTransform();
+            rectangle.PointerPressed += delegate (object sender, PointerRoutedEventArgs e)
+            {
+                inMotion = true;
             };
 
-            canvas.Children.Add(rectangle);
+            rectangle.PointerMoved += delegate (object sender, PointerRoutedEventArgs e)
+            {
+                if (!e.Pointer.IsInContact) { return; }
 
-            flyout.ShowAt(rectangle);
+                var point = e.GetCurrentPoint(canvas).Position;
+                Canvas.SetLeft(rectangle, point.X - (rectangle.Height/2));
+                Canvas.SetTop(rectangle, point.Y - (rectangle.Width/2));
+
+            };
+
+            rectangle.PointerReleased += delegate (object sender, PointerRoutedEventArgs e)
+            {
+                inMotion = false;
+            };
+            */
+            // Return
+            canvas.Children.Add(rectangle);
+            return rectangle;
         }
+
+        
+
+
+        public void makeComment(double x, double y) 
+        {
+            
+            var newComment = comments.CreateComment(x, y);
+            var rect = DrawRectangle(newComment);
+            rect.ContextFlyout.ShowAt(rect);
+            
+
+        }
+
+        private void TouchMakePopup(object sender, RightTappedRoutedEventArgs args)
+        {
+            Point point = args.GetPosition(inkCanvas);
+            makeComment(point.X, point.Y);
+
+            
+        }
+
+        private void OtherMakePopup(InkUnprocessedInput sender, Windows.UI.Core.PointerEventArgs args)
+        {
+            PointerPoint point = args.CurrentPoint;
+
+            makeComment(point.Position.X, point.Position.Y);
+        }
+
+
+        public async void saveAll(object sender, RoutedEventArgs e)
+        {
+            if (save == null)
+            {
+                save = new Save();
+                // display some sort of selection screen
+                await save.CreateFolder();
+            
+            }
+     
+            await save.SaveAll(inkCanvas, comments);
+
+        }
+
+        public async void loadAll(object sender, RoutedEventArgs e)
+        {
+            if (save == null)
+            {
+                save = new Save();
+            }
+
+            await save.LoadAll(inkCanvas, comments);
+            if (comments != null)
+            {
+                canvas.Children.Clear(); // probably better way than this...
+                Debug.WriteLine(comments.GetComments().Count);
+                foreach(Comment c in comments.GetComments())
+                {
+                    DrawRectangle(c);
+                }
+            }
+        }
+
+
 
         private void ClearStack(InkStrokeInput sender, Windows.UI.Core.PointerEventArgs args)
         {
@@ -127,42 +260,14 @@ namespace HelloWorld
             undoStack.Clear();
         }
 
-        private async void saveInk_ClickAsync(object sender, RoutedEventArgs e)
+        private void saveInk_ClickAsync(object sender, RoutedEventArgs e)
         {
-            if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Count > 0) {
-                var savePicker = new Windows.Storage.Pickers.FileSavePicker();
-                savePicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
-                savePicker.FileTypeChoices.Add("Gif with embedded ISF", new List<string> { ".gif" });
-
-                var file = await savePicker.PickSaveFileAsync();
-
-                if (null != file)
-                {
-                    using (IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.ReadWrite))
-                    {
-                        await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(stream);
-                    }
-                }
-            }
+           // Save.SaveInk(inkCanvas);
         }
 
-        private async void loadInk_ClickAsync(object sender, RoutedEventArgs e)
+        private void loadInk_ClickAsync(object sender, RoutedEventArgs e)
         {
-            var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
-            openPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
-            openPicker.FileTypeFilter.Add(".gif");
-
-            var file = await openPicker.PickSingleFileAsync();
-
-            if (file != null)
-            {
-                IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
-                using (var inputStream = stream.GetInputStreamAt(0))
-                {
-                    await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
-                }
-                stream.Dispose();
-            }
+            //Save.LoadInk(inkCanvas);
         }
 
         //private async void recogniseShape_ClickAsync(object sender, RoutedEventArgs e)
@@ -290,15 +395,40 @@ namespace HelloWorld
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter is IRandomAccessStream)
+            if (e.Parameter is bool && (bool)e.Parameter == true)
             {
-                var stream = (IRandomAccessStream)e.Parameter;
-                using (var inputStream = stream.GetInputStreamAt(0))
+                if (save == null)
                 {
-                    await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                    save = new Save();
                 }
-                stream.Dispose();
+
+                await save.LoadAll(inkCanvas, comments);
+                if (comments != null)
+                {
+                    canvas.Children.Clear(); // probably better way than this...
+                    Debug.WriteLine(comments.GetComments().Count);
+                    foreach (Comment c in comments.GetComments())
+                    {
+                        DrawRectangle(c);
+                    }
+                }
             }
+            else if (e.Parameter is Save)
+            {
+                save = e.Parameter as Save;
+                await save.LoadNew(inkCanvas, comments);
+                if (comments != null)
+                {
+                    canvas.Children.Clear(); // probably better way than this...
+                    Debug.WriteLine(comments.GetComments().Count);
+                    foreach (Comment c in comments.GetComments())
+                    {
+                        DrawRectangle(c);
+                    }
+                }
+            }
+
+
             base.OnNavigatedTo(e);
         }
 
@@ -341,6 +471,9 @@ namespace HelloWorld
             DrawBoundingRect();
         }
 
+
+
+
         private void updateBoundingRect(IReadOnlyList<InkStroke> strokes)
         {
             StrokeGroup strokeGroup;
@@ -355,6 +488,7 @@ namespace HelloWorld
                     }
                 }
             }
+
         }
 
 

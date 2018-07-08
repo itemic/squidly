@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Input.Inking;
 
-namespace HelloWorld
+namespace Protocol2
 {
     class StrokeGroup
     {
