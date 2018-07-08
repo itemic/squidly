@@ -19,6 +19,9 @@
             <CommandBar.Content>
                 <InkToolbar x:Name="inkToolbar"
 					TargetInkCanvas="{x:Bind inkCanvas}">
+                    <InkToolbarCustomToolButton x:Name="toolButtonLasso" Click="ToolButton_Lasso" ToolTipService.ToolTip="Select Strokes">
+                        <SymbolIcon Symbol="{x:Bind LassoSelect}"/>
+                    </InkToolbarCustomToolButton>
                 </InkToolbar>
                 
             </CommandBar.Content>
@@ -73,18 +76,18 @@
                     </Flyout>
                 </AppBarButton.Flyout>
             </AppBarButton>
+            <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
+            <AppBarButton Label="Combine Strokes" Click="Combine_Strokes"/>
         </CommandBar>
 
 
-		<Grid x:Name="drawingCanvas" Grid.Row="2">
-            <Grid>
-                <InkCanvas x:Name="inkCanvas"/>
+        <Grid Grid.Row="2">
+            <InkCanvas x:Name="inkCanvas"/>
+            <Canvas x:Name="canvas"/>
+            <Canvas x:Name="selectionCanvas"/>
 
-                <Canvas x:Name="canvas"/>
-            </Grid>
-            
-            
-		</Grid>
+        </Grid>
+
 
 		
         
