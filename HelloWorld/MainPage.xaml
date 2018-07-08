@@ -1,8 +1,8 @@
 ﻿<Page
-    x:Class="HelloWorld.MainPage"
+    x:Class="Protocol2.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:HelloWorld"
+    xmlns:local="using:Protocol2"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -20,46 +20,73 @@
                 <InkToolbar x:Name="inkToolbar"
 					TargetInkCanvas="{x:Bind inkCanvas}">
                 </InkToolbar>
+                
             </CommandBar.Content>
-            <AppBarButton Icon="Save" Label="Save" Click="saveInk_ClickAsync"/>
-            <AppBarButton Icon="OpenFile" Label="Load" Click="loadInk_ClickAsync"/>
-            
+
+            <CommandBar.SecondaryCommands>
+                <AppBarButton Label="Like" />
+                <AppBarButton Label="Dislike"/>
+            </CommandBar.SecondaryCommands>
+
+            <AppBarButton Icon="Save" Label="Save" Click="saveAll"/>
+            <AppBarButton Icon="OpenFile" Label="Load" Click="loadAll"/>
+ 
+
             <AppBarButton Icon="Back" Label="Back" Click="backToMenu"/>
             <AppBarSeparator/>
             <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
             <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
             <AppBarSeparator/>
-            <AppBarButton Icon="Pin" Label="TEST Comment">
-                <AppBarButton.Flyout>
-                    <Flyout LightDismissOverlayMode="On">
+            <AppBarButton Icon="Comment" Label="Comments"> <!-- TODO: COMMENT COLOR SELECTION -->
+                    <AppBarButton.Flyout>
+                    <Flyout>
                         <StackPanel>
-                            <TextBlock Text="Test Comment"/>
-                            <InkToolbar x:Name="inkToolbar2"
-					        TargetInkCanvas="{x:Bind Canvas2}">
-                            </InkToolbar>
-                            <Canvas x:Name="c2"/>
-                            <InkCanvas x:Name="Canvas2" Width="250" Height="250"/>
-                            <Button Content="Does Nothing This Is A Test"/>
-
+                            <Ellipse Margin="8,8,8,8"
+                                                     UseLayoutRounding="false"
+                                                     HorizontalAlignment="Stretch"
+                                                     VerticalAlignment="Stretch"
+                                                     Height="36"
+                                                     Width="36"
+                                                     Fill="Goldenrod"/>
+                            <Ellipse Margin="8,8,8,8"
+                                                     UseLayoutRounding="false"
+                                                     HorizontalAlignment="Stretch"
+                                                     VerticalAlignment="Stretch"
+                                                     Height="36"
+                                                     Width="36"
+                                                     Fill="LightSkyBlue"/>
+                            <Ellipse Margin="8,8,8,8"
+                                                     UseLayoutRounding="false"
+                                                     HorizontalAlignment="Stretch"
+                                                     VerticalAlignment="Stretch"
+                                                     Height="36"
+                                                     Width="36"
+                                                     Fill="Plum"/>
+                            <Ellipse Margin="8,8,8,8"
+                                                     UseLayoutRounding="false"
+                                                     HorizontalAlignment="Stretch"
+                                                     VerticalAlignment="Stretch"
+                                                     Height="36"
+                                                     Width="36"
+                                                     Fill="PaleGreen"/>
                         </StackPanel>
-
                     </Flyout>
                 </AppBarButton.Flyout>
             </AppBarButton>
-            <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
         </CommandBar>
 
 
 		<Grid x:Name="drawingCanvas" Grid.Row="2">
             <Grid>
+                <InkCanvas x:Name="inkCanvas"/>
 
                 <Canvas x:Name="canvas"/>
-                <InkCanvas x:Name="inkCanvas"/>
             </Grid>
+            
             
 		</Grid>
 
 		
         
-	</Grid>
+	</Grid> 
 </Page>
