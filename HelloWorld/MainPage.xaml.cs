@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
@@ -16,7 +13,6 @@ using Windows.UI.Input.Inking;
 using Windows.UI.Input.Inking.Analysis;
 using Windows.UI.Xaml.Shapes;
 using Windows.Storage.Streams;
-using System.Threading.Tasks;
 using Windows.UI.Input;
 using Windows.UI.Core;
 using System.Diagnostics;
@@ -339,21 +335,27 @@ namespace HelloWorld
 
             boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithPolyLine(lasso.Points);
 
-            var strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-            StrokeGroup strokeGroup;
-            foreach(var stroke in strokes)
-            {
-                if (groups.TryGetValue(stroke, out strokeGroup))
-                {
-                    strokeGroup.selectStrokesInGroup();
-                }
-            }
+            updateBoundingRect(inkCanvas.InkPresenter.StrokeContainer.GetStrokes());
 
             isBoundRect = false;
             DrawBoundingRect();
         }
 
-        private void 
+        private void updateBoundingRect(IReadOnlyList<InkStroke> strokes)
+        {
+            StrokeGroup strokeGroup;
+            foreach (var stroke in strokes)
+            {
+                if (stroke.Selected)
+                {
+                    if (groups.TryGetValue(stroke, out strokeGroup))
+                    {
+                        strokeGroup.selectStrokesInGroup();
+                        boundingRect = strokeGroup.findBoundingBox();
+                    }
+                }
+            }
+        }
 
 
         //handle new ink or erase strokes to clean up Selection UI 
@@ -372,12 +374,9 @@ namespace HelloWorld
         {
             selectionCanvas.Children.Clear();
 
-            Debug.WriteLine("drawing");
-
             //draw bounding box only if there are ink strokes within the lasso
             if (!((boundingRect.Width == 0) || (boundingRect.Height == 0) || boundingRect.IsEmpty))
             {
-                Debug.WriteLine("there is bounding rect");
                 var rectangle = new Rectangle()
                 {
                     Stroke = new SolidColorBrush(Windows.UI.Colors.Blue),
@@ -415,10 +414,10 @@ namespace HelloWorld
         
         private void Click_Select(object sender, RightTappedRoutedEventArgs args)
         {
-            Debug.WriteLine("its innnnn");
             Point clickedPoint = args.GetPosition(inkCanvas);
             //need to adjust it so that it works for different thickness strokes
             boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithLine(new Point(clickedPoint.X -1, clickedPoint.Y - 1), new Point(clickedPoint.X, clickedPoint.Y + 3));
+            updateBoundingRect(inkCanvas.InkPresenter.StrokeContainer.GetStrokes());
             DrawBoundingRect();
         }
 
@@ -465,12 +464,6 @@ namespace HelloWorld
             if (selectedExists)
             {
                 ClearDrawnBoundingRect();
-            }
-
-            var check = strokeGroup.getStrokes();
-            foreach(var stroke in check)
-            {
-                Debug.WriteLine(stroke);
             }
         }
 
