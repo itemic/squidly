@@ -10,10 +10,23 @@
         <SplitView.Pane>
             <StackPanel Background="Gray">
                 <Button x:Name="exitActionsPanel" Content="&#xE106;" FontFamily="Segoe MDL2 Assets" Width="50" Height="50" Background="Transparent" HorizontalAlignment="Right" Click="Close_ActionButton"/>
-                <TextBlock Text="Actions" FontSize="30" HorizontalAlignment="Center" Margin="0,60,0,30"/>
-                <Button x:Name="Test1" Content="test 1" Width="250" HorizontalAlignment="Center"/>
-                <Button x:Name="Test2" Content="test 2" Width="250" HorizontalAlignment="Center"/>
-                <Button x:Name="Test3" Content="test 3" Width="250" HorizontalAlignment="Center"/>
+                <TextBlock Text="Actions" FontSize="30" HorizontalAlignment="Center" Margin="0,30,0,30" />
+                <Button Click="Combine_Strokes" Background="Transparent">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE71B;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
+                        <TextBlock Text="Group Strokes" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                    </StackPanel>
+                </Button>
+                <Button Background="Transparent">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE71B;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
+                        <TextBlock Text="Group Strokes" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Content="Group Strokes" Width="250" Height="50" HorizontalAlignment="Center" Click="Combine_Strokes" Background="Transparent"/>
+                <Button x:Name="Test2" Content="test 2" Width="250" Height="50" HorizontalAlignment="Center" Background="Transparent"/>
+                <Button x:Name="Test3" Content="test 3" Width="250" Height="50" HorizontalAlignment="Center" Background="Transparent"/>
                 
             </StackPanel>
         </SplitView.Pane>
@@ -28,13 +41,9 @@
 
                 <CommandBar RequestedTheme="Dark" DefaultLabelPosition="Right">
                     <CommandBar.Content>
-                        <InkToolbar x:Name="inkToolbar"
-					TargetInkCanvas="{x:Bind inkCanvas}">
-                            <InkToolbarCustomToolButton x:Name="toolButtonLasso" Click="ToolButton_Lasso" ToolTipService.ToolTip="Select Strokes">
-                                <SymbolIcon Symbol="{x:Bind LassoSelect}"/>
-                            </InkToolbarCustomToolButton>
+                        <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}">
+                            <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" Click="ToolButton_Lasso" ToolTipService.ToolTip="Select Strokes"/>
                         </InkToolbar>
-
                     </CommandBar.Content>
 
                     <CommandBar.SecondaryCommands>
@@ -89,7 +98,6 @@
                         </AppBarButton.Flyout>
                     </AppBarButton>
                     <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
-                    <AppBarButton Label="Combine Strokes" Click="Combine_Strokes"/>
                 </CommandBar>
 
 

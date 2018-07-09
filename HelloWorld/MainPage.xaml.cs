@@ -42,7 +42,6 @@ namespace Protocol2
         private bool isBoundRect;
         private bool selectedStrokesExist = false;
 
-        Symbol LassoSelect = (Symbol)0xEF20;
         private Random rng = new Random();
         public CommentModel comments;
         private Save save = null;
@@ -629,7 +628,7 @@ namespace Protocol2
 
             if (selectedExists)
             {
-                ClearDrawnBoundingRect();
+                ClearSelection();
             }
         }
 
