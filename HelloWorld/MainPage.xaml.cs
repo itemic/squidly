@@ -40,10 +40,9 @@ namespace Protocol2
         //Stroke selection area
         private Rect boundingRect;
         private bool isBoundRect;
+        private bool selectedStrokesExist = false;
 
         Symbol LassoSelect = (Symbol)0xEF20;
-        IReadOnlyList<InkStroke> strokesShape = null;
-        InkAnalysisResult resultShape = null;
         private Random rng = new Random();
         public CommentModel comments;
         private Save save = null;
@@ -70,10 +69,6 @@ namespace Protocol2
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;                                                                                                                                                                                                                                 
 
             //inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
-
-            //Listeners for new ink or erase strokes so that selection could be cleared when inking or erasing is detected
-            inkCanvas.InkPresenter.StrokeInput.StrokeStarted += StrokeInput_StrokeStarted;
-            inkCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
         }
 
         private async void CreatePopup(object sender, RightTappedRoutedEventArgs e)
@@ -520,11 +515,13 @@ namespace Protocol2
         //handle new ink or erase strokes to clean up Selection UI 
         private void StrokeInput_StrokeStarted(InkStrokeInput sender, PointerEventArgs args)
         {
+            Debug.WriteLine("1");
             ClearSelection();
         }
 
         private void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
         {
+            Debug.WriteLine("2");
             ClearSelection();
         }
 
@@ -536,6 +533,7 @@ namespace Protocol2
             //draw bounding box only if there are ink strokes within the lasso
             if (!((boundingRect.Width == 0) || (boundingRect.Height == 0) || boundingRect.IsEmpty))
             {
+                selectedStrokesExist = true;
                 var rectangle = new Rectangle()
                 {
                     Stroke = new SolidColorBrush(Windows.UI.Colors.Blue),
@@ -549,7 +547,12 @@ namespace Protocol2
                 Canvas.SetTop(rectangle, boundingRect.Y);
 
                 selectionCanvas.Children.Add(rectangle);
+            } else
+            {
+                selectedStrokesExist = false;
             }
+
+            Toggle_ActionBar();
         }
 
         private void ClearSelection()
@@ -560,6 +563,8 @@ namespace Protocol2
                 stroke.Selected = false;
             }
             ClearDrawnBoundingRect();
+            selectedStrokesExist = false;
+            Toggle_ActionBar();
         }
 
         private void ClearDrawnBoundingRect()
@@ -591,14 +596,16 @@ namespace Protocol2
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += UnprocessedInput_PointerPressed;
             inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += UnprocessedInput_PointerMoved;
             inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += UnprocessedInput_PointerReleased;
+
+            //Listeners for new ink or erase strokes so that selection could be cleared when inking or erasing is detected
+            inkCanvas.InkPresenter.StrokeInput.StrokeStarted += StrokeInput_StrokeStarted;
+            inkCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
         }
 
         private void Combine_Strokes(object sender, RoutedEventArgs e)
         {
             bool selectedExists = false;
             var strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-            //InkStrokeBuilder strokeBuilder = new InkStrokeBuilder();
-            //IReadOnlyList<InkPoint> inkPoints = null;
             List<InkStroke> selectedStrokes = new List<InkStroke>();
             StrokeGroup strokeGroup = new StrokeGroup();
             foreach (var stroke in strokes)
@@ -626,5 +633,22 @@ namespace Protocol2
             }
         }
 
+        private void Toggle_ActionBar()
+        {
+            if (selectedStrokesExist)
+            {
+                splitView.IsPaneOpen = true;
+            }
+            else
+            {
+                splitView.IsPaneOpen = false;
+            }
+        }
+
+        private void Close_ActionButton(Object sender, RoutedEventArgs e)
+        {
+            splitView.IsPaneOpen = false;
+        }
     }
 }
+  

@@ -6,90 +6,100 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    
-	<Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="*"/>
-			<RowDefinition Height="Auto"/>
-		</Grid.RowDefinitions>
-
-        <CommandBar RequestedTheme="Dark" DefaultLabelPosition="Right">
-            <CommandBar.Content>
-                <InkToolbar x:Name="inkToolbar"
-					TargetInkCanvas="{x:Bind inkCanvas}">
-                    <InkToolbarCustomToolButton x:Name="toolButtonLasso" Click="ToolButton_Lasso" ToolTipService.ToolTip="Select Strokes">
-                        <SymbolIcon Symbol="{x:Bind LassoSelect}"/>
-                    </InkToolbarCustomToolButton>
-                </InkToolbar>
+    <SplitView x:Name="splitView" IsPaneOpen="False" DisplayMode="CompactOverlay" CompactPaneLength="0" OpenPaneLength="250" PanePlacement="Right">
+        <SplitView.Pane>
+            <StackPanel Background="Gray">
+                <Button x:Name="exitActionsPanel" Content="&#xE106;" FontFamily="Segoe MDL2 Assets" Width="50" Height="50" Background="Transparent" HorizontalAlignment="Right" Click="Close_ActionButton"/>
+                <TextBlock Text="Actions" FontSize="30" HorizontalAlignment="Center" Margin="0,60,0,30"/>
+                <Button x:Name="Test1" Content="test 1" Width="250" HorizontalAlignment="Center"/>
+                <Button x:Name="Test2" Content="test 2" Width="250" HorizontalAlignment="Center"/>
+                <Button x:Name="Test3" Content="test 3" Width="250" HorizontalAlignment="Center"/>
                 
-            </CommandBar.Content>
+            </StackPanel>
+        </SplitView.Pane>
+        <SplitView.Content>
+            <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <CommandBar.SecondaryCommands>
-                <AppBarButton Label="Like" />
-                <AppBarButton Label="Dislike"/>
-            </CommandBar.SecondaryCommands>
+                <CommandBar RequestedTheme="Dark" DefaultLabelPosition="Right">
+                    <CommandBar.Content>
+                        <InkToolbar x:Name="inkToolbar"
+					TargetInkCanvas="{x:Bind inkCanvas}">
+                            <InkToolbarCustomToolButton x:Name="toolButtonLasso" Click="ToolButton_Lasso" ToolTipService.ToolTip="Select Strokes">
+                                <SymbolIcon Symbol="{x:Bind LassoSelect}"/>
+                            </InkToolbarCustomToolButton>
+                        </InkToolbar>
 
-            <AppBarButton Icon="Save" Label="Save" Click="saveAll"/>
-            <AppBarButton Icon="OpenFile" Label="Load" Click="loadAll"/>
- 
+                    </CommandBar.Content>
 
-            <AppBarButton Icon="Back" Label="Back" Click="backToMenu"/>
-            <AppBarSeparator/>
-            <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
-            <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
-            <AppBarSeparator/>
-            <AppBarButton Icon="Comment" Label="Comments"> <!-- TODO: COMMENT COLOR SELECTION -->
-                    <AppBarButton.Flyout>
-                    <Flyout>
-                        <StackPanel>
-                            <Ellipse Margin="8,8,8,8"
+                    <CommandBar.SecondaryCommands>
+                        <AppBarButton Label="Like" />
+                        <AppBarButton Label="Dislike"/>
+                    </CommandBar.SecondaryCommands>
+
+                    <AppBarButton Icon="Save" Label="Save" Click="saveAll"/>
+                    <AppBarButton Icon="OpenFile" Label="Load" Click="loadAll"/>
+
+
+                    <AppBarButton Icon="Back" Label="Back" Click="backToMenu"/>
+                    <AppBarSeparator/>
+                    <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
+                    <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
+                    <AppBarSeparator/>
+                    <AppBarButton Icon="Comment" Label="Comments">
+                        <!-- TODO: COMMENT COLOR SELECTION -->
+                        <AppBarButton.Flyout>
+                            <Flyout>
+                                <StackPanel>
+                                    <Ellipse Margin="8,8,8,8"
                                                      UseLayoutRounding="false"
                                                      HorizontalAlignment="Stretch"
                                                      VerticalAlignment="Stretch"
                                                      Height="36"
                                                      Width="36"
                                                      Fill="Goldenrod"/>
-                            <Ellipse Margin="8,8,8,8"
+                                    <Ellipse Margin="8,8,8,8"
                                                      UseLayoutRounding="false"
                                                      HorizontalAlignment="Stretch"
                                                      VerticalAlignment="Stretch"
                                                      Height="36"
                                                      Width="36"
                                                      Fill="LightSkyBlue"/>
-                            <Ellipse Margin="8,8,8,8"
+                                    <Ellipse Margin="8,8,8,8"
                                                      UseLayoutRounding="false"
                                                      HorizontalAlignment="Stretch"
                                                      VerticalAlignment="Stretch"
                                                      Height="36"
                                                      Width="36"
                                                      Fill="Plum"/>
-                            <Ellipse Margin="8,8,8,8"
+                                    <Ellipse Margin="8,8,8,8"
                                                      UseLayoutRounding="false"
                                                      HorizontalAlignment="Stretch"
                                                      VerticalAlignment="Stretch"
                                                      Height="36"
                                                      Width="36"
                                                      Fill="PaleGreen"/>
-                        </StackPanel>
-                    </Flyout>
-                </AppBarButton.Flyout>
-            </AppBarButton>
-            <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
-            <AppBarButton Label="Combine Strokes" Click="Combine_Strokes"/>
-        </CommandBar>
+                                </StackPanel>
+                            </Flyout>
+                        </AppBarButton.Flyout>
+                    </AppBarButton>
+                    <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
+                    <AppBarButton Label="Combine Strokes" Click="Combine_Strokes"/>
+                </CommandBar>
 
 
-        <Grid Grid.Row="2">
-            <InkCanvas x:Name="inkCanvas"/>
-            <Canvas x:Name="canvas"/>
-            <Canvas x:Name="selectionCanvas"/>
-
-        </Grid>
-
-
-		
-        
-	</Grid> 
+                <Grid Grid.Row="2">
+                    <InkCanvas x:Name="inkCanvas"/>
+                    <Canvas x:Name="canvas"/>
+                    <Canvas x:Name="selectionCanvas"/>
+                </Grid>
+            </Grid>
+        </SplitView.Content>
+    </SplitView>
+ 
 </Page>
