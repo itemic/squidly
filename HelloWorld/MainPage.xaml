@@ -20,7 +20,7 @@
                 <Button Background="Transparent">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xE71B;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
-                        <TextBlock Text="Group Strokes" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                        <TextBlock Text="Draw Path" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
                     </StackPanel>
                 </Button>
 
