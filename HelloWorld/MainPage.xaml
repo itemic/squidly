@@ -76,7 +76,7 @@
                     </Flyout>
                 </AppBarButton.Flyout>
             </AppBarButton>
-            <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
+            <AppBarToggleButton Icon="MapPin" Label="Comment Mode" Click="Make_Comment"/>
             <AppBarButton Label="Combine Strokes" Click="Combine_Strokes"/>
         </CommandBar>
 

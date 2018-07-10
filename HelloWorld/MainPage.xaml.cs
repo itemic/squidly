@@ -161,37 +161,54 @@ namespace Protocol2
 
 
             // Add draggable (test)
-            /*
-            Point dragPoint;
-            bool inMotion = false;
-            rectangle.RenderTransform = new TranslateTransform();
-            rectangle.PointerPressed += delegate (object sender, PointerRoutedEventArgs e)
-            {
-                inMotion = true;
-            };
+            
+            //Point dragPoint;
+            //bool inMotion = false;
+            //rectangle.CanDrag = false;
+            rectangle.ManipulationMode = (ManipulationModes.TranslateX | ManipulationModes.TranslateY);
+            rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Comment);
+            //rectangle.RenderTransform = new TranslateTransform();
+            //rectangle.PointerPressed += delegate (object sender, PointerRoutedEventArgs e)
+            //{
+            //    inMotion = true;
+            //};
 
-            rectangle.PointerMoved += delegate (object sender, PointerRoutedEventArgs e)
-            {
-                if (!e.Pointer.IsInContact) { return; }
+            //rectangle.PointerMoved += delegate (object sender, PointerRoutedEventArgs e)
+            //{
+            //    if (!e.Pointer.IsInContact) { return; }
 
-                var point = e.GetCurrentPoint(canvas).Position;
-                Canvas.SetLeft(rectangle, point.X - (rectangle.Height/2));
-                Canvas.SetTop(rectangle, point.Y - (rectangle.Width/2));
+            //    var point = e.GetCurrentPoint(canvas).Position;
+            //    Canvas.SetLeft(rectangle, point.X - (rectangle.Height/2));
+            //    Canvas.SetTop(rectangle, point.Y - (rectangle.Width/2));
+            //    rectangle.Width = 35;
+            //    rectangle.Height = 35;
 
-            };
+            //};
 
-            rectangle.PointerReleased += delegate (object sender, PointerRoutedEventArgs e)
-            {
-                inMotion = false;
-            };
-            */
+            //rectangle.PointerReleased += delegate (object sender, PointerRoutedEventArgs e)
+            //{
+            //    inMotion = false;
+            //    rectangle.Width = 25;
+            //    rectangle.Height = 25;
+            //};
+            
             // Return
             canvas.Children.Add(rectangle);
             return rectangle;
         }
 
-        
+        public void Drag_Comment(object sender, ManipulationDeltaRoutedEventArgs e)
+        {
+            var rectangle = (Rectangle)sender;
+            Canvas.SetLeft(rectangle, Canvas.GetLeft(rectangle) + e.Delta.Translation.X);
+            Canvas.SetTop(rectangle, Canvas.GetTop(rectangle) + e.Delta.Translation.Y);
+        }
 
+
+        public void Make_Comment(object sender, RoutedEventArgs e)
+        {
+            makeComment(50, 50);
+        }
 
         public void makeComment(double x, double y) 
         {
