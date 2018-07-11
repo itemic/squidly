@@ -165,7 +165,7 @@ namespace Protocol2
             //Point dragPoint;
             //bool inMotion = false;
             //rectangle.CanDrag = false;
-            rectangle.ManipulationMode = (ManipulationModes.TranslateX | ManipulationModes.TranslateY);
+            rectangle.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY;
             rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Comment);
             //rectangle.RenderTransform = new TranslateTransform();
             //rectangle.PointerPressed += delegate (object sender, PointerRoutedEventArgs e)
