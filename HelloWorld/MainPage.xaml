@@ -11,15 +11,15 @@
             <StackPanel Background="Gray">
                 <Button x:Name="exitActionsPanel" Content="&#xE106;" FontFamily="Segoe MDL2 Assets" Width="50" Height="50" Background="Transparent" HorizontalAlignment="Right" Click="Close_ActionButton"/>
                 <TextBlock Text="Actions" FontSize="30" HorizontalAlignment="Center" Margin="0,30,0,30" />
-                <Button Click="Combine_Strokes" Background="Transparent">
+                <Button Click="Combine_Strokes" Background="Transparent" Width="250">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xE71B;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
+                        <TextBlock Text="&#xEC26;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
                         <TextBlock Text="Group Strokes" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
                     </StackPanel>
                 </Button>
-                <Button Background="Transparent">
+                <Button Background="Transparent" Width="250">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xE71B;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
+                        <TextBlock Text="&#xF128;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
                         <TextBlock Text="Draw Path" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
                     </StackPanel>
                 </Button>
