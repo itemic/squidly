@@ -98,10 +98,8 @@
                             </Flyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
-                    <AppBarToggleButton Icon="MapPin" Label="Comment Mode"/>
                 </CommandBar>
-
-
+                
                 <Grid Grid.Row="2">
                     <InkCanvas x:Name="inkCanvas"/>
                     <Canvas x:Name="canvas"/>
