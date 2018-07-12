@@ -586,6 +586,7 @@ namespace Protocol2
 
         private void ToolButton_Lasso(object sender, RoutedEventArgs e)
         {
+            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= OtherMakePopup;
 
             inkCanvas.RightTapped += new RightTappedEventHandler(Click_Select);
             //for passing modified input to the app for custom processing
@@ -599,6 +600,19 @@ namespace Protocol2
             //Listeners for new ink or erase strokes so that selection could be cleared when inking or erasing is detected
             inkCanvas.InkPresenter.StrokeInput.StrokeStarted += StrokeInput_StrokeStarted;
             inkCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
+        }
+
+        private void ToolButton_Comment(object sender, RoutedEventArgs e)
+        {
+            //for passing modified input to the app for custom processing
+
+            //Remove listeners for unprocessed pointer events for selecting strokes
+            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= UnprocessedInput_PointerPressed;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= UnprocessedInput_PointerMoved;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= UnprocessedInput_PointerReleased;
+
+            inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
         }
 
         private void Combine_Strokes(object sender, RoutedEventArgs e)

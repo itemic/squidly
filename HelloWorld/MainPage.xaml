@@ -43,6 +43,7 @@
                     <CommandBar.Content>
                         <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}">
                             <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" Click="ToolButton_Lasso" ToolTipService.ToolTip="Select Strokes"/>
+                            <InkToolbarCustomToolButton x:Name="toolButtonComment" Content="&#xE90A;" FontFamily="Segoe MDL2 Assets" Click="ToolButton_Comment" ToolTipService.ToolTip="Comment Mode"/>
                         </InkToolbar>
                     </CommandBar.Content>
 
