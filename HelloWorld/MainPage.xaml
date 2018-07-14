@@ -6,34 +6,30 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    <SplitView x:Name="splitView" IsPaneOpen="False" DisplayMode="CompactOverlay" CompactPaneLength="0" OpenPaneLength="250" PanePlacement="Right">
+    <SplitView x:Name="splitView" IsPaneOpen="False" DisplayMode="CompactInline" CompactPaneLength="50" OpenPaneLength="250" PanePlacement="Right">
         <SplitView.Pane>
             <StackPanel Background="Gray">
-                <Button x:Name="exitActionsPanel" Content="&#xE106;" FontFamily="Segoe MDL2 Assets" Width="50" Height="50" Background="Transparent" HorizontalAlignment="Right" Click="Close_ActionButton"/>
+                <Button x:Name="exitActionsPanel" Content="&#xE700;" FontFamily="Segoe MDL2 Assets" Width="50" Height="50" Background="Transparent" HorizontalAlignment="Right" Click="Toggle_ActionBar_Pressed"/>
                 <TextBlock Text="Actions" FontSize="30" HorizontalAlignment="Center" Margin="0,30,0,30" />
-                <Button Click="Combine_Strokes" Background="Transparent" Width="250">
+                <Button x:Name="combineStrokesButton" Click="Combine_Strokes" Background="Transparent" Width="250" HorizontalContentAlignment="Stretch">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xEC26;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
                         <TextBlock Text="Group Strokes" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
                     </StackPanel>
                 </Button>
-                <Button Background="Transparent" Width="250">
+                <Button x:Name="drawPathButton" Background="Transparent" Width="250" HorizontalContentAlignment="Stretch">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xF128;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
                         <TextBlock Text="Draw Path" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
                     </StackPanel>
                 </Button>
-                <Button Click="Move_Selected_Mode" Background="Transparent" Width="250">
+                <Button Click="Move_Selected_Mode" Background="Transparent" Width="250" HorizontalContentAlignment="Stretch">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xE759;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
                         <TextBlock Text="Move Selected" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
                     </StackPanel>
                 </Button>
 
-                <Button Content="Group Strokes" Width="250" Height="50" HorizontalAlignment="Center" Click="Combine_Strokes" Background="Transparent"/>
-                <Button x:Name="Test2" Content="test 2" Width="250" Height="50" HorizontalAlignment="Center" Background="Transparent"/>
-                <Button x:Name="Test3" Content="test 3" Width="250" Height="50" HorizontalAlignment="Center" Background="Transparent"/>
-                
             </StackPanel>
         </SplitView.Pane>
         <SplitView.Content>
@@ -52,11 +48,6 @@
                             <InkToolbarCustomToolButton x:Name="toolButtonComment" Content="&#xE90A;" FontFamily="Segoe MDL2 Assets" Click="ToolButton_Comment" ToolTipService.ToolTip="Comment Mode"/>
                         </InkToolbar>
                     </CommandBar.Content>
-
-                    <CommandBar.SecondaryCommands>
-                        <AppBarButton Label="Like" />
-                        <AppBarButton Label="Dislike"/>
-                    </CommandBar.SecondaryCommands>
 
                     <AppBarButton Icon="Save" Label="Save" Click="saveAll"/>
                     <AppBarButton Icon="OpenFile" Label="Load" Click="loadAll"/>

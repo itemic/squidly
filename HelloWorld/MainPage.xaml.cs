@@ -40,7 +40,7 @@ namespace Protocol2
         //Stroke selection area
         private Rect boundingRect;
         private bool isBoundRect;
-        private bool selectedStrokesExist = false;
+        public bool selectedStrokesExist = false;
 
         private Random rng = new Random();
         public CommentModel comments;
@@ -52,6 +52,7 @@ namespace Protocol2
         public MainPage()
         {
             this.InitializeComponent();
+
             canvas.RenderTransform = new TranslateTransform();
             inkCanvas.InkPresenter.InputDeviceTypes =
 
@@ -657,6 +658,8 @@ namespace Protocol2
 
         private void Toggle_ActionBar()
         {
+            this.combineStrokesButton.IsEnabled = selectedStrokesExist;
+            this.drawPathButton.IsEnabled = selectedStrokesExist;
             if (selectedStrokesExist)
             {
                 splitView.IsPaneOpen = true;
@@ -667,9 +670,11 @@ namespace Protocol2
             }
         }
 
-        private void Close_ActionButton(Object sender, RoutedEventArgs e)
+        private void Toggle_ActionBar_Pressed(Object sender, RoutedEventArgs e)
         {
-            splitView.IsPaneOpen = false;
+            this.combineStrokesButton.IsEnabled = selectedStrokesExist;
+            this.drawPathButton.IsEnabled = selectedStrokesExist;
+            splitView.IsPaneOpen = !splitView.IsPaneOpen;
         }
 
         private void Move_Selected_Mode(Object sender, RoutedEventArgs e)
@@ -683,13 +688,6 @@ namespace Protocol2
                 Height = 50
             };
 
-            Debug.WriteLine(boundingRect.X);
-            Debug.WriteLine(boundingRect.Width);
-            Debug.WriteLine(boundingRect.Y);
-            Debug.WriteLine(boundingRect.Height);
-
-            Debug.WriteLine("button x" + (boundingRect.X + boundingRect.Width) / 2);
-            Debug.WriteLine("button y" + (boundingRect.Y + boundingRect.Height) / 2);
             Canvas.SetLeft(moveButton, boundingRect.X + boundingRect.Width/2 - 25);
             Canvas.SetTop(moveButton, boundingRect.Y + boundingRect.Height/2 - 25);
 
