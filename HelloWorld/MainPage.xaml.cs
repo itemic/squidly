@@ -46,6 +46,9 @@ namespace Protocol2
         public CommentModel comments;
         private Save save = null;
 
+        private CoreCursor normalCursor = Window.Current.CoreWindow.PointerCursor;
+        private CoreCursor inBoundingBox = new CoreCursor(CoreCursorType.SizeAll, 0);
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -153,45 +156,15 @@ namespace Protocol2
             flyout.LightDismissOverlayMode = LightDismissOverlayMode.On;
             rectangle.ContextFlyout = flyout;
 
-
-            // Add draggable (test)
-            
-            //Point dragPoint;
-            //bool inMotion = false;
-            //rectangle.CanDrag = false;
+            // settings for dragging comments 
             rectangle.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY;
             rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Comment);
-            //rectangle.RenderTransform = new TranslateTransform();
-            //rectangle.PointerPressed += delegate (object sender, PointerRoutedEventArgs e)
-            //{
-            //    inMotion = true;
-            //};
-
-            //rectangle.PointerMoved += delegate (object sender, PointerRoutedEventArgs e)
-            //{
-            //    if (!e.Pointer.IsInContact) { return; }
-
-            //    var point = e.GetCurrentPoint(canvas).Position;
-            //    Canvas.SetLeft(rectangle, point.X - (rectangle.Height/2));
-            //    Canvas.SetTop(rectangle, point.Y - (rectangle.Width/2));
-            //    rectangle.Width = 35;
-            //    rectangle.Height = 35;
-
-            //};
-
-            //rectangle.PointerReleased += delegate (object sender, PointerRoutedEventArgs e)
-            //{
-            //    inMotion = false;
-            //    rectangle.Width = 25;
-            //    rectangle.Height = 25;
-            //};
-            
-            // Return
             canvas.Children.Add(rectangle);
+
             return rectangle;
         }
 
-        public void Drag_Comment(object sender, ManipulationDeltaRoutedEventArgs e)
+        private void Drag_Comment(object sender, ManipulationDeltaRoutedEventArgs e)
         {
             var rectangle = (Rectangle)sender;
             Canvas.SetLeft(rectangle, Canvas.GetLeft(rectangle) + e.Delta.Translation.X);
@@ -525,13 +498,11 @@ namespace Protocol2
         //handle new ink or erase strokes to clean up Selection UI 
         private void StrokeInput_StrokeStarted(InkStrokeInput sender, PointerEventArgs args)
         {
-            Debug.WriteLine("1");
             ClearSelection();
         }
 
         private void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
         {
-            Debug.WriteLine("2");
             ClearSelection();
         }
 
@@ -544,17 +515,24 @@ namespace Protocol2
             if (!((boundingRect.Width == 0) || (boundingRect.Height == 0) || boundingRect.IsEmpty))
             {
                 selectedStrokesExist = true;
+                SolidColorBrush transparent = new SolidColorBrush(Windows.UI.Colors.Coral);
+                transparent.Opacity = 0;
                 var rectangle = new Rectangle()
                 {
                     Stroke = new SolidColorBrush(Windows.UI.Colors.Blue),
                     StrokeThickness = 1,
                     StrokeDashArray = new DoubleCollection() { 5, 2 },
                     Width = boundingRect.Width,
-                    Height = boundingRect.Height
+                    Height = boundingRect.Height,
+                    Fill = transparent
                 };
 
                 Canvas.SetLeft(rectangle, boundingRect.X);
                 Canvas.SetTop(rectangle, boundingRect.Y);
+                rectangle.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY;
+                rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Stroke);
+                rectangle.PointerEntered += new PointerEventHandler(Cursor_In_BoundingBox);
+                rectangle.PointerExited += new PointerEventHandler(Cursor_Leave_BoundingBox);
 
                 selectionCanvas.Children.Add(rectangle);
             } else
@@ -564,6 +542,26 @@ namespace Protocol2
 
             Toggle_ActionBar();
         }
+
+        private void Drag_Stroke(object sender, ManipulationDeltaRoutedEventArgs e)
+        {
+            var rectangle = (Rectangle)sender;
+            Canvas.SetLeft(rectangle, Canvas.GetLeft(rectangle) + e.Delta.Translation.X);
+            Canvas.SetTop(rectangle, Canvas.GetTop(rectangle) + e.Delta.Translation.Y);
+
+            inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(e.Delta.Translation.X, e.Delta.Translation.Y));
+        }
+
+        private void Cursor_In_BoundingBox(object sender, PointerRoutedEventArgs e)
+        {
+            Window.Current.CoreWindow.PointerCursor = inBoundingBox;
+        }
+
+        private void Cursor_Leave_BoundingBox(object sender, PointerRoutedEventArgs e)
+        {
+            Window.Current.CoreWindow.PointerCursor = normalCursor;
+        }
+       
 
         private void ClearSelection()
         {
@@ -672,6 +670,30 @@ namespace Protocol2
         private void Close_ActionButton(Object sender, RoutedEventArgs e)
         {
             splitView.IsPaneOpen = false;
+        }
+
+        private void Move_Selected_Mode(Object sender, RoutedEventArgs e)
+        {
+            var moveButton = new Button()
+            {
+                Content = "hi",
+                //FontFamily = new FontFamily("Segoe MDL2 Assets")
+
+                Width = 50,
+                Height = 50
+            };
+
+            Debug.WriteLine(boundingRect.X);
+            Debug.WriteLine(boundingRect.Width);
+            Debug.WriteLine(boundingRect.Y);
+            Debug.WriteLine(boundingRect.Height);
+
+            Debug.WriteLine("button x" + (boundingRect.X + boundingRect.Width) / 2);
+            Debug.WriteLine("button y" + (boundingRect.Y + boundingRect.Height) / 2);
+            Canvas.SetLeft(moveButton, boundingRect.X + boundingRect.Width/2 - 25);
+            Canvas.SetTop(moveButton, boundingRect.Y + boundingRect.Height/2 - 25);
+
+            selectionCanvas.Children.Add(moveButton);
         }
     }
 }
