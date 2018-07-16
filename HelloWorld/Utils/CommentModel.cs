@@ -36,13 +36,13 @@ namespace Protocol2.Utils
         {
             Comment comment = new Comment();
 
-            comment.width = 25;
-            comment.height = 25;
+            comment.width = 50;
+            comment.height = 50;
             comment.left = x - 12.5;
             comment.top = y - 12.5;
             comment.fill = colorArray[(rng.Next(0, colorArray.Count))];
-            comment.angle = -30 + rng.Next(60);
-            comment.opacity = 0.8;
+            comment.angle = -20 + rng.Next(40);
+            comment.opacity = 0.75;
 
             comments.Add(comment);
 
