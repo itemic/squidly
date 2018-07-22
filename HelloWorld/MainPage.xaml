@@ -17,7 +17,7 @@
                         <TextBlock Text="Group Strokes" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
                     </StackPanel>
                 </Button>
-                <Button x:Name="drawPathButton" Background="Transparent" Width="250" HorizontalContentAlignment="Stretch">
+                <Button x:Name="drawPathButton" Background="Transparent" Width="250" HorizontalContentAlignment="Stretch" Click="TestDrawPath">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xF128;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
                         <TextBlock Text="Draw Path" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>

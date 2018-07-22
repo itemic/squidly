@@ -18,6 +18,7 @@ using System.Diagnostics;
 using Protocol2.Utils;
 using Windows.UI;
 using Windows.UI.Core;
+using System.Numerics;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -676,6 +677,21 @@ namespace Protocol2
             Canvas.SetTop(moveButton, boundingRect.Y + boundingRect.Height/2 - 25);
 
             selectionCanvas.Children.Add(moveButton);
+        }
+        
+        private void TestDrawPath(Object sender, RoutedEventArgs e)
+        {
+            var container = inkCanvas.InkPresenter.StrokeContainer;
+            container.MoveSelected(new Point(20, 50));
+            foreach(var r in selectionCanvas.Children)
+            {
+                Canvas.SetLeft(r, Canvas.GetLeft(r) + 20);
+                Canvas.SetTop(r, Canvas.GetTop(r) + 50);
+
+            }
+
+
+
         }
     }
 }
