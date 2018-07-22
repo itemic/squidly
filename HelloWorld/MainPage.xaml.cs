@@ -19,6 +19,8 @@ using Protocol2.Utils;
 using Windows.UI;
 using Windows.UI.Core;
 using System.Numerics;
+using Windows.UI.Xaml.Media.Animation;
+using System.Threading.Tasks;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -31,6 +33,7 @@ namespace Protocol2
     {
   
         private Stack<InkStroke> undoStack { get; set; }
+        public Polyline polyline;
 
         InkAnalyzer analyzerShape = new InkAnalyzer();
 
@@ -681,14 +684,76 @@ namespace Protocol2
         
         private void TestDrawPath(Object sender, RoutedEventArgs e)
         {
-            var container = inkCanvas.InkPresenter.StrokeContainer;
-            container.MoveSelected(new Point(20, 50));
-            foreach(var r in selectionCanvas.Children)
+
+            //TODO We still want the canvas we just want to hide it.
+            selectionCanvas.Visibility = Visibility.Collapsed;
+            inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
+            var currentTool = inkToolbar.ActiveTool;
+            var animationPen = new InkToolbarCustomToolButton();
+            inkToolbar.ActiveTool = animationPen;
+            inkToolbar.Children.Add(animationPen);
+
+            void pressed(InkUnprocessedInput i, PointerEventArgs p)
+
             {
-                Canvas.SetLeft(r, Canvas.GetLeft(r) + 20);
-                Canvas.SetTop(r, Canvas.GetTop(r) + 50);
+                Debug.WriteLine("wow");
+                polyline = new Polyline()
+                {
+                    Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
+                    StrokeThickness = 3,
+                    StrokeDashArray = new DoubleCollection() { 5, 2 },
+                };
+
+                polyline.Points.Add(p.CurrentPoint.Position);
+                canvas.Children.Add(polyline);
+            }
+
+            void moved(InkUnprocessedInput i, PointerEventArgs p)
+            {
+
+                polyline.Points.Add(p.CurrentPoint.Position);
 
             }
+
+            async void released(InkUnprocessedInput i, PointerEventArgs p)
+            {
+
+                polyline.Points.Add(p.CurrentPoint.Position);
+                polyline.Opacity = 0.3;
+                inkToolbar.ActiveTool = currentTool;
+                inkToolbar.Children.Remove(animationPen);
+                selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
+                var container = inkCanvas.InkPresenter.StrokeContainer;
+
+                double prevX = 0;
+                double prevY = 0;
+                var delta = polyline.Points[0];
+                foreach (Point pt in polyline.Points)
+                {
+                    //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
+                    Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
+                    var r = container.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
+                    delta = pt;
+                    await Task.Delay(TimeSpan.FromSeconds(0.01));
+
+                }
+
+
+
+                canvas.Children.Remove(polyline); //maybe only show when flyout or something...
+                inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= moved;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= released;
+
+            }
+            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += pressed; 
+            inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += moved;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += released;
+
+
+           
+       
 
 
 
