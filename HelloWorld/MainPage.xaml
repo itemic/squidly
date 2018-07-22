@@ -95,6 +95,7 @@
                             </Flyout>
                         </AppBarButton.Flyout>
                     </AppBarButton>
+                    <AppBarToggleButton x:Name="AnimationToggle" Icon="SolidStar" Label="Animate" />
                 </CommandBar>
                 
                 <Grid Grid.Row="2">

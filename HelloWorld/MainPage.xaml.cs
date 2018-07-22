@@ -74,6 +74,12 @@ namespace Protocol2
             //inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
         }
 
+
+        private void AnimationToggleChecked(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
         private async void CreatePopup(object sender, RightTappedRoutedEventArgs e)
         {
             Point point = e.GetPosition(inkCanvas);
