@@ -41,7 +41,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <CommandBar RequestedTheme="Dark" DefaultLabelPosition="Right">
+                <CommandBar x:Name="commandBar" RequestedTheme="Dark" DefaultLabelPosition="Right">
                     <CommandBar.Content>
                         <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}">
                             <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" Click="ToolButton_Lasso" ToolTipService.ToolTip="Select Strokes"/>
