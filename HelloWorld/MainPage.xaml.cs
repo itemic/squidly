@@ -18,6 +18,9 @@ using System.Diagnostics;
 using Protocol2.Utils;
 using Windows.UI;
 using Windows.UI.Core;
+using System.Numerics;
+using Windows.UI.Xaml.Media.Animation;
+using System.Threading.Tasks;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -30,6 +33,7 @@ namespace Protocol2
     {
   
         private Stack<InkStroke> undoStack { get; set; }
+        public Polyline polyline;
 
         InkAnalyzer analyzerShape = new InkAnalyzer();
 
@@ -48,6 +52,11 @@ namespace Protocol2
 
         private CoreCursor normalCursor = Window.Current.CoreWindow.PointerCursor;
         private CoreCursor inBoundingBox = new CoreCursor(CoreCursorType.SizeAll, 0);
+
+        private InkToolbarBallpointPenButton ballpoint;
+        private InkToolbarEraserButton eraser;
+
+
 
         public MainPage()
         {
@@ -69,9 +78,40 @@ namespace Protocol2
             undoStack = new Stack<InkStroke>();
             comments = new CommentModel();
 
-            inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;                                                                                                                                                                                                                                 
+            inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
 
+            AnimationToggle.Checked += AnimationToggleChecked;
+            AnimationToggle.Unchecked += AnimationToggleUnchecked;
+            inkToolbar.Loading += InitializeInkToolbar;
+            inkToolbar.ActiveToolChanged += InkToolbar_ActiveToolChanged;
             //inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
+        }
+
+        
+
+        private void InitializeInkToolbar(FrameworkElement sender, object args)
+        {
+            inkToolbar.InitialControls = InkToolbarInitialControls.None;
+            ballpoint = new InkToolbarBallpointPenButton();
+            eraser = new InkToolbarEraserButton();
+            inkToolbar.Children.Add(eraser);
+            inkToolbar.Children.Add(ballpoint);
+        }
+
+        private void AnimationToggleChecked(object sender, RoutedEventArgs e)
+        {
+            commandBar.RequestedTheme = ElementTheme.Light;
+            inkToolbar.Children.Remove(ballpoint);
+            inkToolbar.Children.Remove(eraser);
+            inkToolbar.ActiveTool = toolButtonLasso;
+        }
+
+        private void AnimationToggleUnchecked(object sender, RoutedEventArgs e)
+        {
+            commandBar.RequestedTheme = ElementTheme.Dark;
+            inkToolbar.Children.Add(eraser);
+            inkToolbar.Children.Add(ballpoint);
+
         }
 
         private async void CreatePopup(object sender, RightTappedRoutedEventArgs e)
@@ -249,49 +289,7 @@ namespace Protocol2
             //Save.LoadInk(inkCanvas);
         }
 
-        //private async void recogniseShape_ClickAsync(object sender, RoutedEventArgs e)
-        //{
-        //    strokesShape = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-
-        //    if (strokesShape.Count > 0)
-        //    {
-        //        analyzerShape.AddDataForStrokes(strokesShape);
-        //        resultShape = await analyzerShape.AnalyzeAsync();
-
-        //        if (resultShape.Status == InkAnalysisStatus.Updated)
-        //        {
-        //            var drawings = analyzerShape.AnalysisRoot.FindNodes(InkAnalysisNodeKind.InkDrawing);
-
-        //            foreach (var drawing in drawings)
-        //            {
-        //                var shape = (InkAnalysisInkDrawing)drawing;
-        //                if (shape.DrawingKind == InkAnalysisDrawingKind.Drawing)
-        //                {
-        //                    // Catch and process unsupported shapes (lines and so on) here.
-        //                }
-        //                else
-        //                {
-        //                    // Process recognized shapes here.
-        //                    if (shape.DrawingKind == InkAnalysisDrawingKind.Circle || shape.DrawingKind == InkAnalysisDrawingKind.Ellipse)
-        //                    {
-        //                        DrawEllipse(shape);
-        //                    }
-        //                    else
-        //                    {
-        //                        DrawPolygon(shape);
-        //                    }
-        //                    foreach (var strokeId in shape.GetStrokeIds())
-        //                    {
-        //                        var stroke = inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(strokeId);
-        //                        stroke.Selected = true;
-        //                    }
-        //                }
-        //                analyzerShape.RemoveDataForStrokes(shape.GetStrokeIds());
-        //            }
-        //            inkCanvas.InkPresenter.StrokeContainer.DeleteSelected();
-        //        }
-        //    }
-        //}
+      
 
         private void backToMenu(object sender, RoutedEventArgs e)
         {
@@ -326,51 +324,6 @@ namespace Protocol2
             }
         }
 
-        //private void DrawEllipse(InkAnalysisInkDrawing shape)
-        //{
-        //    var points = shape.Points;
-        //    Ellipse ellipse = new Ellipse();
-        //    ellipse.Width = Math.Sqrt((points[0].X - points[2].X) * (points[0].X - points[2].X) +
-        //         (points[0].Y - points[2].Y) * (points[0].Y - points[2].Y));
-        //    ellipse.Height = Math.Sqrt((points[1].X - points[3].X) * (points[1].X - points[3].X) +
-        //         (points[1].Y - points[3].Y) * (points[1].Y - points[3].Y));
-
-        //    var rotAngle = Math.Atan2(points[2].Y - points[0].Y, points[2].X - points[0].X);
-        //    RotateTransform rotateTransform = new RotateTransform();
-        //    rotateTransform.Angle = rotAngle * 180 / Math.PI;
-        //    rotateTransform.CenterX = ellipse.Width / 2.0;
-        //    rotateTransform.CenterY = ellipse.Height / 2.0;
-
-        //    TranslateTransform translateTransform = new TranslateTransform();
-        //    translateTransform.X = shape.Center.X - ellipse.Width / 2.0;
-        //    translateTransform.Y = shape.Center.Y - ellipse.Height / 2.0;
-
-        //    TransformGroup transformGroup = new TransformGroup();
-        //    transformGroup.Children.Add(rotateTransform);
-        //    transformGroup.Children.Add(translateTransform);
-        //    ellipse.RenderTransform = transformGroup;
-
-        //    var brush = new SolidColorBrush(Windows.UI.ColorHelper.FromArgb(255, 0, 0, 255));
-        //    ellipse.Stroke = brush;
-        //    ellipse.StrokeThickness = 2;
-        //    canvas.Children.Add(ellipse);
-        //}
-
-        //private void DrawPolygon(InkAnalysisInkDrawing shape)
-        //{
-        //    var points = shape.Points;
-        //    Polygon polygon = new Polygon();
-
-        //    foreach (var point in points)
-        //    {
-        //        polygon.Points.Add(point);
-        //    }
-
-        //    var brush = new SolidColorBrush(Windows.UI.ColorHelper.FromArgb(255, 0, 0, 255));
-        //    polygon.Stroke = brush;
-        //    polygon.StrokeThickness = 2;
-        //    canvas.Children.Add(polygon);
-        //}
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -443,7 +396,7 @@ namespace Protocol2
             lasso.Points.Add(args.CurrentPoint.RawPosition);
 
             boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithPolyLine(lasso.Points);
-
+            
             updateSelected(inkCanvas.InkPresenter.StrokeContainer.GetStrokes());
 
             isBoundRect = false;
@@ -535,6 +488,8 @@ namespace Protocol2
                 rectangle.PointerEntered += new PointerEventHandler(Cursor_In_BoundingBox);
                 rectangle.PointerExited += new PointerEventHandler(Cursor_Leave_BoundingBox);
 
+  
+
                 selectionCanvas.Children.Add(rectangle);
             } else
             {
@@ -594,35 +549,70 @@ namespace Protocol2
             DrawBoundingRect();
         }
 
+        private void ClearAllHandlers()
+        {
+            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= UnprocessedInput_PointerPressed;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= UnprocessedInput_PointerMoved;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= UnprocessedInput_PointerReleased;
+            inkCanvas.RightTapped -= Click_Select;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= OtherMakePopup;
+            inkCanvas.InkPresenter.StrokeInput.StrokeStarted -= StrokeInput_StrokeStarted;
+            inkCanvas.InkPresenter.StrokesErased -= InkPresenter_StrokesErased;
+
+        }
+
+        private void InkToolbar_ActiveToolChanged(InkToolbar sender, object args)
+        {
+            ClearAllHandlers();
+            if (inkToolbar.ActiveTool == toolButtonLasso)
+            {
+                inkCanvas.RightTapped += Click_Select;
+                //for passing modified input to the app for custom processing
+                inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
+
+                //Listeners for unprocessed pointer events from the modified input
+                inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += UnprocessedInput_PointerPressed;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += UnprocessedInput_PointerMoved;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += UnprocessedInput_PointerReleased;
+
+                //Listeners for new ink or erase strokes so that selection could be cleared when inking or erasing is detected
+                inkCanvas.InkPresenter.StrokeInput.StrokeStarted += StrokeInput_StrokeStarted;
+                inkCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
+            } else if (inkToolbar.ActiveTool == toolButtonComment)
+            {
+                inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
+            }
+        }
+
         private void ToolButton_Lasso(object sender, RoutedEventArgs e)
         {
-            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= OtherMakePopup;
 
-            inkCanvas.RightTapped += new RightTappedEventHandler(Click_Select);
-            //for passing modified input to the app for custom processing
-            inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
+            //ClearAllHandlers();
 
-            //Listeners for unprocessed pointer events from the modified input
-            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += UnprocessedInput_PointerPressed;
-            inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += UnprocessedInput_PointerMoved;
-            inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += UnprocessedInput_PointerReleased;
+            //inkCanvas.RightTapped += Click_Select;
+            ////for passing modified input to the app for custom processing
+            //inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
 
-            //Listeners for new ink or erase strokes so that selection could be cleared when inking or erasing is detected
-            inkCanvas.InkPresenter.StrokeInput.StrokeStarted += StrokeInput_StrokeStarted;
-            inkCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
+            ////Listeners for unprocessed pointer events from the modified input
+            //inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += UnprocessedInput_PointerPressed;
+            //inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += UnprocessedInput_PointerMoved;
+            //inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += UnprocessedInput_PointerReleased;
+
+            ////Listeners for new ink or erase strokes so that selection could be cleared when inking or erasing is detected
+            //inkCanvas.InkPresenter.StrokeInput.StrokeStarted += StrokeInput_StrokeStarted;
+            //inkCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
         }
 
         private void ToolButton_Comment(object sender, RoutedEventArgs e)
         {
-            //for passing modified input to the app for custom processing
+            ////for passing modified input to the app for custom processing
 
-            //Remove listeners for unprocessed pointer events for selecting strokes
-            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= UnprocessedInput_PointerPressed;
-            inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= UnprocessedInput_PointerMoved;
-            inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= UnprocessedInput_PointerReleased;
+            ////Remove listeners for unprocessed pointer events for selecting strokes
+            //ClearAllHandlers();
 
-            inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
-            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
+            //inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
+            //inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
         }
 
         private void Combine_Strokes(object sender, RoutedEventArgs e)
@@ -692,6 +682,83 @@ namespace Protocol2
             Canvas.SetTop(moveButton, boundingRect.Y + boundingRect.Height/2 - 25);
 
             selectionCanvas.Children.Add(moveButton);
+        }
+        
+        private void TestDrawPath(Object sender, RoutedEventArgs e)
+        {
+
+            //TODO We still want the canvas we just want to hide it.
+            selectionCanvas.Visibility = Visibility.Collapsed;
+            inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
+            var currentTool = inkToolbar.ActiveTool;
+            var animationPen = new InkToolbarCustomToolButton();
+            inkToolbar.ActiveTool = animationPen;
+            inkToolbar.Children.Add(animationPen);
+
+            void pressed(InkUnprocessedInput i, PointerEventArgs p)
+
+            {
+                Debug.WriteLine("wow");
+                polyline = new Polyline()
+                {
+                    Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
+                    StrokeThickness = 3,
+                    StrokeDashArray = new DoubleCollection() { 5, 2 },
+                };
+
+                polyline.Points.Add(p.CurrentPoint.Position);
+                canvas.Children.Add(polyline);
+            }
+
+            void moved(InkUnprocessedInput i, PointerEventArgs p)
+            {
+
+                polyline.Points.Add(p.CurrentPoint.Position);
+
+            }
+
+            async void released(InkUnprocessedInput i, PointerEventArgs p)
+            {
+
+                polyline.Points.Add(p.CurrentPoint.Position);
+                polyline.Opacity = 0.3;
+                inkToolbar.ActiveTool = currentTool;
+                inkToolbar.Children.Remove(animationPen);
+                selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
+                var container = inkCanvas.InkPresenter.StrokeContainer;
+
+                double prevX = 0;
+                double prevY = 0;
+                var delta = polyline.Points[0];
+                foreach (Point pt in polyline.Points)
+                {
+                    //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
+                    Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
+                    var r = container.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
+                    delta = pt;
+                    await Task.Delay(TimeSpan.FromSeconds(0.01));
+
+                }
+
+
+
+                canvas.Children.Remove(polyline); //maybe only show when flyout or something...
+                inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= moved;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= released;
+
+            }
+            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += pressed; 
+            inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += moved;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += released;
+
+
+           
+       
+
+
+
         }
     }
 }

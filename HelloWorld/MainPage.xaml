@@ -17,7 +17,7 @@
                         <TextBlock Text="Group Strokes" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
                     </StackPanel>
                 </Button>
-                <Button x:Name="drawPathButton" Background="Transparent" Width="250" HorizontalContentAlignment="Stretch">
+                <Button x:Name="drawPathButton" Background="Transparent" Width="250" HorizontalContentAlignment="Stretch" Click="TestDrawPath">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xF128;" FontFamily="Segoe MDL2 Assets" VerticalAlignment="Center"/>
                         <TextBlock Text="Draw Path" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
@@ -41,7 +41,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <CommandBar RequestedTheme="Dark" DefaultLabelPosition="Right">
+                <CommandBar x:Name="commandBar" RequestedTheme="Dark" DefaultLabelPosition="Right">
                     <CommandBar.Content>
                         <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}">
                             <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" Click="ToolButton_Lasso" ToolTipService.ToolTip="Select Strokes"/>
@@ -51,50 +51,13 @@
 
                     <AppBarButton Icon="Save" Label="Save" Click="saveAll"/>
                     <AppBarButton Icon="OpenFile" Label="Load" Click="loadAll"/>
-
-
+                    <AppBarSeparator/>
                     <AppBarButton Icon="Back" Label="Back" Click="backToMenu"/>
                     <AppBarSeparator/>
                     <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
                     <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
                     <AppBarSeparator/>
-                    <AppBarButton Icon="Comment" Label="Comments">
-                        <!-- TODO: COMMENT COLOR SELECTION -->
-                        <AppBarButton.Flyout>
-                            <Flyout>
-                                <StackPanel>
-                                    <Ellipse Margin="8,8,8,8"
-                                                     UseLayoutRounding="false"
-                                                     HorizontalAlignment="Stretch"
-                                                     VerticalAlignment="Stretch"
-                                                     Height="36"
-                                                     Width="36"
-                                                     Fill="Goldenrod"/>
-                                    <Ellipse Margin="8,8,8,8"
-                                                     UseLayoutRounding="false"
-                                                     HorizontalAlignment="Stretch"
-                                                     VerticalAlignment="Stretch"
-                                                     Height="36"
-                                                     Width="36"
-                                                     Fill="LightSkyBlue"/>
-                                    <Ellipse Margin="8,8,8,8"
-                                                     UseLayoutRounding="false"
-                                                     HorizontalAlignment="Stretch"
-                                                     VerticalAlignment="Stretch"
-                                                     Height="36"
-                                                     Width="36"
-                                                     Fill="Plum"/>
-                                    <Ellipse Margin="8,8,8,8"
-                                                     UseLayoutRounding="false"
-                                                     HorizontalAlignment="Stretch"
-                                                     VerticalAlignment="Stretch"
-                                                     Height="36"
-                                                     Width="36"
-                                                     Fill="PaleGreen"/>
-                                </StackPanel>
-                            </Flyout>
-                        </AppBarButton.Flyout>
-                    </AppBarButton>
+                    <AppBarToggleButton x:Name="AnimationToggle" Icon="SolidStar" Label="Animate" />
                 </CommandBar>
                 
                 <Grid Grid.Row="2">
