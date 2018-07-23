@@ -488,11 +488,7 @@ namespace Protocol2
                 rectangle.PointerEntered += new PointerEventHandler(Cursor_In_BoundingBox);
                 rectangle.PointerExited += new PointerEventHandler(Cursor_Leave_BoundingBox);
 
-                rectangle.RightTapped += delegate (object sender, RightTappedRoutedEventArgs e)
-                {
-                    MenuFlyout f = CreateFlyout();
-                    f.ShowAt(sender as FrameworkElement);
-                };
+  
 
                 selectionCanvas.Children.Add(rectangle);
             } else
@@ -669,17 +665,6 @@ namespace Protocol2
             this.combineStrokesButton.IsEnabled = selectedStrokesExist;
             this.drawPathButton.IsEnabled = selectedStrokesExist;
             splitView.IsPaneOpen = !splitView.IsPaneOpen;
-        }
-
-        private MenuFlyout CreateFlyout()
-        {
-            MenuFlyout flyout = new MenuFlyout();
-            flyout.Items.Add(new MenuFlyoutItem { Text = "Group", Icon = new FontIcon { Glyph = "&#xE72D;", }, });
-            flyout.Items.Add(new MenuFlyoutItem { Text = "Delete", });
-            flyout.Items.Add(new MenuFlyoutItem { Text = "Duplicate", });
-            flyout.Items.Add(new MenuFlyoutItem { Text = "Draw path", });
-
-            return flyout;
         }
 
         private void Move_Selected_Mode(Object sender, RoutedEventArgs e)
