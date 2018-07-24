@@ -812,12 +812,12 @@ namespace Protocol2
 
         private async void Replay(object sender, RoutedEventArgs e)
         {
-            Button b = sender as Button;
+            TextBlock b = sender as TextBlock;
+            
             Animation a = b.DataContext as Animation;
-            int index = animeList.IndexOf(a);
+            int index = a.id;
             Debug.WriteLine("works:" + index);
-
-            var replayAnimation = animations.GetAnimations()[index];
+            var replayAnimation = animations.GetAnimations()[index]; // won't work once we start deleting
             var delta = replayAnimation.GetPolyline().Points[0];
             canvas.Children.Add(replayAnimation.GetPolyline()); //TODO breaks when you double click
             foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())

@@ -29,11 +29,11 @@
                         <TextBlock Text="Move Selected" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
                     </StackPanel>
                 </Button>
-                <ListView x:Name="Animationlist">
+                <ListView x:Name="Animationlist" CanReorderItems="True" AllowDrop="True" CanDragItems="True">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Grid>
-                                <Button Content="{Binding name}" Click="Replay"/>
+                                <TextBlock Text="{Binding name}" Tapped="Replay"/>
                             </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>

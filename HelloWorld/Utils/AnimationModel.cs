@@ -15,11 +15,14 @@ namespace Protocol2.Utils
         public List<InkStroke> inkStrokes { get; set; }
         public Polyline polyline { get; set; }
         public string name { get; set; }
-
+        public int id { get; set; }
+        public static int counter = 0; // temporary use
         public Animation()
         {
             inkStrokes = new List<InkStroke>();
-            name = "Animation";
+            name = "Animation " + counter;
+            id = counter;
+            counter++;
         }
 
         public Polyline GetPolyline()
@@ -56,7 +59,6 @@ namespace Protocol2.Utils
         {
             return animations;
         }
-        
 
     }
 }
