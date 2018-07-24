@@ -21,6 +21,7 @@ using Windows.UI.Core;
 using System.Numerics;
 using Windows.UI.Xaml.Media.Animation;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -48,6 +49,9 @@ namespace Protocol2
 
         private Random rng = new Random();
         public CommentModel comments;
+        private AnimationModel animations;
+        private ObservableCollection<Animation> animeList;
+    
         private Save save = null;
 
         private CoreCursor normalCursor = Window.Current.CoreWindow.PointerCursor;
@@ -77,6 +81,9 @@ namespace Protocol2
 
             undoStack = new Stack<InkStroke>();
             comments = new CommentModel();
+            animations = new AnimationModel();
+            animeList = new ObservableCollection<Animation>();
+            Animationlist.ItemsSource = animeList;
 
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
 
@@ -722,6 +729,17 @@ namespace Protocol2
 
                 polyline.Points.Add(p.CurrentPoint.Position);
                 polyline.Opacity = 0.3;
+
+                Animation anime = new Animation();
+                foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+                {
+                    if (stroke.Selected)
+                    {
+                        anime.GetInkStrokes().Add(stroke);
+                    }
+                }
+                anime.SetPolyline(polyline);
+
                 inkToolbar.ActiveTool = currentTool;
                 inkToolbar.Children.Remove(animationPen);
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
@@ -730,7 +748,9 @@ namespace Protocol2
                 double prevX = 0;
                 double prevY = 0;
                 var delta = polyline.Points[0];
-                foreach (Point pt in polyline.Points)
+                animations.Add(anime);
+                animeList.Add(anime);
+                foreach (Point pt in anime.GetPolyline().Points)
                 {
                     //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
                     Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
@@ -740,7 +760,7 @@ namespace Protocol2
 
                 }
 
-
+                
 
                 canvas.Children.Remove(polyline); //maybe only show when flyout or something...
                 inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
@@ -758,6 +778,66 @@ namespace Protocol2
        
 
 
+
+        }
+
+        private async void Animate_Test(object sender, RoutedEventArgs e)
+        {
+            foreach (var animation in animations.GetAnimations()) 
+            {
+                var delta = animation.GetPolyline().Points[0];
+                canvas.Children.Add(animation.GetPolyline());
+
+                foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+                {
+                    stroke.Selected = false;
+                }
+                foreach (var stroke in animation.GetInkStrokes())
+                {
+                    stroke.Selected = true;
+                }
+                foreach (Point pt in animation.GetPolyline().Points)
+                {
+                    //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
+                    Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
+                    var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
+                    delta = pt;
+                    await Task.Delay(TimeSpan.FromSeconds(0.01));
+
+                }
+                canvas.Children.Remove(animation.GetPolyline());
+
+            }
+        }
+
+        private async void Replay(object sender, RoutedEventArgs e)
+        {
+            Button b = sender as Button;
+            Animation a = b.DataContext as Animation;
+            int index = animeList.IndexOf(a);
+            Debug.WriteLine("works:" + index);
+
+            var replayAnimation = animations.GetAnimations()[index];
+            var delta = replayAnimation.GetPolyline().Points[0];
+            canvas.Children.Add(replayAnimation.GetPolyline()); //TODO breaks when you double click
+            foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+            {
+                stroke.Selected = false;
+            }
+            foreach (var stroke in replayAnimation.GetInkStrokes())
+            {
+                stroke.Selected = true;
+            }
+            foreach (Point pt in replayAnimation.GetPolyline().Points)
+            {
+                //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
+                Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
+                var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
+                delta = pt;
+                await Task.Delay(TimeSpan.FromSeconds(0.01));
+
+            }
+            canvas.Children.Remove(replayAnimation.GetPolyline());
 
         }
     }
