@@ -787,8 +787,30 @@ namespace Protocol2
 
         private void duplicate(object sender, RoutedEventArgs e)
         {
+            var strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+            var numStrokesBefore = strokes.Count();
+
             inkCanvas.InkPresenter.StrokeContainer.CopySelectedToClipboard();
-            inkCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(Canvas.GetLeft(boundingBox) + 10, Canvas.GetTop(boundingBox)));
+            boundingRect = inkCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(Canvas.GetLeft(boundingBox) + 10, Canvas.GetTop(boundingBox)));
+            
+            var numStrokesAfter = strokes.Count();
+
+            if (numStrokesAfter - numStrokesBefore > 0)
+            {
+                foreach (var stroke in strokes)
+                {
+                    stroke.Selected = false;
+                }
+                for (int i = numStrokesBefore; i < numStrokesAfter; i++)
+                {
+                    strokes[i].Selected = true;
+                }
+            }
+            
+            DrawBoundingRect();
+
+
+
         }
     }
 }
