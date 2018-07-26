@@ -18,8 +18,6 @@ using System.Diagnostics;
 using Protocol2.Utils;
 using Windows.UI;
 using Windows.UI.Core;
-using System.Numerics;
-using Windows.UI.Xaml.Media.Animation;
 using System.Threading.Tasks;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -480,6 +478,7 @@ namespace Protocol2
                     Height = boundingRect.Height,
                     Fill = transparent
                 };
+                Add_ContextMenu(rectangle);
 
                 Canvas.SetLeft(rectangle, boundingRect.X);
                 Canvas.SetTop(rectangle, boundingRect.Y);
@@ -497,6 +496,29 @@ namespace Protocol2
             }
 
             Toggle_ActionBar();
+        }
+
+        //add context menu to selected strokes
+        private void Add_ContextMenu(Rectangle boundingBox)
+        {
+            MenuFlyoutItem item1 = new MenuFlyoutItem { Text = "Group strokes" };
+            MenuFlyoutItem item2 = new MenuFlyoutItem { Text = "Draw path" };
+            MenuFlyoutItem item3 = new MenuFlyoutItem { Text = "Delete" };
+            MenuFlyoutItem item4 = new MenuFlyoutItem { Text = "Duplicate" };
+            item1.Click += new RoutedEventHandler(Combine_Strokes);
+            item2.Click += new RoutedEventHandler(TestDrawPath);
+            item3.Click += new RoutedEventHandler(deleteSelectedStrokes);
+            item4.Click += new RoutedEventHandler(duplicate);
+
+
+            MenuFlyout flyout = new MenuFlyout();
+            flyout.Items.Add(item1);
+            flyout.Items.Add(item2);
+            flyout.Items.Add(item3);
+            flyout.Items.Add(item4);
+
+            boundingBox.ContextFlyout = flyout;
+           
         }
 
         private void Drag_Stroke(object sender, ManipulationDeltaRoutedEventArgs e)
@@ -752,13 +774,19 @@ namespace Protocol2
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += pressed; 
             inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += moved;
             inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += released;
+        }
 
+        private void deleteSelectedStrokes(object sender, RoutedEventArgs e)
+        {
+            inkCanvas.InkPresenter.StrokeContainer.DeleteSelected();
+            ClearDrawnBoundingRect();
+            ClearSelection();
+        }
 
-           
-       
-
-
-
+        private void duplicate(object sender, RoutedEventArgs e)
+        {
+            inkCanvas.InkPresenter.StrokeContainer.CopySelectedToClipboard();
+            inkCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(boundingRect.X + 10, boundingRect.Y));
         }
     }
 }
