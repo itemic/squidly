@@ -48,7 +48,7 @@ namespace Protocol2
         private Random rng = new Random();
         public CommentModel comments;
         private AnimationModel animations;
-        private ObservableCollection<Animation> animeList;
+        //private ObservableCollection<Animation> animeList;
     
         private Save save = null;
 
@@ -80,8 +80,7 @@ namespace Protocol2
             undoStack = new Stack<InkStroke>();
             comments = new CommentModel();
             animations = new AnimationModel();
-            animeList = new ObservableCollection<Animation>();
-            Animationlist.ItemsSource = animeList;
+            Animationlist.ItemsSource = animations.GetAnimations();
 
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
 
@@ -771,7 +770,6 @@ namespace Protocol2
                 double prevY = 0;
                 var delta = polyline.Points[0];
                 animations.Add(anime);
-                animeList.Add(anime);
                 foreach (Point pt in anime.GetPolyline().Points)
                 {
                     //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
@@ -809,32 +807,39 @@ namespace Protocol2
             inkCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(boundingRect.X + 10, boundingRect.Y));
         }
 
+        private async Task Animate(Animation animation)
+        {
+            var delta = animation.GetPolyline().Points[0];
+            canvas.Children.Add(animation.GetPolyline());
+
+            // want something here so we reset the location of ink to where it should start from
+            // MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
+
+            foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+            {
+                stroke.Selected = false;
+            }
+            foreach (var stroke in animation.GetInkStrokes())
+            {
+                stroke.Selected = true;
+            }
+            foreach (Point pt in animation.GetPolyline().Points)
+            {
+                //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
+                Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
+                var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
+                delta = pt;
+                await Task.Delay(TimeSpan.FromSeconds(0.01));
+
+            }
+            canvas.Children.Remove(animation.GetPolyline());
+        }
+
         private async void Animate_Test(object sender, RoutedEventArgs e)
         {
             foreach (var animation in animations.GetAnimations()) 
             {
-                var delta = animation.GetPolyline().Points[0];
-                canvas.Children.Add(animation.GetPolyline());
-
-                foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
-                {
-                    stroke.Selected = false;
-                }
-                foreach (var stroke in animation.GetInkStrokes())
-                {
-                    stroke.Selected = true;
-                }
-                foreach (Point pt in animation.GetPolyline().Points)
-                {
-                    //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
-                    Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
-                    var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
-                    delta = pt;
-                    await Task.Delay(TimeSpan.FromSeconds(0.01));
-
-                }
-                canvas.Children.Remove(animation.GetPolyline());
-
+                await Animate(animation);
             }
         }
 
@@ -846,26 +851,9 @@ namespace Protocol2
             int index = a.id;
             Debug.WriteLine("works:" + index);
             var replayAnimation = animations.GetAnimations()[index]; // won't work once we start deleting
-            var delta = replayAnimation.GetPolyline().Points[0];
-            canvas.Children.Add(replayAnimation.GetPolyline()); //TODO breaks when you double click
-            foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
-            {
-                stroke.Selected = false;
-            }
-            foreach (var stroke in replayAnimation.GetInkStrokes())
-            {
-                stroke.Selected = true;
-            }
-            foreach (Point pt in replayAnimation.GetPolyline().Points)
-            {
-                //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
-                Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
-                var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
-                delta = pt;
-                await Task.Delay(TimeSpan.FromSeconds(0.01));
 
-            }
-            canvas.Children.Remove(replayAnimation.GetPolyline());
+            await Animate(replayAnimation);
+
 
         }
     }

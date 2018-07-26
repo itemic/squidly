@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,16 +47,16 @@ namespace Protocol2.Utils
     {
 
       
-        private List<Animation> animations { get; }
+        private ObservableCollection<Animation> animations { get; }
         public AnimationModel()
         {
-            animations = new List<Animation>();
+            animations = new ObservableCollection<Animation>();
         }
         public void Add(Animation animation)
         {
             animations.Add(animation);
         }
-        public List<Animation> GetAnimations()
+        public ObservableCollection<Animation> GetAnimations()
         {
             return animations;
         }
