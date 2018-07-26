@@ -19,6 +19,7 @@ using Protocol2.Utils;
 using Windows.UI;
 using Windows.UI.Core;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -46,6 +47,9 @@ namespace Protocol2
 
         private Random rng = new Random();
         public CommentModel comments;
+        private AnimationModel animations;
+        //private ObservableCollection<Animation> animeList;
+    
         private Save save = null;
 
         private CoreCursor normalCursor = Window.Current.CoreWindow.PointerCursor;
@@ -75,6 +79,8 @@ namespace Protocol2
 
             undoStack = new Stack<InkStroke>();
             comments = new CommentModel();
+            animations = new AnimationModel();
+            Animationlist.ItemsSource = animations.GetAnimations();
 
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
 
@@ -744,6 +750,17 @@ namespace Protocol2
 
                 polyline.Points.Add(p.CurrentPoint.Position);
                 polyline.Opacity = 0.3;
+
+                Animation anime = new Animation();
+                foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+                {
+                    if (stroke.Selected)
+                    {
+                        anime.GetInkStrokes().Add(stroke);
+                    }
+                }
+                anime.SetPolyline(polyline);
+
                 inkToolbar.ActiveTool = currentTool;
                 inkToolbar.Children.Remove(animationPen);
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
@@ -752,7 +769,8 @@ namespace Protocol2
                 double prevX = 0;
                 double prevY = 0;
                 var delta = polyline.Points[0];
-                foreach (Point pt in polyline.Points)
+                animations.Add(anime);
+                foreach (Point pt in anime.GetPolyline().Points)
                 {
                     //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
                     Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
@@ -762,7 +780,7 @@ namespace Protocol2
 
                 }
 
-
+                
 
                 canvas.Children.Remove(polyline); //maybe only show when flyout or something...
                 inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
@@ -787,6 +805,56 @@ namespace Protocol2
         {
             inkCanvas.InkPresenter.StrokeContainer.CopySelectedToClipboard();
             inkCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(boundingRect.X + 10, boundingRect.Y));
+        }
+
+        private async Task Animate(Animation animation)
+        {
+            var delta = animation.GetPolyline().Points[0];
+            canvas.Children.Add(animation.GetPolyline());
+
+            // want something here so we reset the location of ink to where it should start from
+            // MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
+
+            foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+            {
+                stroke.Selected = false;
+            }
+            foreach (var stroke in animation.GetInkStrokes())
+            {
+                stroke.Selected = true;
+            }
+            foreach (Point pt in animation.GetPolyline().Points)
+            {
+                //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
+                Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
+                var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
+                delta = pt;
+                await Task.Delay(TimeSpan.FromSeconds(0.01));
+
+            }
+            canvas.Children.Remove(animation.GetPolyline());
+        }
+
+        private async void Animate_Test(object sender, RoutedEventArgs e)
+        {
+            foreach (var animation in animations.GetAnimations()) 
+            {
+                await Animate(animation);
+            }
+        }
+
+        private async void Replay(object sender, RoutedEventArgs e)
+        {
+            TextBlock b = sender as TextBlock;
+            
+            Animation a = b.DataContext as Animation;
+            int index = a.id;
+            Debug.WriteLine("works:" + index);
+            var replayAnimation = animations.GetAnimations()[index]; // won't work once we start deleting
+
+            await Animate(replayAnimation);
+
+
         }
     }
 }
