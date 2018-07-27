@@ -55,7 +55,20 @@
                     <CommandBar.Content>
                         <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}">
                             <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" Click="ToolButton_Lasso" ToolTipService.ToolTip="Select Strokes"/>
-                            <InkToolbarCustomToolButton x:Name="toolButtonComment" Content="&#xE90A;" FontFamily="Segoe MDL2 Assets" Click="ToolButton_Comment" ToolTipService.ToolTip="Comment Mode"/>
+                            <InkToolbarCustomToolButton x:Name="toolButtonComment" Content="&#xE90A;" FontFamily="Segoe MDL2 Assets" Click="ToolButton_Comment" ToolTipService.ToolTip="Comment Mode">
+                                <InkToolbarCustomToolButton.ContextFlyout>
+                                    <Flyout x:Name="StickyFlyout">
+                                        <StackPanel VerticalAlignment="Center" Orientation="Vertical">
+                                            <TextBlock Text="Sticky Note Color"/>
+                                            <StackPanel x:Name="StickyNoteStack" Orientation="Horizontal">
+                                                
+                                                
+                                            </StackPanel>
+                                            
+                                        </StackPanel>
+                                    </Flyout>
+                                </InkToolbarCustomToolButton.ContextFlyout>
+                            </InkToolbarCustomToolButton>
                         </InkToolbar>
                     </CommandBar.Content>
 

@@ -34,6 +34,8 @@ namespace Protocol2
         private Stack<InkStroke> undoStack { get; set; }
         public Polyline polyline;
 
+        private Color stickyColor;
+
         InkAnalyzer analyzerShape = new InkAnalyzer();
 
         Dictionary<InkStroke, StrokeGroup> groups = new Dictionary<InkStroke, StrokeGroup>();
@@ -88,10 +90,65 @@ namespace Protocol2
             AnimationToggle.Unchecked += AnimationToggleUnchecked;
             inkToolbar.Loading += InitializeInkToolbar;
             inkToolbar.ActiveToolChanged += InkToolbar_ActiveToolChanged;
+            SetUpStickyNotes();
+            stickyColor = Colors.Goldenrod;
+            toolButtonComment.Foreground = new SolidColorBrush(stickyColor);
+
             //inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
         }
 
-        
+
+        private void SetUpStickyNotes()
+        {
+            Color[] colors = { Colors.Goldenrod, Colors.Plum, Colors.LightSkyBlue, Colors.PaleGreen };
+            foreach (Color c in colors)
+            {
+                Ellipse ellipse = new Ellipse
+                {
+                    Width = 36,
+                    Height = 36,
+                    Margin = new Thickness(8),
+                    Fill = new SolidColorBrush(c),
+                    StrokeThickness = 2,
+                    Stroke = new SolidColorBrush(Colors.Black),
+                };
+                ellipse.Tapped += ChangeStickyColor;
+                ellipse.PointerEntered += StickyPointerHover;
+                ellipse.PointerExited += StickyPointerExit;
+                ellipse.PointerPressed += StickyPointerPress;
+                ellipse.PointerReleased += StickyPointerExit;
+                
+                StickyNoteStack.Children.Add(ellipse);
+            }
+           
+        }
+
+        private void StickyPointerPress(object sender, PointerRoutedEventArgs e)
+        {
+            var ellipse = sender as Ellipse;
+            ellipse.Stroke = new SolidColorBrush(Colors.White);
+
+        }
+
+        private void StickyPointerExit(object sender, PointerRoutedEventArgs e)
+        {
+            var ellipse = sender as Ellipse;
+            ellipse.Stroke = new SolidColorBrush(Colors.Black);
+        }
+
+        private void StickyPointerHover(object sender, PointerRoutedEventArgs e)
+        {
+            var ellipse = sender as Ellipse;
+            ellipse.Stroke = ellipse.Fill;
+        }
+
+        private void ChangeStickyColor(object sender, TappedRoutedEventArgs e)
+        {
+            var ellipse = sender as Ellipse;
+            stickyColor = (ellipse.Fill as SolidColorBrush).Color;
+            toolButtonComment.Foreground = new SolidColorBrush(stickyColor);
+            StickyFlyout.Hide();
+        }
 
         private void InitializeInkToolbar(FrameworkElement sender, object args)
         {
@@ -100,6 +157,7 @@ namespace Protocol2
             eraser = new InkToolbarEraserButton();
             inkToolbar.Children.Add(eraser);
             inkToolbar.Children.Add(ballpoint);
+
         }
 
         private void AnimationToggleChecked(object sender, RoutedEventArgs e)
@@ -219,7 +277,7 @@ namespace Protocol2
         public void makeComment(double x, double y) 
         {
             
-            var newComment = comments.CreateComment(x, y);
+            var newComment = comments.CreateComment(x, y, stickyColor);
             var rect = DrawRectangle(newComment);
             rect.ContextFlyout.ShowAt(rect);
             

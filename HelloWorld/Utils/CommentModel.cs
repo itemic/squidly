@@ -32,7 +32,9 @@ namespace Protocol2.Utils
             comments.Remove(comment);
         }
 
-        public Comment CreateComment(double x, double y)
+
+
+        public Comment CreateComment(double x, double y, Color color)
         {
             Comment comment = new Comment();
 
@@ -40,7 +42,7 @@ namespace Protocol2.Utils
             comment.height = 50;
             comment.left = x - 12.5;
             comment.top = y - 12.5;
-            comment.fill = colorArray[(rng.Next(0, colorArray.Count))];
+            comment.fill = color;
             comment.angle = -20 + rng.Next(40);
             comment.opacity = 0.75;
 

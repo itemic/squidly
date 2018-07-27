@@ -51,7 +51,7 @@ namespace Protocol2.Utils
 
         private static Random rng = new Random();
 
-        public static Comment CreateComment(double x, double y)
+        public static Comment CreateComment(double x, double y, Color color)
         {
             Comment comment = new Comment();
 
@@ -59,11 +59,17 @@ namespace Protocol2.Utils
             comment.height = 25;
             comment.left = x - 12.5;
             comment.top = y - 12.5;
-            comment.fill = colorArray[(rng.Next(0, colorArray.Count))];
+            comment.fill = color;
             comment.angle = -30 + rng.Next(60);
             comment.opacity = 0.8;
 
             return comment;
+        }
+
+        public static Comment CreateComment(double x, double y)
+        {
+
+            return CreateComment(x, y, colorArray[(rng.Next(0, colorArray.Count))]);
         }
     }
 
