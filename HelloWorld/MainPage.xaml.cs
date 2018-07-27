@@ -19,7 +19,11 @@ using Protocol2.Utils;
 using Windows.UI;
 using Windows.UI.Core;
 using System.Threading.Tasks;
+<<<<<<< HEAD
+using System.Numerics;
+=======
 using System.Collections.ObjectModel;
+>>>>>>> master
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -44,6 +48,7 @@ namespace Protocol2
         private Polyline lasso;
         //Stroke selection area
         private Rect boundingRect;
+        private Rectangle boundingBox;
         private bool isBoundRect;
         public bool selectedStrokesExist = false;
 
@@ -546,12 +551,11 @@ namespace Protocol2
 
                 Canvas.SetLeft(rectangle, boundingRect.X);
                 Canvas.SetTop(rectangle, boundingRect.Y);
+                boundingBox = rectangle;
                 rectangle.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY;
                 rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Stroke);
                 rectangle.PointerEntered += new PointerEventHandler(Cursor_In_BoundingBox);
                 rectangle.PointerExited += new PointerEventHandler(Cursor_Leave_BoundingBox);
-
-  
 
                 selectionCanvas.Children.Add(rectangle);
             } else
@@ -590,6 +594,7 @@ namespace Protocol2
             var rectangle = (Rectangle)sender;
             Canvas.SetLeft(rectangle, Canvas.GetLeft(rectangle) + e.Delta.Translation.X);
             Canvas.SetTop(rectangle, Canvas.GetTop(rectangle) + e.Delta.Translation.Y);
+            
 
             inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(e.Delta.Translation.X, e.Delta.Translation.Y));
         }
@@ -623,6 +628,7 @@ namespace Protocol2
             {
                 selectionCanvas.Children.Clear();
                 boundingRect = Rect.Empty;
+                boundingBox = null;
             }
         }
         
@@ -857,8 +863,39 @@ namespace Protocol2
 
         private void duplicate(object sender, RoutedEventArgs e)
         {
+            //var numStrokesBefore = strokes.Count();
+
             inkCanvas.InkPresenter.StrokeContainer.CopySelectedToClipboard();
-            inkCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(boundingRect.X + 10, boundingRect.Y));
+            boundingRect = inkCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(Canvas.GetLeft(boundingBox), Canvas.GetTop(boundingBox)));
+            //boundingRect.X += 25;
+            //boundingRect.Y -= 25;
+            
+            var strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+
+            foreach (var stroke in strokes)
+            {
+                inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+            }
+
+            
+            //var numStrokesAfter = strokes.Count();
+
+            //if (numStrokesAfter - numStrokesBefore > 0)
+            //{
+            //    foreach (var stroke in strokes)
+            //    {
+            //        stroke.Selected = false;
+            //    }
+            //    for (int i = numStrokesBefore; i < numStrokesAfter; i++)
+            //    {
+            //        strokes[i].Selected = true;
+            //    }
+            //}
+
+            DrawBoundingRect();
+
+
+
         }
 
         private async Task Animate(Animation animation)
