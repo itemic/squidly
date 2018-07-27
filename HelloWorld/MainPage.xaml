@@ -29,6 +29,16 @@
                         <TextBlock Text="Move Selected" FontSize="18" VerticalAlignment="Center" Margin="20,0,0,0"/>
                     </StackPanel>
                 </Button>
+                <ListView x:Name="Animationlist" CanReorderItems="True" AllowDrop="True" CanDragItems="True">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <TextBlock Text="{Binding name}" Tapped="Replay"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    
+                </ListView>
 
             </StackPanel>
         </SplitView.Pane>
@@ -58,6 +68,7 @@
                     <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
                     <AppBarSeparator/>
                     <AppBarToggleButton x:Name="AnimationToggle" Icon="SolidStar" Label="Animate" />
+                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
                 </CommandBar>
                 
                 <Grid Grid.Row="2">
