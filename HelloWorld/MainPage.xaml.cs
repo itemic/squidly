@@ -19,11 +19,8 @@ using Protocol2.Utils;
 using Windows.UI;
 using Windows.UI.Core;
 using System.Threading.Tasks;
-<<<<<<< HEAD
 using System.Numerics;
-=======
 using System.Collections.ObjectModel;
->>>>>>> master
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
