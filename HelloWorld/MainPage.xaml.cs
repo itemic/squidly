@@ -824,8 +824,6 @@ namespace Protocol2
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
                 var container = inkCanvas.InkPresenter.StrokeContainer;
 
-                double prevX = 0;
-                double prevY = 0;
                 var delta = polyline.Points[0];
                 animations.Add(anime);
                 foreach (Point pt in anime.GetPolyline().Points)
@@ -837,8 +835,6 @@ namespace Protocol2
                     await Task.Delay(TimeSpan.FromSeconds(0.01));
 
                 }
-
-                
 
                 canvas.Children.Remove(polyline); //maybe only show when flyout or something...
                 inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
