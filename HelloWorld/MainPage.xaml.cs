@@ -19,6 +19,7 @@ using Protocol2.Utils;
 using Windows.UI;
 using Windows.UI.Core;
 using System.Threading.Tasks;
+using System.Numerics;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -787,26 +788,35 @@ namespace Protocol2
 
         private void duplicate(object sender, RoutedEventArgs e)
         {
-            var strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-            var numStrokesBefore = strokes.Count();
+            //var numStrokesBefore = strokes.Count();
 
             inkCanvas.InkPresenter.StrokeContainer.CopySelectedToClipboard();
-            boundingRect = inkCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(Canvas.GetLeft(boundingBox) + 10, Canvas.GetTop(boundingBox)));
+            boundingRect = inkCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(Canvas.GetLeft(boundingBox), Canvas.GetTop(boundingBox)));
+            //boundingRect.X += 25;
+            //boundingRect.Y -= 25;
             
-            var numStrokesAfter = strokes.Count();
+            var strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
 
-            if (numStrokesAfter - numStrokesBefore > 0)
+            foreach (var stroke in strokes)
             {
-                foreach (var stroke in strokes)
-                {
-                    stroke.Selected = false;
-                }
-                for (int i = numStrokesBefore; i < numStrokesAfter; i++)
-                {
-                    strokes[i].Selected = true;
-                }
+                inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
             }
+
             
+            //var numStrokesAfter = strokes.Count();
+
+            //if (numStrokesAfter - numStrokesBefore > 0)
+            //{
+            //    foreach (var stroke in strokes)
+            //    {
+            //        stroke.Selected = false;
+            //    }
+            //    for (int i = numStrokesBefore; i < numStrokesAfter; i++)
+            //    {
+            //        strokes[i].Selected = true;
+            //    }
+            //}
+
             DrawBoundingRect();
 
 
