@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.UI.Input.Inking;
 using Windows.UI.Xaml.Shapes;
 
@@ -17,6 +18,9 @@ namespace Protocol2.Utils
         public Polyline polyline { get; set; }
         public string name { get; set; }
         public int id { get; set; }
+        public Point startPoint {get; set;}
+        public Point endPoint { get; set; }
+
         public static int counter = 0; // temporary use
         public Animation()
         {
@@ -39,6 +43,8 @@ namespace Protocol2.Utils
         public void SetPolyline(Polyline p)
         {
             polyline = p;
+            startPoint = p.Points[0];
+            endPoint = p.Points[p.Points.Count - 1];
         }
         
     }
