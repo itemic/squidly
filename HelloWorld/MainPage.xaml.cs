@@ -845,13 +845,15 @@ namespace Protocol2
             {
                 stroke.Selected = true;
             }
+            var i = -1;
             foreach (Point pt in animation.GetPolyline().Points)
             {
                 //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
                 Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
                 var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
                 delta = pt;
-                await Task.Delay(TimeSpan.FromSeconds(0.01));
+                await Task.Delay(TimeSpan.FromSeconds(i == -1 ? 0 : animation.distArray[i] / 10));
+                i++;
 
             }
             canvas.Children.Remove(animation.GetPolyline());
