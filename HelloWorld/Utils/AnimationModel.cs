@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -60,7 +61,6 @@ namespace Protocol2.Utils
 
         public double getInterval()
         {
-            Debug.WriteLine(time / polyline.Points.Count());
             return time / polyline.Points.Count();
         }
 
@@ -72,10 +72,11 @@ namespace Protocol2.Utils
     {
 
       
-        private ObservableCollection<Animation> animations { get; }
+        private ObservableCollection<Animation> animations { get; set; }
         public AnimationModel()
         {
             animations = new ObservableCollection<Animation>();
+ 
         }
         public void Add(Animation animation)
         {
@@ -83,7 +84,22 @@ namespace Protocol2.Utils
         }
         public ObservableCollection<Animation> GetAnimations()
         {
+            //Reorder();
+            foreach (var a in animations)
+            {
+                Debug.WriteLine(a.name);
+            }
             return animations;
+        }
+        public void Reorder()
+        {
+            animations = new ObservableCollection<Animation>(animations.OrderBy(x => x.id).ToList());
+        }
+
+        public Animation Play(int id)
+        {
+            Animation anim = animations.Single(x => x.id == id);
+            return anim;
         }
 
     }

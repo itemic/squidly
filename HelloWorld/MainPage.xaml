@@ -10,16 +10,24 @@
         <SplitView.Pane>
             <StackPanel Background="LightGray">
                 <Button x:Name="exitActionsPanel" Content="&#xE700;" FontFamily="Segoe MDL2 Assets" Width="50" Height="50" Background="Transparent" HorizontalAlignment="Right" Click="Toggle_ActionBar_Pressed"/>
-                <TextBlock Text="ANIMATIONS" FontSize="30" FontWeight="SemiLight" Margin="0,30,0,30" />
-                
-                <ListView x:Name="Animationlist" CanReorderItems="True" AllowDrop="True" CanDragItems="True">
+                <TextBlock Text="Animations" FontSize="30" FontWeight="SemiLight" Margin="0,30,0,30" />
+
+                <ListView x:Name="Animationlist" SelectionMode="None" IsItemClickEnabled="False" CanReorderItems="True" AllowDrop="True" CanDragItems="True">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <StackPanel>
                                 <TextBlock Text="{Binding name}"/>
-                                <Button Content="Play" Click="Replay"></Button>
-                                <Button Content="Settings" Click="Replay"></Button>
-                                <Button Content="Delete" Click="Replay"></Button>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Click="Replay">
+                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;"/>
+                                    </Button>
+                                    <Button Click="Replay">
+                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
+                                    </Button>
+                                    <Button Click="Replay">
+                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;"/>
+                                    </Button>
+                                </StackPanel>
                             </StackPanel>
                             
                         </DataTemplate>
