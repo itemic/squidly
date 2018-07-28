@@ -94,7 +94,7 @@ namespace Protocol2
             inkToolbar.ActiveToolChanged += InkToolbar_ActiveToolChanged;
             SetUpStickyNotes();
             stickyColor = Colors.Goldenrod;
-            toolButtonComment.Foreground = new SolidColorBrush(stickyColor);
+            toolButtonCommentGlyph.Foreground = new SolidColorBrush(stickyColor);
 
             //inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
         }
@@ -148,7 +148,7 @@ namespace Protocol2
         {
             var ellipse = sender as Ellipse;
             stickyColor = (ellipse.Fill as SolidColorBrush).Color;
-            toolButtonComment.Foreground = new SolidColorBrush(stickyColor);
+            toolButtonCommentGlyph.Foreground = new SolidColorBrush(stickyColor);
             StickyFlyout.Hide();
         }
 
@@ -712,22 +712,7 @@ namespace Protocol2
             splitView.IsPaneOpen = !splitView.IsPaneOpen;
         }
 
-        private void Move_Selected_Mode(Object sender, RoutedEventArgs e)
-        {
-            var moveButton = new Button()
-            {
-                Content = "hi",
-                //FontFamily = new FontFamily("Segoe MDL2 Assets")
 
-                Width = 50,
-                Height = 50
-            };
-
-            Canvas.SetLeft(moveButton, boundingRect.X + boundingRect.Width/2 - 25);
-            Canvas.SetTop(moveButton, boundingRect.Y + boundingRect.Height/2 - 25);
-
-            selectionCanvas.Children.Add(moveButton);
-        }
         
         private void TestDrawPath(Object sender, RoutedEventArgs e)
         {
@@ -780,24 +765,15 @@ namespace Protocol2
 
                 inkToolbar.ActiveTool = currentTool;
                 inkToolbar.Children.Remove(animationPen);
-                selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
                 var container = inkCanvas.InkPresenter.StrokeContainer;
 
                 animations.Add(anime);
-                //var delta = anime.startPoint;
-                //foreach (Point pt in anime.GetPolyline().Points)
-                //{
-                //    //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
-                //    Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
-                //    var r = container.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
-                //    delta = pt;
-                //    await Task.Delay(TimeSpan.FromSeconds(0.01));
-
-                //}
 
                 canvas.Children.Remove(polyline); //maybe only show when flyout or something...
 
                 await Animate(anime);
+                selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
+
                 ClearSelection();
                 inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
                 inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
@@ -834,6 +810,24 @@ namespace Protocol2
 
         private async Task Animate(Animation animation)
         {
+            //TODO: Check if the inkstrokes of the animation still exists...
+            List<InkStroke> strokesToAnimate = new List<InkStroke>();
+
+            foreach(var s in animation.inkStrokes)
+            {
+                if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(s))
+                {
+                    strokesToAnimate.Add(s);
+                }
+            }
+
+            if (strokesToAnimate.Count == 0)
+            {
+                // we can delete this current animation entry
+                animations.GetAnimations().Remove(animation);
+                return;
+            }
+
             var delta = animation.startPoint;
             canvas.Children.Add(animation.GetPolyline());
             Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
