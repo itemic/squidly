@@ -101,6 +101,11 @@ namespace Protocol2.Utils
             Animation anim = animations.Single(x => x.id == id);
             return anim;
         }
+        public void RemoveAnimation(int id)
+        {
+            Animation anim = animations.Single(x => x.id == id);
+            animations.Remove(anim);
+        }
 
     }
 }

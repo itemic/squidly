@@ -881,7 +881,28 @@ namespace Protocol2
             await Animate(replayAnimation); 
         }
 
-        
+        private async void DeleteAnimation(object sender, RoutedEventArgs e)
+        {
+            Button b = sender as Button;
+
+            Animation a = b.DataContext as Animation;
+            int index = a.id;
+            Debug.WriteLine("works:" + index);
+            animations.RemoveAnimation(index);
+        }
+
+        private async void SettingsAnimation(object sender, RoutedEventArgs e)
+        {
+            Button b = sender as Button;
+
+            Animation a = b.DataContext as Animation;
+            int index = a.id;
+
+            Flyout f = new Flyout();
+            b.Flyout = f;
+        }
+
+
     }
 }
   

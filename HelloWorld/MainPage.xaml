@@ -21,11 +21,11 @@
                                     <Button Click="Replay">
                                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;"/>
                                     </Button>
-                                    <Button Click="Replay">
+                                    <Button Click="SettingsAnimation">
                                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
                                     </Button>
-                                    <Button Click="Replay">
-                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;"/>
+                                    <Button Click="DeleteAnimation">
+                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" Foreground="Crimson"/>
                                     </Button>
                                 </StackPanel>
                             </StackPanel>
