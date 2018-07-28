@@ -823,22 +823,13 @@ namespace Protocol2
 
             inkCanvas.InkPresenter.StrokeContainer.CopySelectedToClipboard();
             boundingRect = inkCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(Canvas.GetLeft(boundingBox), Canvas.GetTop(boundingBox)));
-            //boundingRect.X += 25;
-            //boundingRect.Y -= 25;
+            boundingRect.X += 20;
+            boundingRect.Y -= 20;
             
             var strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-
-            foreach (var stroke in strokes)
-            {
-                inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
-            }
-
-
+            inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(20, -20));
 
             DrawBoundingRect();
-
-
-
         }
 
         private async Task Animate(Animation animation)
