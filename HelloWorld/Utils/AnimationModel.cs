@@ -22,7 +22,8 @@ namespace Protocol2.Utils
         public int id { get; set; }
         public Point startPoint {get; set;}
         public Point endPoint { get; set; }
-        public List<Double> distArray;
+        private double time { get; set; }
+
 
         public static int counter = 0; // temporary use
         public Animation()
@@ -31,7 +32,7 @@ namespace Protocol2.Utils
             name = "Animation " + counter;
             id = counter;
             counter++;
-            distArray = new List<Double>();
+            time = 1; //default animations are 2s
         }
 
         public Polyline GetPolyline()
@@ -49,29 +50,21 @@ namespace Protocol2.Utils
             polyline = p;
             startPoint = p.Points[0];
             endPoint = p.Points[p.Points.Count - 1];
-            normalize();
+            
         }
 
-        public void normalize()
+        public void setTime(double d)
         {
-            double d = 0.0;
-            for (int i = 1; i < polyline.Points.Count(); i++)
-            {
-                var delx = polyline.Points[i].X - polyline.Points[i - 1].X;
-                var dely = polyline.Points[i].Y - polyline.Points[i - 1].Y;
-                var dist = Math.Sqrt(Math.Pow(delx, 2) + Math.Pow(dely, 2));
-                Debug.WriteLine("dist: " + dist);
-                distArray.Add(dist);
-                d += dist;
-            }
-
-            for (int i = 0; i < distArray.Count(); i++)
-            {
-                distArray[i] /= d;
-                Debug.WriteLine("normeld:" + distArray[i]);
-            }
-
+            time = d;
         }
+
+        public double getInterval()
+        {
+            Debug.WriteLine(time / polyline.Points.Count());
+            return time / polyline.Points.Count();
+        }
+
+        
         
     }
 

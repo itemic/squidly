@@ -852,7 +852,7 @@ namespace Protocol2
                 Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
                 var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
                 delta = pt;
-                await Task.Delay(TimeSpan.FromSeconds(i == -1 ? 0 : animation.distArray[i] / 10));
+                await Task.Delay(TimeSpan.FromSeconds(animation.getInterval()));
                 i++;
 
             }
