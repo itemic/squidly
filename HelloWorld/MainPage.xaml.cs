@@ -863,7 +863,7 @@ namespace Protocol2
         {
             // sort
             
-            foreach (var animation in animations.GetAnimations()) 
+            foreach (var animation in animations.GetAnimations().ToList()) 
             {
                 await Animate(animation);
             }
