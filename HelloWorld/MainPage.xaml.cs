@@ -560,7 +560,6 @@ namespace Protocol2
                 selectedStrokesExist = false;
             }
 
-            Toggle_ActionBar();
         }
 
         //add context menu to selected strokes
@@ -616,7 +615,6 @@ namespace Protocol2
             }
             ClearDrawnBoundingRect();
             selectedStrokesExist = false;
-            Toggle_ActionBar();
         }
 
         private void ClearDrawnBoundingRect()
@@ -674,35 +672,7 @@ namespace Protocol2
             }
         }
 
-        private void ToolButton_Lasso(object sender, RoutedEventArgs e)
-        {
-
-            //ClearAllHandlers();
-
-            //inkCanvas.RightTapped += Click_Select;
-            ////for passing modified input to the app for custom processing
-            //inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
-
-            ////Listeners for unprocessed pointer events from the modified input
-            //inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += UnprocessedInput_PointerPressed;
-            //inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += UnprocessedInput_PointerMoved;
-            //inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += UnprocessedInput_PointerReleased;
-
-            ////Listeners for new ink or erase strokes so that selection could be cleared when inking or erasing is detected
-            //inkCanvas.InkPresenter.StrokeInput.StrokeStarted += StrokeInput_StrokeStarted;
-            //inkCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
-        }
-
-        private void ToolButton_Comment(object sender, RoutedEventArgs e)
-        {
-            ////for passing modified input to the app for custom processing
-
-            ////Remove listeners for unprocessed pointer events for selecting strokes
-            //ClearAllHandlers();
-
-            //inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
-            //inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
-        }
+       
 
         private void Combine_Strokes(object sender, RoutedEventArgs e)
         {
@@ -735,24 +705,10 @@ namespace Protocol2
             }
         }
 
-        private void Toggle_ActionBar()
-        {
-            this.combineStrokesButton.IsEnabled = selectedStrokesExist;
-            this.drawPathButton.IsEnabled = selectedStrokesExist;
-            if (selectedStrokesExist)
-            {
-                splitView.IsPaneOpen = true;
-            }
-            else
-            {
-                splitView.IsPaneOpen = false;
-            }
-        }
+
 
         private void Toggle_ActionBar_Pressed(Object sender, RoutedEventArgs e)
         {
-            this.combineStrokesButton.IsEnabled = selectedStrokesExist;
-            this.drawPathButton.IsEnabled = selectedStrokesExist;
             splitView.IsPaneOpen = !splitView.IsPaneOpen;
         }
 
@@ -874,20 +830,7 @@ namespace Protocol2
                 inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
             }
 
-            
-            //var numStrokesAfter = strokes.Count();
 
-            //if (numStrokesAfter - numStrokesBefore > 0)
-            //{
-            //    foreach (var stroke in strokes)
-            //    {
-            //        stroke.Selected = false;
-            //    }
-            //    for (int i = numStrokesBefore; i < numStrokesAfter; i++)
-            //    {
-            //        strokes[i].Selected = true;
-            //    }
-            //}
 
             DrawBoundingRect();
 
