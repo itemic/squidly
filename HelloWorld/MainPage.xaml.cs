@@ -812,8 +812,15 @@ namespace Protocol2
         {
             //TODO: Check if the inkstrokes of the animation still exists...
             List<InkStroke> strokesToAnimate = new List<InkStroke>();
-
-            foreach(var s in animation.inkStrokes)
+            foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+            {
+                stroke.Selected = false;
+            }
+            foreach (var stroke in animation.GetInkStrokes())
+            {
+                stroke.Selected = true;
+            }
+            foreach (var s in animation.inkStrokes)
             {
                 if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(s))
                 {
@@ -836,15 +843,7 @@ namespace Protocol2
     
             // want something here so we reset the location of ink to where it should start from
             // MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
-
-            foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
-            {
-                stroke.Selected = false;
-            }
-            foreach (var stroke in animation.GetInkStrokes())
-            {
-                stroke.Selected = true;
-            }
+            
             var i = -1;
             foreach (Point pt in animation.GetPolyline().Points)
             {
@@ -852,7 +851,7 @@ namespace Protocol2
                 Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
                 var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
                 delta = pt;
-                await Task.Delay(TimeSpan.FromSeconds(animation.getInterval()));
+                await Task.Delay(TimeSpan.FromSeconds(0.001));
                 i++;
 
             }
@@ -869,7 +868,7 @@ namespace Protocol2
 
         private async void Replay(object sender, RoutedEventArgs e)
         {
-            TextBlock b = sender as TextBlock;
+            Button b = sender as Button;
             
             Animation a = b.DataContext as Animation;
             int index = a.id;

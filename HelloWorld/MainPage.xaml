@@ -15,9 +15,13 @@
                 <ListView x:Name="Animationlist" CanReorderItems="True" AllowDrop="True" CanDragItems="True">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Grid>
-                                <TextBlock Text="{Binding name}" Tapped="Replay"/>
-                            </Grid>
+                            <StackPanel>
+                                <TextBlock Text="{Binding name}"/>
+                                <Button Content="Play" Click="Replay"></Button>
+                                <Button Content="Settings" Click="Replay"></Button>
+                                <Button Content="Delete" Click="Replay"></Button>
+                            </StackPanel>
+                            
                         </DataTemplate>
                     </ListView.ItemTemplate>
                     
