@@ -21,6 +21,7 @@ using Windows.UI.Core;
 using System.Threading.Tasks;
 using System.Numerics;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -94,7 +95,7 @@ namespace Protocol2
             inkToolbar.ActiveToolChanged += InkToolbar_ActiveToolChanged;
             SetUpStickyNotes();
             stickyColor = Colors.Goldenrod;
-            toolButtonComment.Foreground = new SolidColorBrush(stickyColor);
+            toolButtonCommentGlyph.Foreground = new SolidColorBrush(stickyColor);
 
             //inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
         }
@@ -148,7 +149,7 @@ namespace Protocol2
         {
             var ellipse = sender as Ellipse;
             stickyColor = (ellipse.Fill as SolidColorBrush).Color;
-            toolButtonComment.Foreground = new SolidColorBrush(stickyColor);
+            toolButtonCommentGlyph.Foreground = new SolidColorBrush(stickyColor);
             StickyFlyout.Hide();
         }
 
@@ -560,7 +561,6 @@ namespace Protocol2
                 selectedStrokesExist = false;
             }
 
-            Toggle_ActionBar();
         }
 
         //add context menu to selected strokes
@@ -616,7 +616,6 @@ namespace Protocol2
             }
             ClearDrawnBoundingRect();
             selectedStrokesExist = false;
-            Toggle_ActionBar();
         }
 
         private void ClearDrawnBoundingRect()
@@ -674,35 +673,7 @@ namespace Protocol2
             }
         }
 
-        private void ToolButton_Lasso(object sender, RoutedEventArgs e)
-        {
-
-            //ClearAllHandlers();
-
-            //inkCanvas.RightTapped += Click_Select;
-            ////for passing modified input to the app for custom processing
-            //inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
-
-            ////Listeners for unprocessed pointer events from the modified input
-            //inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += UnprocessedInput_PointerPressed;
-            //inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += UnprocessedInput_PointerMoved;
-            //inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += UnprocessedInput_PointerReleased;
-
-            ////Listeners for new ink or erase strokes so that selection could be cleared when inking or erasing is detected
-            //inkCanvas.InkPresenter.StrokeInput.StrokeStarted += StrokeInput_StrokeStarted;
-            //inkCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
-        }
-
-        private void ToolButton_Comment(object sender, RoutedEventArgs e)
-        {
-            ////for passing modified input to the app for custom processing
-
-            ////Remove listeners for unprocessed pointer events for selecting strokes
-            //ClearAllHandlers();
-
-            //inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
-            //inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
-        }
+       
 
         private void Combine_Strokes(object sender, RoutedEventArgs e)
         {
@@ -735,43 +706,14 @@ namespace Protocol2
             }
         }
 
-        private void Toggle_ActionBar()
-        {
-            this.combineStrokesButton.IsEnabled = selectedStrokesExist;
-            this.drawPathButton.IsEnabled = selectedStrokesExist;
-            if (selectedStrokesExist)
-            {
-                splitView.IsPaneOpen = true;
-            }
-            else
-            {
-                splitView.IsPaneOpen = false;
-            }
-        }
+
 
         private void Toggle_ActionBar_Pressed(Object sender, RoutedEventArgs e)
         {
-            this.combineStrokesButton.IsEnabled = selectedStrokesExist;
-            this.drawPathButton.IsEnabled = selectedStrokesExist;
             splitView.IsPaneOpen = !splitView.IsPaneOpen;
         }
 
-        private void Move_Selected_Mode(Object sender, RoutedEventArgs e)
-        {
-            var moveButton = new Button()
-            {
-                Content = "hi",
-                //FontFamily = new FontFamily("Segoe MDL2 Assets")
 
-                Width = 50,
-                Height = 50
-            };
-
-            Canvas.SetLeft(moveButton, boundingRect.X + boundingRect.Width/2 - 25);
-            Canvas.SetTop(moveButton, boundingRect.Y + boundingRect.Height/2 - 25);
-
-            selectionCanvas.Children.Add(moveButton);
-        }
         
         private void TestDrawPath(Object sender, RoutedEventArgs e)
         {
@@ -824,22 +766,16 @@ namespace Protocol2
 
                 inkToolbar.ActiveTool = currentTool;
                 inkToolbar.Children.Remove(animationPen);
-                selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
                 var container = inkCanvas.InkPresenter.StrokeContainer;
 
-                var delta = polyline.Points[0];
                 animations.Add(anime);
-                foreach (Point pt in anime.GetPolyline().Points)
-                {
-                    //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
-                    Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
-                    var r = container.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
-                    delta = pt;
-                    await Task.Delay(TimeSpan.FromSeconds(0.01));
-
-                }
 
                 canvas.Children.Remove(polyline); //maybe only show when flyout or something...
+
+                await Animate(anime);
+                selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
+
+                ClearSelection();
                 inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
                 inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
                 inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= moved;
@@ -864,45 +800,19 @@ namespace Protocol2
 
             inkCanvas.InkPresenter.StrokeContainer.CopySelectedToClipboard();
             boundingRect = inkCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(Canvas.GetLeft(boundingBox), Canvas.GetTop(boundingBox)));
-            //boundingRect.X += 25;
-            //boundingRect.Y -= 25;
+            boundingRect.X += 20;
+            boundingRect.Y -= 20;
             
             var strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-
-            foreach (var stroke in strokes)
-            {
-                inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
-            }
-
-            
-            //var numStrokesAfter = strokes.Count();
-
-            //if (numStrokesAfter - numStrokesBefore > 0)
-            //{
-            //    foreach (var stroke in strokes)
-            //    {
-            //        stroke.Selected = false;
-            //    }
-            //    for (int i = numStrokesBefore; i < numStrokesAfter; i++)
-            //    {
-            //        strokes[i].Selected = true;
-            //    }
-            //}
+            inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(20, -20));
 
             DrawBoundingRect();
-
-
-
         }
 
         private async Task Animate(Animation animation)
         {
-            var delta = animation.GetPolyline().Points[0];
-            canvas.Children.Add(animation.GetPolyline());
-
-            // want something here so we reset the location of ink to where it should start from
-            // MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
-
+            //TODO: Check if the inkstrokes of the animation still exists...
+            List<InkStroke> strokesToAnimate = new List<InkStroke>();
             foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
             {
                 stroke.Selected = false;
@@ -911,13 +821,39 @@ namespace Protocol2
             {
                 stroke.Selected = true;
             }
+            foreach (var s in animation.inkStrokes)
+            {
+                if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(s))
+                {
+                    strokesToAnimate.Add(s);
+                }
+            }
+
+            if (strokesToAnimate.Count == 0)
+            {
+                // we can delete this current animation entry
+                animations.GetAnimations().Remove(animation);
+                return;
+            }
+
+            var delta = animation.startPoint;
+            canvas.Children.Add(animation.GetPolyline());
+            Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
+
+
+            inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X  - (currentPosition.X + currentPosition.Width/2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+    
+            // want something here so we reset the location of ink to where it should start from
+            // MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
+            
+            var i = -1;
             foreach (Point pt in animation.GetPolyline().Points)
             {
                 //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
-                Debug.WriteLine("Stroke points: " + pt.X + " " + pt.Y);
                 var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
                 delta = pt;
-                await Task.Delay(TimeSpan.FromSeconds(0.01));
+                await Task.Delay(TimeSpan.FromSeconds(0.001));
+                i++;
 
             }
             canvas.Children.Remove(animation.GetPolyline());
@@ -925,7 +861,9 @@ namespace Protocol2
 
         private async void Animate_Test(object sender, RoutedEventArgs e)
         {
-            foreach (var animation in animations.GetAnimations()) 
+            // sort
+            
+            foreach (var animation in animations.GetAnimations().ToList()) 
             {
                 await Animate(animation);
             }
@@ -933,17 +871,38 @@ namespace Protocol2
 
         private async void Replay(object sender, RoutedEventArgs e)
         {
-            TextBlock b = sender as TextBlock;
+            Button b = sender as Button;
             
             Animation a = b.DataContext as Animation;
             int index = a.id;
             Debug.WriteLine("works:" + index);
-            var replayAnimation = animations.GetAnimations()[index]; // won't work once we start deleting
+            var replayAnimation = animations.Play(index); // won't work once we start deleting
 
-            await Animate(replayAnimation);
-
-
+            await Animate(replayAnimation); 
         }
+
+        private async void DeleteAnimation(object sender, RoutedEventArgs e)
+        {
+            Button b = sender as Button;
+
+            Animation a = b.DataContext as Animation;
+            int index = a.id;
+            Debug.WriteLine("works:" + index);
+            animations.RemoveAnimation(index);
+        }
+
+        private async void SettingsAnimation(object sender, RoutedEventArgs e)
+        {
+            Button b = sender as Button;
+
+            Animation a = b.DataContext as Animation;
+            int index = a.id;
+
+            Flyout f = new Flyout();
+            b.Flyout = f;
+        }
+
+
     }
 }
   
