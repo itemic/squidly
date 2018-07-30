@@ -46,7 +46,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <CommandBar x:Name="commandBar" RequestedTheme="Dark" DefaultLabelPosition="Right">
+                <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right">
                     <CommandBar.Content>
                         <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}">
                             <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" ToolTipService.ToolTip="Select Strokes"/>
@@ -78,8 +78,8 @@
                     <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
                     <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
                     <AppBarSeparator/>
-                    <AppBarToggleButton x:Name="AnimationToggle" Icon="SolidStar" Label="Animate" />
-                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
+                    <AppBarToggleButton x:Name="PathView" Icon="OutlineStar" Label="View Paths"  />
+                    <AppBarButton Icon="SolidStar" Label="Run Animations" Click="Animate_Test"/>
                 </CommandBar>
                 
                 <Grid Grid.Row="2">

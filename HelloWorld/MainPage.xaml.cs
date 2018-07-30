@@ -89,8 +89,8 @@ namespace Protocol2
 
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
 
-            AnimationToggle.Checked += AnimationToggleChecked;
-            AnimationToggle.Unchecked += AnimationToggleUnchecked;
+            PathView.Checked += AnimationToggleChecked;
+            PathView.Unchecked += AnimationToggleUnchecked;
             inkToolbar.Loading += InitializeInkToolbar;
             inkToolbar.ActiveToolChanged += InkToolbar_ActiveToolChanged;
             SetUpStickyNotes();
@@ -165,17 +165,20 @@ namespace Protocol2
 
         private void AnimationToggleChecked(object sender, RoutedEventArgs e)
         {
-            commandBar.RequestedTheme = ElementTheme.Light;
-            inkToolbar.Children.Remove(ballpoint);
-            inkToolbar.Children.Remove(eraser);
-            inkToolbar.ActiveTool = toolButtonLasso;
+            foreach (var animation in animations.GetAnimations())
+            {
+                var pline = animation.GetPolyline();
+                pline.Opacity = 0.3;
+            }
         }
 
         private void AnimationToggleUnchecked(object sender, RoutedEventArgs e)
         {
-            commandBar.RequestedTheme = ElementTheme.Dark;
-            inkToolbar.Children.Add(eraser);
-            inkToolbar.Children.Add(ballpoint);
+            foreach (var animation in animations.GetAnimations())
+            {
+                var pline = animation.GetPolyline();
+                pline.Opacity = 0;
+            }
 
         }
 
@@ -770,8 +773,9 @@ namespace Protocol2
 
                 animations.Add(anime);
 
-                canvas.Children.Remove(polyline); //maybe only show when flyout or something...
-
+                
+                //canvas.Children.Remove(polyline); //maybe only show when flyout or something...
+                
                 await Animate(anime);
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
 
@@ -837,7 +841,11 @@ namespace Protocol2
             }
 
             var delta = animation.startPoint;
-            canvas.Children.Add(animation.GetPolyline());
+
+                var pline = animation.GetPolyline();
+                pline.Opacity = 1;
+
+            //canvas.Children.Add(animation.GetPolyline());
             Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
 
 
@@ -856,7 +864,14 @@ namespace Protocol2
                 i++;
 
             }
-            canvas.Children.Remove(animation.GetPolyline());
+            if (PathView.IsChecked == true)
+            {
+                pline.Opacity = 0.3;
+
+            } else
+            {
+                pline.Opacity = 0;
+            }
         }
 
         private async void Animate_Test(object sender, RoutedEventArgs e)
