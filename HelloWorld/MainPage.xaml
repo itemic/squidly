@@ -6,6 +6,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
+    <Page.Resources>
+        <SolidColorBrush x:Key="animationWindowBackground" Color="#f4fafd"/>
+        <SolidColorBrush x:Key="animationBlockColor" Color="#323e53 "/>
+    </Page.Resources>
+    
     <SplitView x:Name="splitView" IsPaneOpen="False" DisplayMode="CompactInline" CompactPaneLength="50" OpenPaneLength="250" PanePlacement="Right">
         <SplitView.Pane>
             <StackPanel Background="LightGray">
@@ -29,10 +34,10 @@
                                     </Button>
                                 </StackPanel>
                             </StackPanel>
-                            
+
                         </DataTemplate>
                     </ListView.ItemTemplate>
-                    
+
                 </ListView>
 
             </StackPanel>
@@ -40,11 +45,12 @@
         <SplitView.Content>
             <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="4*"/>
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
 
-                <CommandBar x:Name="commandBar" RequestedTheme="Dark" DefaultLabelPosition="Right">
+                <CommandBar x:Name="commandBar" RequestedTheme="Dark" DefaultLabelPosition="Right" Grid.Row="0">
                     <CommandBar.Content>
                         <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}">
                             <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" ToolTipService.ToolTip="Select Strokes"/>
@@ -57,10 +63,10 @@
                                         <StackPanel VerticalAlignment="Center" Orientation="Vertical">
                                             <TextBlock Text="Sticky Note Color"/>
                                             <StackPanel x:Name="StickyNoteStack" Orientation="Horizontal">
-                                                
-                                                
+
+
                                             </StackPanel>
-                                            
+
                                         </StackPanel>
                                     </Flyout>
                                 </InkToolbarCustomToolButton.ContextFlyout>
@@ -79,23 +85,25 @@
                     <AppBarToggleButton x:Name="AnimationToggle" Icon="SolidStar" Label="Animate" />
                     <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
                 </CommandBar>
-                
-                <Grid Grid.Row="0">
+
+                <Grid Grid.Row="1">
                     <InkCanvas x:Name="inkCanvas"/>
                     <Canvas x:Name="canvas"/>
                     <Canvas x:Name="selectionCanvas"/>
                 </Grid>
-
-                <ScrollViewer Grid.Row="1" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
-                    <StackPanel>
-                        <Rectangle Fill="Gray" Height="70" Width="100" Margin="10,0,0,10" HorizontalAlignment="Left" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk"/>
-                        <Rectangle Fill="Gray" Height="70" Width="150" Margin="10,0,0,10" HorizontalAlignment="Left"/>
-
+                <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
+                    <StackPanel Background="{StaticResource animationWindowBackground}">
+                        <Canvas Height="">
+                            <Rectangle Fill="{StaticResource animationBlockColor}" Canvas.Left="0" Canvas.Top="0" Height="40" Width="100" Margin="10,0,0,0" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk"/>
+                            <Rectangle Fill="{StaticResource animationBlockColor}" Canvas.Left="0" Canvas.Top="40" Height="40" Width="150" Margin="10,10,0,0" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk"/>
+                            <Rectangle Fill="{StaticResource animationBlockColor}" Canvas.Left="0" Canvas.Top="90" Height="40" Width="150" Margin="10,10,0,10" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk"/>
+                            <Rectangle Fill="{StaticResource animationBlockColor}" Canvas.Left="0" Canvas.Top="140" Height="40" Width="150" Margin="10,10,0,10" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk"/>
+                            <Rectangle Fill="{StaticResource animationBlockColor}" Canvas.Left="0" Canvas.Top="190" Height="40" Width="150" Margin="10,10,0,10" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk"/>
+                        </Canvas>
                     </StackPanel>
-   
+
                 </ScrollViewer>
             </Grid>
         </SplitView.Content>
     </SplitView>
- 
 </Page>
