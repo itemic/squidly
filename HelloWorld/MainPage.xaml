@@ -40,10 +40,8 @@
         <SplitView.Content>
             <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="4*"/>
+                    <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
 
                 <CommandBar x:Name="commandBar" RequestedTheme="Dark" DefaultLabelPosition="Right">
@@ -82,11 +80,20 @@
                     <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
                 </CommandBar>
                 
-                <Grid Grid.Row="2">
+                <Grid Grid.Row="0">
                     <InkCanvas x:Name="inkCanvas"/>
                     <Canvas x:Name="canvas"/>
                     <Canvas x:Name="selectionCanvas"/>
                 </Grid>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
+                    <StackPanel>
+                        <Rectangle Fill="Gray" Height="70" Width="100" Margin="10,0,0,10" HorizontalAlignment="Left" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk"/>
+                        <Rectangle Fill="Gray" Height="70" Width="150" Margin="10,0,0,10" HorizontalAlignment="Left"/>
+
+                    </StackPanel>
+   
+                </ScrollViewer>
             </Grid>
         </SplitView.Content>
     </SplitView>

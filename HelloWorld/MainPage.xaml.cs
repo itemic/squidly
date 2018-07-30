@@ -902,6 +902,13 @@ namespace Protocol2
             b.Flyout = f;
         }
 
+        private void Drag_AnimationChunk(object sender, ManipulationDeltaRoutedEventArgs e)
+        {
+            var rectangle = (Rectangle)sender;
+            Canvas.SetLeft(rectangle, Canvas.GetLeft(rectangle) + e.Delta.Translation.X);
+            Canvas.SetTop(rectangle, Canvas.GetTop(rectangle) + e.Delta.Translation.Y);
+        }
+
 
     }
 }
