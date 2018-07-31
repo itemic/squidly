@@ -877,11 +877,34 @@ namespace Protocol2
         private async void Animate_Test(object sender, RoutedEventArgs e)
         {
             // sort
-            
-            foreach (var animation in animations.GetAnimations().ToList()) 
+            if (resetCheckbox.IsChecked == true)
             {
-                await Animate(animation);
+                var saveState = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+                List<InkStroke> earlyState = new List<InkStroke>();
+                foreach (var s in saveState)
+                {
+                    Debug.WriteLine("b: " + s.Clone().PointTransform.ToString());
+
+                }
+                foreach (var animation in animations.GetAnimations().ToList())
+                {
+                    await Animate(animation);
+                }
+                var current = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+                foreach (var s in current)
+                {
+                    Debug.WriteLine("b: " + s.PointTransform.ToString());
+
+                }
             }
+            else
+            {
+                foreach (var animation in animations.GetAnimations().ToList()) // can we remove this duplicate code?
+                {
+                    await Animate(animation);
+                }
+            }
+            
         }
 
         private async void Replay(object sender, RoutedEventArgs e)
