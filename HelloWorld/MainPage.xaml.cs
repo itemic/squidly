@@ -554,7 +554,7 @@ namespace Protocol2
                 Canvas.SetTop(rectangle, boundingRect.Y);
                 boundingBox = rectangle;
                 rectangle.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY;
-                rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Stroke);
+                rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Stroke); //TODO on release edit hte matrix3x2 so that new position is origin?
                 rectangle.PointerEntered += new PointerEventHandler(Cursor_In_BoundingBox);
                 rectangle.PointerExited += new PointerEventHandler(Cursor_Leave_BoundingBox);
 
@@ -597,6 +597,7 @@ namespace Protocol2
             
 
             inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(e.Delta.Translation.X, e.Delta.Translation.Y));
+            
         }
 
         private void Cursor_In_BoundingBox(object sender, PointerRoutedEventArgs e)
@@ -779,6 +780,8 @@ namespace Protocol2
                 await Animate(anime);
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
 
+
+                
                 ClearSelection();
                 inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
                 inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
@@ -837,6 +840,7 @@ namespace Protocol2
             {
                 // we can delete this current animation entry
                 animations.GetAnimations().Remove(animation);
+                canvas.Children.Remove(animation.GetPolyline());
                 return;
             }
 
@@ -893,7 +897,11 @@ namespace Protocol2
                 var current = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
                 foreach (var s in current)
                 {
-                    Debug.WriteLine("b: " + s.PointTransform.ToString());
+                    Debug.WriteLine("b2: " + s.PointTransform.ToString());
+                    Matrix3x2 pt = s.PointTransform;
+                    pt.M31 = pt.M31 * 0;
+                    pt.M32 = pt.M32 * 0;
+                    s.PointTransform = pt;
 
                 }
             }
@@ -910,13 +918,32 @@ namespace Protocol2
         private async void Replay(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
-            
+
             Animation a = b.DataContext as Animation;
             int index = a.id;
             Debug.WriteLine("works:" + index);
             var replayAnimation = animations.Play(index); // won't work once we start deleting
 
-            await Animate(replayAnimation); 
+            if (resetCheckbox.IsChecked == true)
+            {
+                await Animate(replayAnimation);
+                foreach (var s in replayAnimation.inkStrokes)
+                {
+                    // doesn't support moving afterwards but good start
+                    // TODO move to start of THIS stroke not the original
+                    Matrix3x2 pt = s.PointTransform;
+                    pt.M31 = 0;
+                    pt.M32 = 0;
+                    s.PointTransform = pt;
+                }
+
+
+            }
+            else
+            {
+                await Animate(replayAnimation);
+
+            }
         }
 
         private async void DeleteAnimation(object sender, RoutedEventArgs e)
