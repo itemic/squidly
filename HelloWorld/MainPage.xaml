@@ -16,20 +16,28 @@
                 <ListView x:Name="Animationlist" SelectionMode="None" IsItemClickEnabled="False" CanReorderItems="True" AllowDrop="True" CanDragItems="True">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Text="{Binding name}"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button Click="Replay">
-                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;"/>
-                                    </Button>
-                                    <Button Click="SettingsAnimation">
-                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
-                                    </Button>
-                                    <Button Click="DeleteAnimation">
-                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" Foreground="Crimson"/>
-                                    </Button>
+                            <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="=" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,10,0"/>
+                                <StackPanel Grid.Column="1" >
+                                    <TextBlock Text="{Binding name}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Click="Replay">
+                                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;"/>
+                                        </Button>
+                                        <Button Click="SettingsAnimation">
+                                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
+                                        </Button>
+                                        <Button Click="DeleteAnimation">
+                                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" Foreground="Crimson"/>
+                                        </Button>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
+                            </Grid>
+                           
                             
                         </DataTemplate>
                     </ListView.ItemTemplate>
