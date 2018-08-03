@@ -777,7 +777,7 @@ namespace Protocol2
                 
                 //canvas.Children.Remove(polyline); //maybe only show when flyout or something...
                 
-                await Animate(anime);
+                await Animate(anime, true);
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
 
 
@@ -816,7 +816,7 @@ namespace Protocol2
             DrawBoundingRect();
         }
 
-        private async Task Animate(Animation animation)
+        private async Task Animate(Animation animation, bool revert)
         {
             //TODO: Check if the inkstrokes of the animation still exists...
             List<InkStroke> strokesToAnimate = new List<InkStroke>();
@@ -868,6 +868,16 @@ namespace Protocol2
                 i++;
 
             }
+
+            if (revert)
+            {
+                currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+
+
+                inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+
+            }
+
             if (PathView.IsChecked == true)
             {
                 pline.Opacity = 0.3;
@@ -878,41 +888,86 @@ namespace Protocol2
             }
         }
 
+        
         private async void Animate_Test(object sender, RoutedEventArgs e)
         {
-            // sort
-            if (resetCheckbox.IsChecked == true)
-            {
-                var saveState = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-                List<InkStroke> earlyState = new List<InkStroke>();
-                foreach (var s in saveState)
+
+            List<Animation> allAnimations = animations.GetAnimations().ToList();
+            foreach (var animation in allAnimations) 
+            {    
+                List<InkStroke> strokesToAnimate = new List<InkStroke>();
+                foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
                 {
-                    Debug.WriteLine("b: " + s.Clone().PointTransform.ToString());
+                    stroke.Selected = false;
+                }
+                foreach (var stroke in animation.GetInkStrokes())
+                {
+                    stroke.Selected = true;
+                }
+                foreach (var s in animation.inkStrokes)
+                {
+                    if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(s))
+                    {
+                        strokesToAnimate.Add(s);
+                    }
+                }
+
+                if (strokesToAnimate.Count == 0)
+                {
+                    // we can delete this current animation entry
+                    animations.GetAnimations().Remove(animation);
+                    canvas.Children.Remove(animation.GetPolyline());
+                    return;
+                }
+
+                var delta = animation.startPoint;
+
+                var pline = animation.GetPolyline();
+                pline.Opacity = 1;
+
+                //canvas.Children.Add(animation.GetPolyline());
+                Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+
+
+                inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+
+                // want something here so we reset the location of ink to where it should start from
+                // MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
+
+                var i = -1;
+                foreach (Point pt in animation.GetPolyline().Points)
+                {
+                    //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
+                    var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
+                    delta = pt;
+                    await Task.Delay(TimeSpan.FromSeconds(0.001));
+                    i++;
 
                 }
-                foreach (var animation in animations.GetAnimations().ToList())
+
+                if (resetCheckbox.IsChecked == true)
                 {
-                    await Animate(animation);
-                }
-                var current = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-                foreach (var s in current)
-                {
-                    Debug.WriteLine("b2: " + s.PointTransform.ToString());
-                    Matrix3x2 pt = s.PointTransform;
-                    pt.M31 = pt.M31 * 0;
-                    pt.M32 = pt.M32 * 0;
-                    s.PointTransform = pt;
+                    currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+
+
+                    inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(allAnimations[0].startPoint.X - (currentPosition.X + currentPosition.Width / 2), allAnimations[0].startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
 
                 }
-            }
-            else
-            {
-                foreach (var animation in animations.GetAnimations().ToList()) // can we remove this duplicate code?
+
+                if (PathView.IsChecked == true)
                 {
-                    await Animate(animation);
+                    pline.Opacity = 0.3;
+
                 }
+                else
+                {
+                    pline.Opacity = 0;
+                }
+
+
+
             }
-            
+
         }
 
         private async void Replay(object sender, RoutedEventArgs e)
@@ -924,29 +979,12 @@ namespace Protocol2
             Debug.WriteLine("works:" + index);
             var replayAnimation = animations.Play(index); // won't work once we start deleting
 
-            if (resetCheckbox.IsChecked == true)
-            {
-                await Animate(replayAnimation);
-                foreach (var s in replayAnimation.inkStrokes)
-                {
-                    // doesn't support moving afterwards but good start
-                    // TODO move to start of THIS stroke not the original
-                    Matrix3x2 pt = s.PointTransform;
-                    pt.M31 = 0;
-                    pt.M32 = 0;
-                    s.PointTransform = pt;
-                }
-
-
-            }
-            else
-            {
-                await Animate(replayAnimation);
-
-            }
+             
+            await Animate(replayAnimation, resetCheckbox.IsChecked == true);
+               
         }
 
-        private async void DeleteAnimation(object sender, RoutedEventArgs e)
+        private  void DeleteAnimation(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
 
@@ -956,7 +994,7 @@ namespace Protocol2
             animations.RemoveAnimation(index);
         }
 
-        private async void SettingsAnimation(object sender, RoutedEventArgs e)
+        private  void SettingsAnimation(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
 
