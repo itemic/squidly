@@ -25,6 +25,8 @@ namespace Protocol2.Utils
         public Point endPoint { get; set; }
         private double time { get; set; }
 
+        public Rectangle animationRepresentation;
+
 
         public static int counter = 0; // temporary use
         public Animation()
@@ -62,6 +64,11 @@ namespace Protocol2.Utils
         public double getInterval()
         {
             return time / polyline.Points.Count();
+        }
+
+        public Rectangle getRepresentation()
+        {
+            return animationRepresentation;
         }
 
         

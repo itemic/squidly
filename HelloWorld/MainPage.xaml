@@ -43,11 +43,11 @@
             </StackPanel>
         </SplitView.Pane>
         <SplitView.Content>
-            <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+            <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="mainGrid">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="4*"/>
-                    <RowDefinition Height="1*"/>
+                    <RowDefinition x:Name="col3" Height="0"/>
                 </Grid.RowDefinitions>
 
                 <CommandBar x:Name="commandBar" RequestedTheme="Dark" DefaultLabelPosition="Right" Grid.Row="0">
@@ -82,7 +82,7 @@
                     <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
                     <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
                     <AppBarSeparator/>
-                    <AppBarToggleButton x:Name="AnimationToggle" Icon="SolidStar" Label="Animate" />
+                    <AppBarToggleButton x:Name="AnimationToggle" Icon="SolidStar" Label="Animation Mode" Click="Animation_Mode" />
                     <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
                 </CommandBar>
 
@@ -93,7 +93,7 @@
                 </Grid>
                 <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
                     <StackPanel Background="{StaticResource animationWindowBackground}">
-                        <Canvas Height="">
+                        <Canvas x:Name="animationViewer" Height="600">
                             <Rectangle Fill="{StaticResource animationBlockColor}" Canvas.Left="0" Canvas.Top="0" Height="40" Width="100" Margin="10,0,0,0" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk"/>
                             <Rectangle Fill="{StaticResource animationBlockColor}" Canvas.Left="0" Canvas.Top="40" Height="40" Width="150" Margin="10,10,0,0" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk"/>
                             <Rectangle Fill="{StaticResource animationBlockColor}" Canvas.Left="0" Canvas.Top="90" Height="40" Width="150" Margin="10,10,0,10" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk"/>

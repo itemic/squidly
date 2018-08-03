@@ -49,6 +49,7 @@ namespace Protocol2
         private Rectangle boundingBox;
         private bool isBoundRect;
         public bool selectedStrokesExist = false;
+        public bool isAnimationMode = false;
 
         private Random rng = new Random();
         public CommentModel comments;
@@ -907,6 +908,27 @@ namespace Protocol2
             var rectangle = (Rectangle)sender;
             Canvas.SetLeft(rectangle, Canvas.GetLeft(rectangle) + e.Delta.Translation.X);
             Canvas.SetTop(rectangle, Canvas.GetTop(rectangle) + e.Delta.Translation.Y);
+        }
+
+
+        private void Animation_Mode(object sender, RoutedEventArgs e)
+        {
+            isAnimationMode = !isAnimationMode;
+            if (isAnimationMode)
+            {
+                col3.Height = new GridLength(1, GridUnitType.Star);
+            } else
+            {
+                col3.Height = new GridLength(0);
+            }
+
+            ObservableCollection<Animation> animationList = animations.GetAnimations();
+            var height = animationViewer.Height;
+            foreach(var animation in animationList)
+            {
+                //need a cache to check if animation is already there
+                animationViewer.Children.Add(animation.getRepresentation());
+            }
         }
 
 
