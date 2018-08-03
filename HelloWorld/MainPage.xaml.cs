@@ -89,8 +89,8 @@ namespace Protocol2
 
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
 
-            AnimationToggle.Checked += AnimationToggleChecked;
-            AnimationToggle.Unchecked += AnimationToggleUnchecked;
+            PathView.Checked += AnimationToggleChecked;
+            PathView.Unchecked += AnimationToggleUnchecked;
             inkToolbar.Loading += InitializeInkToolbar;
             inkToolbar.ActiveToolChanged += InkToolbar_ActiveToolChanged;
             SetUpStickyNotes();
@@ -165,17 +165,20 @@ namespace Protocol2
 
         private void AnimationToggleChecked(object sender, RoutedEventArgs e)
         {
-            commandBar.RequestedTheme = ElementTheme.Light;
-            inkToolbar.Children.Remove(ballpoint);
-            inkToolbar.Children.Remove(eraser);
-            inkToolbar.ActiveTool = toolButtonLasso;
+            foreach (var animation in animations.GetAnimations())
+            {
+                var pline = animation.GetPolyline();
+                pline.Opacity = 0.3;
+            }
         }
 
         private void AnimationToggleUnchecked(object sender, RoutedEventArgs e)
         {
-            commandBar.RequestedTheme = ElementTheme.Dark;
-            inkToolbar.Children.Add(eraser);
-            inkToolbar.Children.Add(ballpoint);
+            foreach (var animation in animations.GetAnimations())
+            {
+                var pline = animation.GetPolyline();
+                pline.Opacity = 0;
+            }
 
         }
 
@@ -551,7 +554,7 @@ namespace Protocol2
                 Canvas.SetTop(rectangle, boundingRect.Y);
                 boundingBox = rectangle;
                 rectangle.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY;
-                rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Stroke);
+                rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Stroke); //TODO on release edit hte matrix3x2 so that new position is origin?
                 rectangle.PointerEntered += new PointerEventHandler(Cursor_In_BoundingBox);
                 rectangle.PointerExited += new PointerEventHandler(Cursor_Leave_BoundingBox);
 
@@ -594,6 +597,7 @@ namespace Protocol2
             
 
             inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(e.Delta.Translation.X, e.Delta.Translation.Y));
+            
         }
 
         private void Cursor_In_BoundingBox(object sender, PointerRoutedEventArgs e)
@@ -770,11 +774,14 @@ namespace Protocol2
 
                 animations.Add(anime);
 
-                canvas.Children.Remove(polyline); //maybe only show when flyout or something...
-
+                
+                //canvas.Children.Remove(polyline); //maybe only show when flyout or something...
+                
                 await Animate(anime);
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
 
+
+                
                 ClearSelection();
                 inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
                 inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
@@ -833,11 +840,16 @@ namespace Protocol2
             {
                 // we can delete this current animation entry
                 animations.GetAnimations().Remove(animation);
+                canvas.Children.Remove(animation.GetPolyline());
                 return;
             }
 
             var delta = animation.startPoint;
-            canvas.Children.Add(animation.GetPolyline());
+
+                var pline = animation.GetPolyline();
+                pline.Opacity = 1;
+
+            //canvas.Children.Add(animation.GetPolyline());
             Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
 
 
@@ -856,29 +868,82 @@ namespace Protocol2
                 i++;
 
             }
-            canvas.Children.Remove(animation.GetPolyline());
+            if (PathView.IsChecked == true)
+            {
+                pline.Opacity = 0.3;
+
+            } else
+            {
+                pline.Opacity = 0;
+            }
         }
 
         private async void Animate_Test(object sender, RoutedEventArgs e)
         {
             // sort
-            
-            foreach (var animation in animations.GetAnimations().ToList()) 
+            if (resetCheckbox.IsChecked == true)
             {
-                await Animate(animation);
+                var saveState = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+                List<InkStroke> earlyState = new List<InkStroke>();
+                foreach (var s in saveState)
+                {
+                    Debug.WriteLine("b: " + s.Clone().PointTransform.ToString());
+
+                }
+                foreach (var animation in animations.GetAnimations().ToList())
+                {
+                    await Animate(animation);
+                }
+                var current = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
+                foreach (var s in current)
+                {
+                    Debug.WriteLine("b2: " + s.PointTransform.ToString());
+                    Matrix3x2 pt = s.PointTransform;
+                    pt.M31 = pt.M31 * 0;
+                    pt.M32 = pt.M32 * 0;
+                    s.PointTransform = pt;
+
+                }
             }
+            else
+            {
+                foreach (var animation in animations.GetAnimations().ToList()) // can we remove this duplicate code?
+                {
+                    await Animate(animation);
+                }
+            }
+            
         }
 
         private async void Replay(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
-            
+
             Animation a = b.DataContext as Animation;
             int index = a.id;
             Debug.WriteLine("works:" + index);
             var replayAnimation = animations.Play(index); // won't work once we start deleting
 
-            await Animate(replayAnimation); 
+            if (resetCheckbox.IsChecked == true)
+            {
+                await Animate(replayAnimation);
+                foreach (var s in replayAnimation.inkStrokes)
+                {
+                    // doesn't support moving afterwards but good start
+                    // TODO move to start of THIS stroke not the original
+                    Matrix3x2 pt = s.PointTransform;
+                    pt.M31 = 0;
+                    pt.M32 = 0;
+                    s.PointTransform = pt;
+                }
+
+
+            }
+            else
+            {
+                await Animate(replayAnimation);
+
+            }
         }
 
         private async void DeleteAnimation(object sender, RoutedEventArgs e)

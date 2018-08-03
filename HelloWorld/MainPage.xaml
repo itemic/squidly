@@ -10,7 +10,8 @@
         <SplitView.Pane>
             <StackPanel Background="LightGray">
                 <Button x:Name="exitActionsPanel" Content="&#xE700;" FontFamily="Segoe MDL2 Assets" Width="50" Height="50" Background="Transparent" HorizontalAlignment="Right" Click="Toggle_ActionBar_Pressed"/>
-                <TextBlock Text="Animations" FontSize="30" FontWeight="SemiLight" Margin="0,30,0,30" />
+                <TextBlock Text="Animations" FontSize="24" FontWeight="SemiLight" Margin="15,0,0,0"/>
+                <CheckBox x:Name="resetCheckbox" Content="Reset position after animation" Margin="15,0,0,0"/>
 
                 <ListView x:Name="Animationlist" SelectionMode="None" IsItemClickEnabled="False" CanReorderItems="True" AllowDrop="True" CanDragItems="True">
                     <ListView.ItemTemplate>
@@ -46,7 +47,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <CommandBar x:Name="commandBar" RequestedTheme="Dark" DefaultLabelPosition="Right">
+                <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right">
                     <CommandBar.Content>
                         <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}">
                             <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" ToolTipService.ToolTip="Select Strokes"/>
@@ -78,8 +79,8 @@
                     <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
                     <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
                     <AppBarSeparator/>
-                    <AppBarToggleButton x:Name="AnimationToggle" Icon="SolidStar" Label="Animate" />
-                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
+                    <AppBarToggleButton x:Name="PathView" Icon="OutlineStar" Label="View Paths"  />
+                    <AppBarButton Icon="SolidStar" Label="Run Animations" Click="Animate_Test"/>
                 </CommandBar>
                 
                 <Grid Grid.Row="2">
