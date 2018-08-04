@@ -898,7 +898,7 @@ namespace Protocol2
 
             //canvas.Children.Add(animation.GetPolyline());
             Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
-
+            
 
             inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X  - (currentPosition.X + currentPosition.Width/2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
     
@@ -946,15 +946,9 @@ namespace Protocol2
                 foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
                 {
                     stroke.Selected = false;
-                    Debug.WriteLine("all stroke sid: " + stroke.Id);
                 }
-                //foreach (var stroke in animation.GetInkStrokes())
-                //{
-                //    stroke.Selected = true;
-                //}
                 foreach (var strokeid in animation.inkStrokesIndex)
                 {
-                    Debug.WriteLine("SID: " + strokeid);
                     inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(strokeid).Selected = true;
                 }
                 foreach (var s in animation.inkStrokesIndex)
