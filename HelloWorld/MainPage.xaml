@@ -92,13 +92,13 @@
                     <Canvas x:Name="selectionCanvas"/>
                 </Grid>
                 <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
-                    <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False" CanReorderItems="True" AllowDrop="True" CanDragItems="True">
+                    <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Background="{StaticResource animationWindowBackground}">
                                     <Canvas>
                                         <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk">
-                                            <TextBlock Text="{Binding name}" Height="40" Width="150"/>
+                                            <TextBlock TextAlignment="Center" Text="{Binding name}" Height="40" Width="150"/>
                                         </Border>
                                     </Canvas>
                                 </StackPanel>
