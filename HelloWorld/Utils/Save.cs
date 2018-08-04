@@ -62,7 +62,7 @@ namespace Protocol2.Utils
             await CreateFolder("DefaultProject");
         }
 
-        public async Task SaveAll(InkCanvas inkCanvas, CommentModel comments)
+        public async Task SaveAll(InkCanvas inkCanvas, CommentModel comments, AnimationModel animations)
         {
             // save ink
             var inkFile = await projectFolder.CreateFileAsync("InkFile.gif", CreationCollisionOption.ReplaceExisting);
@@ -70,6 +70,26 @@ namespace Protocol2.Utils
             {
                 await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(streamX);
             }
+
+            // save animations
+            var animationsFile = await projectFolder.CreateFileAsync("animations.txt", CreationCollisionOption.ReplaceExisting);
+            var animationStream = await animationsFile.OpenAsync(FileAccessMode.ReadWrite);
+            using (var outputStream = animationStream.GetOutputStreamAt(0))
+            {
+                using (var dataWriter = new DataWriter(outputStream))
+                {
+                    foreach (Animation animation in animations.GetAnimations())
+                    {
+                        dataWriter.WriteString($"{Serialize(animation)}\n");
+                    }
+                    await dataWriter.StoreAsync();
+                    await outputStream.FlushAsync();
+                }
+            }
+
+            animationStream.Dispose();
+            
+
 
             // save comments
             var commentsFile = await projectFolder.CreateFileAsync("comments.txt", CreationCollisionOption.ReplaceExisting);
@@ -87,6 +107,7 @@ namespace Protocol2.Utils
                     await outputStream.FlushAsync();
                 }
             }
+
             stream.Dispose();
 
             var iterator = 0;
@@ -121,7 +142,7 @@ namespace Protocol2.Utils
             }
         }
 
-        public async Task LoadNew(InkCanvas inkCanvas, CommentModel commentModel)
+        public async Task LoadNew(InkCanvas inkCanvas, CommentModel commentModel, AnimationModel animationModel)
         {
             if (projectFolder != null)
             {
@@ -148,6 +169,19 @@ namespace Protocol2.Utils
                                 Comment c = Deserialize<Comment>(component);
                                 commentModel.Add(c);
                                 Debug.WriteLine(commentModel.GetComments().Count());
+                            }
+                        }
+                    } else if (file.Name.Equals("animations.txt"))
+                    {
+                        string text = await FileIO.ReadTextAsync(file);
+                        string[] components = text.Split('\n');
+                        foreach (string component in components)
+                        {
+                            if (component.Length > 0)
+                            {
+                                Animation a = Deserialize<Animation>(component);
+                                animationModel.Add(a);
+                                Debug.WriteLine(animationModel.GetAnimations().Count);
                             }
                         }
                     }
@@ -178,16 +212,17 @@ namespace Protocol2.Utils
             }
         }
 
-        public async Task LoadAll(InkCanvas inkCanvas, CommentModel commentModel)
+        public async Task LoadAll(InkCanvas inkCanvas, CommentModel commentModel, AnimationModel animationModel)
         {
             commentModel.GetComments().Clear();
+            animationModel.GetAnimations().Clear();
 
             var folderPicker = new FolderPicker();
             folderPicker.FileTypeFilter.Add("*");
 
             projectFolder = await folderPicker.PickSingleFolderAsync();
 
-            await LoadNew(inkCanvas, commentModel);
+            await LoadNew(inkCanvas, commentModel, animationModel);
             
         }
         
