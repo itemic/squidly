@@ -63,7 +63,8 @@ namespace Protocol2
         private InkToolbarBallpointPenButton ballpoint;
         private InkToolbarEraserButton eraser;
 
-
+        private double canvasWidth;
+        private double canvasHeight;
 
         public MainPage()
         {
@@ -100,6 +101,11 @@ namespace Protocol2
             //inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
         }
 
+        private void Canvas_Loaded(object sender, RoutedEventArgs e)
+        {
+            canvasWidth = canvas.ActualWidth;
+            canvasHeight = canvas.ActualHeight;
+        }
 
         private void SetUpStickyNotes()
         {
@@ -276,8 +282,26 @@ namespace Protocol2
         private void Drag_Comment(object sender, ManipulationDeltaRoutedEventArgs e)
         {
             var rectangle = (Rectangle)sender;
-            Canvas.SetLeft(rectangle, Canvas.GetLeft(rectangle) + e.Delta.Translation.X);
-            Canvas.SetTop(rectangle, Canvas.GetTop(rectangle) + e.Delta.Translation.Y);
+            var newLeft = Canvas.GetLeft(rectangle) + e.Delta.Translation.X;
+            var newTop = Canvas.GetTop(rectangle) + e.Delta.Translation.Y;
+            if (newLeft < 0)
+            {
+                newLeft = 0;
+            }
+            if (newTop < 0)
+            {
+                newTop = 0;
+            }
+            if (newLeft + rectangle.ActualWidth > canvasWidth)
+            {
+                newLeft = canvasWidth - rectangle.ActualWidth;
+            }
+            if (newTop + rectangle.ActualHeight > canvasHeight)
+            {
+                newTop = canvasHeight - rectangle.ActualHeight;
+            }
+            Canvas.SetLeft(rectangle, newLeft);
+            Canvas.SetTop(rectangle, newTop);
         }
 
         public void makeComment(double x, double y) 
@@ -592,12 +616,34 @@ namespace Protocol2
         private void Drag_Stroke(object sender, ManipulationDeltaRoutedEventArgs e)
         {
             var rectangle = (Rectangle)sender;
-            Canvas.SetLeft(rectangle, Canvas.GetLeft(rectangle) + e.Delta.Translation.X);
-            Canvas.SetTop(rectangle, Canvas.GetTop(rectangle) + e.Delta.Translation.Y);
-            
+            var newLeft = Canvas.GetLeft(rectangle) + e.Delta.Translation.X;
+            var newTop = Canvas.GetTop(rectangle) + e.Delta.Translation.Y;
+            var xTranslation = e.Delta.Translation.X;
+            var yTranslation = e.Delta.Translation.Y;
+            if (newLeft < 0)
+            {
+                newLeft = 0;
+                xTranslation = 0;
+            }
+            if (newTop < 0)
+            {
+                newTop = 0;
+                yTranslation = 0;
+            }
+            if (newLeft + rectangle.ActualWidth > canvasWidth)
+            {
+                newLeft = canvasWidth - rectangle.ActualWidth;
+                xTranslation = 0;
+            }
+            if (newTop + rectangle.ActualHeight > canvasHeight)
+            {
+                newTop = canvasHeight - rectangle.ActualHeight;
+                yTranslation = 0;
+            }
+            inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(xTranslation, yTranslation));
+            Canvas.SetLeft(rectangle, newLeft);
+            Canvas.SetTop(rectangle, newTop);
 
-            inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(e.Delta.Translation.X, e.Delta.Translation.Y));
-            
         }
 
         private void Cursor_In_BoundingBox(object sender, PointerRoutedEventArgs e)
