@@ -91,8 +91,8 @@ namespace Protocol2
 
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
 
-            AnimationToggle.Checked += AnimationToggleChecked;
-            AnimationToggle.Unchecked += AnimationToggleUnchecked;
+            AnimationMode.Checked += AnimationToggleChecked;
+            AnimationMode.Unchecked += AnimationToggleUnchecked;
             inkToolbar.Loading += InitializeInkToolbar;
             inkToolbar.ActiveToolChanged += InkToolbar_ActiveToolChanged;
             SetUpStickyNotes();
@@ -167,17 +167,20 @@ namespace Protocol2
 
         private void AnimationToggleChecked(object sender, RoutedEventArgs e)
         {
-            commandBar.RequestedTheme = ElementTheme.Light;
-            inkToolbar.Children.Remove(ballpoint);
-            inkToolbar.Children.Remove(eraser);
-            inkToolbar.ActiveTool = toolButtonLasso;
+            foreach (var animation in animations.GetAnimations())
+            {
+                var pline = animation.GetPolyline();
+                pline.Opacity = 0.3;
+            }
         }
 
         private void AnimationToggleUnchecked(object sender, RoutedEventArgs e)
         {
-            commandBar.RequestedTheme = ElementTheme.Dark;
-            inkToolbar.Children.Add(eraser);
-            inkToolbar.Children.Add(ballpoint);
+            foreach (var animation in animations.GetAnimations())
+            {
+                var pline = animation.GetPolyline();
+                pline.Opacity = 0;
+            }
 
         }
 
@@ -553,7 +556,7 @@ namespace Protocol2
                 Canvas.SetTop(rectangle, boundingRect.Y);
                 boundingBox = rectangle;
                 rectangle.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY;
-                rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Stroke);
+                rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Stroke); //TODO on release edit hte matrix3x2 so that new position is origin?
                 rectangle.PointerEntered += new PointerEventHandler(Cursor_In_BoundingBox);
                 rectangle.PointerExited += new PointerEventHandler(Cursor_Leave_BoundingBox);
 
@@ -596,6 +599,7 @@ namespace Protocol2
             
 
             inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(e.Delta.Translation.X, e.Delta.Translation.Y));
+            
         }
 
         private void Cursor_In_BoundingBox(object sender, PointerRoutedEventArgs e)
@@ -772,11 +776,14 @@ namespace Protocol2
 
                 animations.Add(anime);
 
-                canvas.Children.Remove(polyline); //maybe only show when flyout or something...
-
-                await Animate(anime);
+                
+                //canvas.Children.Remove(polyline); //maybe only show when flyout or something...
+                
+                await Animate(anime, true);
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
 
+
+                
                 ClearSelection();
                 inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
                 inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
@@ -811,7 +818,7 @@ namespace Protocol2
             DrawBoundingRect();
         }
 
-        private async Task Animate(Animation animation)
+        private async Task Animate(Animation animation, bool revert)
         {
             //TODO: Check if the inkstrokes of the animation still exists...
             List<InkStroke> strokesToAnimate = new List<InkStroke>();
@@ -835,11 +842,16 @@ namespace Protocol2
             {
                 // we can delete this current animation entry
                 animations.GetAnimations().Remove(animation);
+                canvas.Children.Remove(animation.GetPolyline());
                 return;
             }
 
             var delta = animation.startPoint;
-            canvas.Children.Add(animation.GetPolyline());
+
+                var pline = animation.GetPolyline();
+                pline.Opacity = 1;
+
+            //canvas.Children.Add(animation.GetPolyline());
             Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
 
 
@@ -858,42 +870,134 @@ namespace Protocol2
                 i++;
 
             }
-            canvas.Children.Remove(animation.GetPolyline());
+
+            if (revert)
+            {
+                currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+
+
+                inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+
+            }
+
+            if (AnimationMode.IsChecked == true)
+            {
+                pline.Opacity = 0.3;
+
+            } else
+            {
+                pline.Opacity = 0;
+            }
         }
 
+        
         private async void Animate_Test(object sender, RoutedEventArgs e)
         {
-            // sort
-            
-            foreach (var animation in animations.GetAnimations().ToList()) 
-            {
-                await Animate(animation);
+
+            List<Animation> allAnimations = animations.GetAnimations().ToList();
+            foreach (var animation in allAnimations) 
+            {    
+                List<InkStroke> strokesToAnimate = new List<InkStroke>();
+                foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+                {
+                    stroke.Selected = false;
+                }
+                foreach (var stroke in animation.GetInkStrokes())
+                {
+                    stroke.Selected = true;
+                }
+                foreach (var s in animation.inkStrokes)
+                {
+                    if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(s))
+                    {
+                        strokesToAnimate.Add(s);
+                    }
+                }
+
+                if (strokesToAnimate.Count == 0)
+                {
+                    // we can delete this current animation entry
+                    animations.GetAnimations().Remove(animation);
+                    canvas.Children.Remove(animation.GetPolyline());
+                    return;
+                }
+
+                var delta = animation.startPoint;
+
+                var pline = animation.GetPolyline();
+                pline.Opacity = 1;
+
+                //canvas.Children.Add(animation.GetPolyline());
+                Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+
+
+                inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+
+                // want something here so we reset the location of ink to where it should start from
+                // MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
+
+                var i = -1;
+                foreach (Point pt in animation.GetPolyline().Points)
+                {
+                    //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
+                    var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
+                    delta = pt;
+                    await Task.Delay(TimeSpan.FromSeconds(0.001));
+                    i++;
+
+                }
+
+                if (resetCheckbox.IsChecked == true)
+                {
+                    currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+
+
+                    inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(allAnimations[0].startPoint.X - (currentPosition.X + currentPosition.Width / 2), allAnimations[0].startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+
+                }
+
+                if (AnimationMode.IsChecked == true)
+                {
+                    pline.Opacity = 0.3;
+
+                }
+                else
+                {
+                    pline.Opacity = 0;
+                }
+
+
+
             }
+
         }
 
         private async void Replay(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
-            
+
             Animation a = b.DataContext as Animation;
             int index = a.id;
             Debug.WriteLine("works:" + index);
-            var replayAnimation = animations.Play(index); // won't work once we start deleting
+            var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
 
-            await Animate(replayAnimation); 
+             
+            await Animate(replayAnimation, resetCheckbox.IsChecked == true);
+               
         }
 
-        private async void DeleteAnimation(object sender, RoutedEventArgs e)
+        private  void DeleteAnimation(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
 
             Animation a = b.DataContext as Animation;
             int index = a.id;
             Debug.WriteLine("works:" + index);
+            canvas.Children.Remove(animations.GetAnimationAt(index).GetPolyline());
             animations.RemoveAnimation(index);
         }
 
-        private async void SettingsAnimation(object sender, RoutedEventArgs e)
+        private  void SettingsAnimation(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
 

@@ -15,26 +15,33 @@
         <SplitView.Pane>
             <StackPanel Background="LightGray">
                 <Button x:Name="exitActionsPanel" Content="&#xE700;" FontFamily="Segoe MDL2 Assets" Width="50" Height="50" Background="Transparent" HorizontalAlignment="Right" Click="Toggle_ActionBar_Pressed"/>
-                <TextBlock Text="Animations" FontSize="30" FontWeight="SemiLight" Margin="0,30,0,30" />
+                <TextBlock Text="Animations" FontSize="24" FontWeight="SemiLight" Margin="15,0,0,0"/>
+                <CheckBox x:Name="resetCheckbox" Content="Reset position after animation" Margin="15,0,0,0"/>
 
                 <ListView x:Name="Animationlist" SelectionMode="None" IsItemClickEnabled="False" CanReorderItems="True" AllowDrop="True" CanDragItems="True">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Text="{Binding name}"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button Click="Replay">
-                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;"/>
-                                    </Button>
-                                    <Button Click="SettingsAnimation">
-                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
-                                    </Button>
-                                    <Button Click="DeleteAnimation">
-                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" Foreground="Crimson"/>
-                                    </Button>
+                            <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="=" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,10,0"/>
+                                <StackPanel Grid.Column="1" >
+                                    <TextBlock Text="{Binding name}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Click="Replay">
+                                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;"/>
+                                        </Button>
+                                        <Button Click="SettingsAnimation" FontFamily="Segoe UI">
+                                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
+                                        </Button>
+                                        <Button Click="DeleteAnimation">
+                                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" Foreground="Crimson"/>
+                                        </Button>
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
-
+                            </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
 
@@ -82,8 +89,8 @@
                     <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
                     <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
                     <AppBarSeparator/>
-                    <AppBarToggleButton x:Name="AnimationToggle" Icon="SolidStar" Label="Animation Mode" Click="Animation_Mode" />
-                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
+                    <AppBarToggleButton x:Name="AnimationMode" Icon="SolidStar" Label="Animation Mode" Click="Animation_Mode" />
+                        <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
                 </CommandBar>
 
                 <Grid Grid.Row="1">

@@ -7,43 +7,73 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local1="using:Protocol2.Utils"
     mc:Ignorable="d" Margin="0,0,0,-4">
+    <Grid Margin="50,50,50,50">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="Protocol 2" Style="{StaticResource HeaderTextBlockStyle}"/>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0"  Margin="0,10,10,10" Click="NewProject">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <FontIcon Grid.Column="0" FontFamily="Segoe MDL2 Assets" FontSize="32" Glyph="&#xE7C3;" Margin="10,10,10,10" />
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="New Project" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <TextBlock Text="Create a new Protocol 2 prototype." Style="{StaticResource BodyTextBlockStyle}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    
+                </Grid>
+            </Button>
+            <Button Grid.Column="1"  Margin="0,10,10,10" Click="LoadClick">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <FontIcon Grid.Column="0" FontFamily="Segoe MDL2 Assets" FontSize="32" Glyph="&#xE8DA;" Margin="10,10,10,10" />
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Open Project" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <TextBlock Text="Open an existing Protocol 2 prototype." Style="{StaticResource BodyTextBlockStyle}" TextWrapping="Wrap"/>
+                    </StackPanel>
 
-    <Pivot x:Name="rootPivot" Title="Protocol 2">
-        <Pivot.RightHeader>
-            <CommandBar OverflowButtonVisibility="Collapsed" Background="Transparent">
-                <AppBarButton Icon="Add" Click="NewProject"/>
-                <AppBarButton Icon="OpenLocal" Click="LoadClick"/>
-            </CommandBar>
+                </Grid>
+            </Button>
+        </Grid>
+        <TextBlock Grid.Row="2" Text="Recents" Style="{StaticResource SubheaderTextBlockStyle}"/>
+        <GridView Grid.Row="3" ItemsSource="{x:Bind vm.Recents}" ItemClick="LoadItem" IsItemClickEnabled="True">
+            <GridView.ItemTemplate>
+                <DataTemplate x:DataType="local1:Recents">
 
-        </Pivot.RightHeader>
-        
-        
-        <PivotItem Header="Recents">
-            <GridView ItemsSource="{x:Bind vm.Recents}" ItemClick="LoadItem" IsItemClickEnabled="True">
-                <GridView.ItemTemplate>
-                    <DataTemplate x:DataType="local1:Recents">
-
-                        <StackPanel Height="280" Width="320" Margin="12">
-                            <Rectangle Height="180" Width="320" Fill="LightSteelBlue" Stretch="UniformToFill"/>
-                            <StackPanel Margin="0,12">
-                                <TextBlock Text="{x:Bind Name}"/>
-                                <TextBlock Text="{x:Bind Path}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"/>
-                            </StackPanel>
+                    <StackPanel Height="280" Width="320" Margin="0,12,12,12">
+                        <Rectangle Height="180" Width="320" Fill="LightSteelBlue" Stretch="UniformToFill"/>
+                        <StackPanel Margin="0,12">
+                            <TextBlock Text="{x:Bind Name}" Style="{StaticResource BodyTextBlockStyle}"/>
+                            <TextBlock Text="{x:Bind Path}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"/>
                         </StackPanel>
+                    </StackPanel>
 
 
-                      
-                    </DataTemplate>
-                </GridView.ItemTemplate>
 
-                <GridView.Items>
-                </GridView.Items>
+                </DataTemplate>
+            </GridView.ItemTemplate>
+
+            <GridView.Items>
+            </GridView.Items>
 
 
-            </GridView>
-        </PivotItem>
-        
-    </Pivot>
+        </GridView>
+    </Grid>
+    
 
 
 </Page>

@@ -103,7 +103,7 @@ namespace Protocol2.Utils
             animations = new ObservableCollection<Animation>(animations.OrderBy(x => x.id).ToList());
         }
 
-        public Animation Play(int id)
+        public Animation GetAnimationAt(int id)
         {
             Animation anim = animations.Single(x => x.id == id);
             return anim;
