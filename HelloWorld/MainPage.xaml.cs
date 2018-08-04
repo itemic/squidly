@@ -977,7 +977,7 @@ namespace Protocol2
             Animation a = b.DataContext as Animation;
             int index = a.id;
             Debug.WriteLine("works:" + index);
-            var replayAnimation = animations.Play(index); // won't work once we start deleting
+            var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
 
              
             await Animate(replayAnimation, resetCheckbox.IsChecked == true);
@@ -991,6 +991,7 @@ namespace Protocol2
             Animation a = b.DataContext as Animation;
             int index = a.id;
             Debug.WriteLine("works:" + index);
+            canvas.Children.Remove(animations.GetAnimationAt(index).GetPolyline());
             animations.RemoveAnimation(index);
         }
 
