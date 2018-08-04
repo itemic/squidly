@@ -340,7 +340,7 @@ namespace Protocol2
             
             }
      
-            await save.SaveAll(inkCanvas, comments);
+            await save.SaveAll(inkCanvas, comments, animations);
 
         }
 
@@ -351,7 +351,7 @@ namespace Protocol2
                 save = new Save();
             }
 
-            await save.LoadAll(inkCanvas, comments);
+            await save.LoadAll(inkCanvas, comments, animations);
             if (comments != null)
             {
                 canvas.Children.Clear(); // probably better way than this...
@@ -359,6 +359,24 @@ namespace Protocol2
                 foreach(Comment c in comments.GetComments())
                 {
                     DrawRectangle(c);
+                }
+                
+            }
+            if (animations != null)
+            {
+                foreach (Animation a in animations.GetAnimations())
+                {
+                    // recreate polyline!
+                    polyline = new Polyline()
+                    {
+                        Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
+                        StrokeThickness = 3,
+                        StrokeDashArray = new DoubleCollection() { 5, 2 },
+                    };
+                    polyline.Points = a.linePoints;
+                    polyline.Opacity = PathView.IsChecked == true ? 0.3 : 0;
+                    a.SetPolyline(polyline);
+                    canvas.Children.Add(polyline);
                 }
             }
         }
@@ -369,16 +387,6 @@ namespace Protocol2
         {
             // clear the stack if a new stroke has been added
             undoStack.Clear();
-        }
-
-        private void saveInk_ClickAsync(object sender, RoutedEventArgs e)
-        {
-           // Save.SaveInk(inkCanvas);
-        }
-
-        private void loadInk_ClickAsync(object sender, RoutedEventArgs e)
-        {
-            //Save.LoadInk(inkCanvas);
         }
 
       
@@ -426,7 +434,7 @@ namespace Protocol2
                     save = new Save();
                 }
 
-                await save.LoadAll(inkCanvas, comments);
+                await save.LoadAll(inkCanvas, comments, animations);
                 if (comments != null)
                 {
                     canvas.Children.Clear(); // probably better way than this...
@@ -436,11 +444,28 @@ namespace Protocol2
                         DrawRectangle(c);
                     }
                 }
+                if (animations != null)
+                {
+                    foreach (Animation a in animations.GetAnimations())
+                    {
+                        // recreate polyline!
+                        polyline = new Polyline()
+                        {
+                            Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
+                            StrokeThickness = 3,
+                            StrokeDashArray = new DoubleCollection() { 5, 2 },
+                        };
+                        polyline.Points = a.linePoints;
+                        polyline.Opacity = PathView.IsChecked == true ? 0.3 : 0;
+                        a.SetPolyline(polyline);
+                        canvas.Children.Add(polyline);
+                    }
+                }
             }
             else if (e.Parameter is Save)
             {
                 save = e.Parameter as Save;
-                await save.LoadNew(inkCanvas, comments);
+                await save.LoadNew(inkCanvas, comments, animations);
                 if (comments != null)
                 {
                     canvas.Children.Clear(); // probably better way than this...
@@ -448,6 +473,23 @@ namespace Protocol2
                     foreach (Comment c in comments.GetComments())
                     {
                         DrawRectangle(c);
+                    }
+                }
+                if (animations != null)
+                {
+                    foreach (Animation a in animations.GetAnimations())
+                    {
+                        // recreate polyline!
+                        polyline = new Polyline()
+                        {
+                            Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
+                            StrokeThickness = 3,
+                            StrokeDashArray = new DoubleCollection() { 5, 2 },
+                        };
+                        polyline.Points = a.linePoints;
+                        polyline.Opacity = PathView.IsChecked == true ? 0.3 : 0;
+                        a.SetPolyline(polyline);
+                        canvas.Children.Add(polyline);
                     }
                 }
             }
@@ -810,6 +852,7 @@ namespace Protocol2
                     if (stroke.Selected)
                     {
                         anime.GetInkStrokes().Add(stroke);
+                        anime.inkStrokesIndex.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ToList().IndexOf(stroke));
                     }
                 }
                 anime.SetPolyline(polyline);
@@ -870,15 +913,19 @@ namespace Protocol2
             {
                 stroke.Selected = false;
             }
-            foreach (var stroke in animation.GetInkStrokes())
+            //foreach (var stroke in animation.GetInkStrokes())
+            //{
+            //    stroke.Selected = true;
+            //}
+            foreach (var strokeid in animation.inkStrokesIndex)
             {
-                stroke.Selected = true;
+                inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(strokeid).Selected = true;
             }
-            foreach (var s in animation.inkStrokes)
+            foreach (var s in animation.inkStrokesIndex)
             {
-                if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(s))
+                if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s)))
                 {
-                    strokesToAnimate.Add(s);
+                    strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s));
                 }
             }
 
@@ -897,7 +944,7 @@ namespace Protocol2
 
             //canvas.Children.Add(animation.GetPolyline());
             Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
-
+            
 
             inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X  - (currentPosition.X + currentPosition.Width/2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
     
@@ -946,15 +993,15 @@ namespace Protocol2
                 {
                     stroke.Selected = false;
                 }
-                foreach (var stroke in animation.GetInkStrokes())
+                foreach (var strokeid in animation.inkStrokesIndex)
                 {
-                    stroke.Selected = true;
+                    inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(strokeid).Selected = true;
                 }
-                foreach (var s in animation.inkStrokes)
+                foreach (var s in animation.inkStrokesIndex)
                 {
-                    if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(s))
+                    if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s)))
                     {
-                        strokesToAnimate.Add(s);
+                        strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s));
                     }
                 }
 

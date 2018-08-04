@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -13,23 +14,36 @@ using Windows.UI.Xaml.Shapes;
 
 namespace Protocol2.Utils
 {
-
+    [DataContract]
     public class Animation
     {
         // public is only temporary!
         public List<InkStroke> inkStrokes { get; set; }
+
+        [DataMember]
+        public List<int> inkStrokesIndex { get; set; }
+
         public Polyline polyline { get; set; }
+        [DataMember]
         public string name { get; set; }
+        [DataMember]
         public int id { get; set; }
+        [DataMember]
         public Point startPoint {get; set;}
+        [DataMember]
         public Point endPoint { get; set; }
+        [DataMember]
         private double time { get; set; }
+        [DataMember]
+        public PointCollection linePoints { get; set; }
 
 
+        [DataMember]
         public static int counter = 0; // temporary use
         public Animation()
         {
             inkStrokes = new List<InkStroke>();
+            inkStrokesIndex = new List<int>();
             name = "Animation " + counter;
             id = counter;
             counter++;
@@ -51,6 +65,7 @@ namespace Protocol2.Utils
             polyline = p;
             startPoint = p.Points[0];
             endPoint = p.Points[p.Points.Count - 1];
+            linePoints = p.Points;
             
         }
 
