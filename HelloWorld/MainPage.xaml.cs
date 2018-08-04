@@ -87,6 +87,7 @@ namespace Protocol2
             comments = new CommentModel();
             animations = new AnimationModel();
             Animationlist.ItemsSource = animations.GetAnimations();
+            AnimationRepresentation.ItemsSource = animations.GetAnimations();
 
             inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
 
@@ -905,9 +906,9 @@ namespace Protocol2
 
         private void Drag_AnimationChunk(object sender, ManipulationDeltaRoutedEventArgs e)
         {
-            var rectangle = (Rectangle)sender;
-            Canvas.SetLeft(rectangle, Canvas.GetLeft(rectangle) + e.Delta.Translation.X);
-            Canvas.SetTop(rectangle, Canvas.GetTop(rectangle) + e.Delta.Translation.Y);
+            var textblock = (Border)sender;
+            Canvas.SetLeft(textblock, Canvas.GetLeft(textblock) + e.Delta.Translation.X);
+            Canvas.SetTop(textblock, Canvas.GetTop(textblock) + e.Delta.Translation.Y);
         }
 
 
@@ -920,14 +921,6 @@ namespace Protocol2
             } else
             {
                 col3.Height = new GridLength(0);
-            }
-
-            ObservableCollection<Animation> animationList = animations.GetAnimations();
-            var height = animationViewer.Height;
-            foreach(var animation in animationList)
-            {
-                //need a cache to check if animation is already there
-                animationViewer.Children.Add(animation.getRepresentation());
             }
         }
 
