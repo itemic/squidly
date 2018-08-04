@@ -1104,8 +1104,20 @@ namespace Protocol2
         private void Drag_AnimationChunk(object sender, ManipulationDeltaRoutedEventArgs e)
         {
             var textblock = (Border)sender;
-            Canvas.SetLeft(textblock, Canvas.GetLeft(textblock) + e.Delta.Translation.X);
-            Canvas.SetTop(textblock, Canvas.GetTop(textblock) + e.Delta.Translation.Y);
+            var newLeft = Canvas.GetLeft(textblock) + e.Delta.Translation.X;
+            var newTop = Canvas.GetTop(textblock) + e.Delta.Translation.Y;
+
+            if (newLeft < 0)
+            {
+                newLeft = 0;
+            }
+            if (newLeft + textblock.ActualWidth > canvasWidth - 40)
+            {
+                newLeft = canvasWidth - textblock.ActualWidth - 40;
+            }
+
+            Canvas.SetLeft(textblock, newLeft);
+            Canvas.SetTop(textblock, newTop);
         }
 
 
