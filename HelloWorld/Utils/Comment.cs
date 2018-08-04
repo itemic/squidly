@@ -41,37 +41,7 @@ namespace Protocol2.Utils
 
     }
 
-    public class CommentUtils
-    {
-        private static List<Color> colorArray = new List<Color> {
-            Colors.Goldenrod,
-            Colors.LightSkyBlue,
-            Colors.Plum,
-            Colors.PaleGreen};
-
-        private static Random rng = new Random();
-
-        public static Comment CreateComment(double x, double y, Color color)
-        {
-            Comment comment = new Comment();
-
-            comment.width = 25;
-            comment.height = 25;
-            comment.left = x - 12.5;
-            comment.top = y - 12.5;
-            comment.fill = color;
-            comment.angle = -30 + rng.Next(60);
-            comment.opacity = 0.8;
-
-            return comment;
-        }
-
-        public static Comment CreateComment(double x, double y)
-        {
-
-            return CreateComment(x, y, colorArray[(rng.Next(0, colorArray.Count))]);
-        }
-    }
+   
 
 
 }

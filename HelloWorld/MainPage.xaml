@@ -95,7 +95,7 @@
 
                 <Grid Grid.Row="1">
                     <InkCanvas x:Name="inkCanvas"/>
-                    <Canvas x:Name="canvas"/>
+                    <Canvas x:Name="canvas" Loaded="Canvas_Loaded"/>
                     <Canvas x:Name="selectionCanvas"/>
                 </Grid>
                 <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
