@@ -376,7 +376,7 @@ namespace Protocol2
                         StrokeDashArray = new DoubleCollection() { 5, 2 },
                     };
                     polyline.Points = a.linePoints;
-                    polyline.Opacity = PathView.IsChecked == true ? 0.3 : 0;
+                    polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
                     a.SetPolyline(polyline);
                     canvas.Children.Add(polyline);
                 }
@@ -458,7 +458,7 @@ namespace Protocol2
                             StrokeDashArray = new DoubleCollection() { 5, 2 },
                         };
                         polyline.Points = a.linePoints;
-                        polyline.Opacity = PathView.IsChecked == true ? 0.3 : 0;
+                        polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
                         a.SetPolyline(polyline);
                         canvas.Children.Add(polyline);
                     }
@@ -489,7 +489,7 @@ namespace Protocol2
                             StrokeDashArray = new DoubleCollection() { 5, 2 },
                         };
                         polyline.Points = a.linePoints;
-                        polyline.Opacity = PathView.IsChecked == true ? 0.3 : 0;
+                        polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
                         a.SetPolyline(polyline);
                         canvas.Children.Add(polyline);
                     }
