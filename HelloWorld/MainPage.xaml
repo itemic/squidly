@@ -79,13 +79,10 @@
                         </InkToolbar>
                     </CommandBar.Content>
 
-                    <AppBarButton Icon="Save" Label="Save" Click="saveAll"/>
-                    <AppBarButton Icon="OpenFile" Label="Load" Click="loadAll"/>
+                    <AppBarButton Icon="Save" Label="Save" Click="SaveAll"/>
+                    <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
                     <AppBarSeparator/>
-                    <AppBarButton Icon="Back" Label="Back" Click="backToMenu"/>
-                    <AppBarSeparator/>
-                    <AppBarButton Icon="Undo" Label="Undo" Click="Undo_Click"/>
-                    <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
+                    <AppBarButton Icon="Home" Label="Back" Click="BackToMenu"/>
                     <AppBarSeparator/>
                     <AppBarToggleButton x:Name="PathView" Icon="OutlineStar" Label="View Paths"  />
                     <AppBarButton Icon="SolidStar" Label="Run Animations" Click="Animate_Test"/>

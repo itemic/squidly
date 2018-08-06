@@ -33,7 +33,6 @@ namespace Protocol2
     public sealed partial class MainPage : Page
     {
   
-        private Stack<InkStroke> undoStack { get; set; }
         public Polyline polyline;
 
         private Color stickyColor;
@@ -79,16 +78,10 @@ namespace Protocol2
                 // Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
-            //Multiple pen input, breaks undo!
-            //inkCanvas.InkPresenter.ActivateCustomDrying();
-            //inkCanvas.InkPresenter.SetPredefinedConfiguration(InkPresenterPredefinedConfiguration.SimpleMultiplePointer);
-
-            undoStack = new Stack<InkStroke>();
             comments = new CommentModel();
             animations = new AnimationModel();
             Animationlist.ItemsSource = animations.GetAnimations();
 
-            inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
 
             PathView.Checked += AnimationToggleChecked;
             PathView.Unchecked += AnimationToggleUnchecked;
@@ -97,8 +90,6 @@ namespace Protocol2
             SetUpStickyNotes();
             stickyColor = Colors.Goldenrod;
             toolButtonCommentGlyph.Foreground = new SolidColorBrush(stickyColor);
-
-            //inkCanvas.RightTapped += new RightTappedEventHandler(CreatePopup);
         }
 
         private void Canvas_Loaded(object sender, RoutedEventArgs e)
@@ -188,14 +179,11 @@ namespace Protocol2
 
         }
 
-        private async void CreatePopup(object sender, RightTappedRoutedEventArgs e)
+        private void CreatePopup(object sender, RightTappedRoutedEventArgs e)
         {
             Point point = e.GetPosition(inkCanvas);
-
-
-            inkCanvas.InkPresenter.StrokeInput.StrokeEnded += ClearStack;
             
-            // enable adding comments with right click (how in hub??)
+            // enable adding comments with right click
             inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
 
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
@@ -207,17 +195,15 @@ namespace Protocol2
 
         public Rectangle DrawRectangle(Comment comment)
         {
-            Rectangle rectangle = new Rectangle();
-            rectangle.Fill = new SolidColorBrush(comment.fill);
-            rectangle.Width = comment.width;
-            rectangle.Height = comment.height;
-            rectangle.Opacity = comment.opacity;
+            Rectangle rectangle = new Rectangle {
+                Fill = new SolidColorBrush(comment.fill),
+                Width = comment.width,
+                Height = comment.height,
+                Opacity = comment.opacity,
+                RenderTransform = new RotateTransform { Angle = comment.angle }
+            };
             Canvas.SetLeft(rectangle, comment.left);
             Canvas.SetTop(rectangle, comment.top);
-
-            var rotation = new RotateTransform();
-            rotation.Angle = comment.angle;
-            rectangle.RenderTransform = rotation;
 
             // Add flyout
             var flyout = new Flyout();
@@ -229,21 +215,24 @@ namespace Protocol2
             // Add delete button
             Button deleteButton = new Button();
             deleteButton.Content = new SymbolIcon(Symbol.Delete);
-            deleteButton.Click += async delegate (object e, RoutedEventArgs evt)
+            deleteButton.Click += delegate (object e, RoutedEventArgs evt)
             {
                 canvas.Children.Remove(rectangle);
                 comments.Remove(comment);
             };
 
             // Add canvas
-            InkCanvas flyoutInkCanvas = new InkCanvas();
-            flyoutInkCanvas.Width = 250;
-            flyoutInkCanvas.Height = 250;
+            InkCanvas flyoutInkCanvas = new InkCanvas
+            {
+                Width = 250,
+                Height = 250
+            };
             flyoutInkCanvas.InkPresenter.InputDeviceTypes = 
               Windows.UI.Core.CoreInputDeviceTypes.Mouse |
               Windows.UI.Core.CoreInputDeviceTypes.Touch |
               Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
+            // Set up stroke container for serialization
             if (comment.ic != null)
             {
                 flyoutInkCanvas.InkPresenter.StrokeContainer = comment.ic;
@@ -268,7 +257,7 @@ namespace Protocol2
 
             // Additional settings
             flyout.Content = stackPanel;
-            flyout.LightDismissOverlayMode = LightDismissOverlayMode.On;
+            //flyout.LightDismissOverlayMode = LightDismissOverlayMode.On;
             rectangle.ContextFlyout = flyout;
 
             // settings for dragging comments 
@@ -304,7 +293,7 @@ namespace Protocol2
             Canvas.SetTop(rectangle, newTop);
         }
 
-        public void makeComment(double x, double y) 
+        public void MakeComment(double x, double y) 
         {
             
             var newComment = comments.CreateComment(x, y, stickyColor);
@@ -317,20 +306,20 @@ namespace Protocol2
         private void TouchMakePopup(object sender, RightTappedRoutedEventArgs args)
         {
             Point point = args.GetPosition(inkCanvas);
-            makeComment(point.X, point.Y);
+            MakeComment(point.X, point.Y);
 
             
         }
 
-        private void OtherMakePopup(InkUnprocessedInput sender, Windows.UI.Core.PointerEventArgs args)
+        private void OtherMakePopup(InkUnprocessedInput sender, PointerEventArgs args)
         {
             PointerPoint point = args.CurrentPoint;
 
-            makeComment(point.Position.X, point.Position.Y);
+            MakeComment(point.Position.X, point.Position.Y);
         }
 
 
-        public async void saveAll(object sender, RoutedEventArgs e)
+        public async void SaveAll(object sender, RoutedEventArgs e)
         {
             if (save == null)
             {
@@ -344,7 +333,7 @@ namespace Protocol2
 
         }
 
-        public async void loadAll(object sender, RoutedEventArgs e)
+        public async void LoadAll(object sender, RoutedEventArgs e)
         {
             if (save == null)
             {
@@ -383,45 +372,11 @@ namespace Protocol2
 
 
 
-        private void ClearStack(InkStrokeInput sender, Windows.UI.Core.PointerEventArgs args)
-        {
-            // clear the stack if a new stroke has been added
-            undoStack.Clear();
-        }
 
-      
 
-        private void backToMenu(object sender, RoutedEventArgs e)
+        private void BackToMenu(object sender, RoutedEventArgs e)
         {
             this.Frame.Navigate(typeof(Home));
-        }
-
-        private void Undo_Click(object sender, RoutedEventArgs e)
-        {
-            //Source: http://edi.wang/post/2017/7/25/uwp-ink-undo-redo
-            IReadOnlyList<InkStroke> strokes = inkCanvas.InkPresenter.StrokeContainer.GetStrokes();
-            if (strokes.Count > 0)
-            {
-                strokes[strokes.Count - 1].Selected = true;
-                undoStack.Push(strokes[strokes.Count - 1]);
-                inkCanvas.InkPresenter.StrokeContainer.DeleteSelected();
-            }
-
-        }
-
-        private void Redo_Click(object sender, RoutedEventArgs e)
-        {
-            if (undoStack.Count > 0)
-            {
-                var stroke = undoStack.Pop();
-
-                var strokeBuilder = new InkStrokeBuilder();
-                strokeBuilder.SetDefaultDrawingAttributes(stroke.DrawingAttributes);
-                System.Numerics.Matrix3x2 matrix = stroke.PointTransform;
-                IReadOnlyList<InkPoint> inkPoints = stroke.GetInkPoints();
-                InkStroke inkStroke = strokeBuilder.CreateStrokeFromInkPoints(inkPoints, matrix);
-                inkCanvas.InkPresenter.StrokeContainer.AddStroke(inkStroke);
-            }
         }
 
 
