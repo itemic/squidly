@@ -355,6 +355,12 @@ namespace Protocol2
             {
                 foreach (Animation a in animations.GetAnimations())
                 {
+
+                    for (int i = 0; i < a.inkStrokesId.Count; i++)
+                    {
+                        a.inkStrokesId[i] = inkCanvas.InkPresenter.StrokeContainer.GetStrokes()[a.inkStrokesIndex[i]].Id;
+                    }
+
                     // recreate polyline!
                     polyline = new Polyline()
                     {
@@ -403,6 +409,13 @@ namespace Protocol2
                 {
                     foreach (Animation a in animations.GetAnimations())
                     {
+                        for (int i = 0; i < a.inkStrokesId.Count; i++)
+                        {
+                            a.inkStrokesId[i] = inkCanvas.InkPresenter.StrokeContainer.GetStrokes()[a.inkStrokesIndex[i]].Id;
+                        }
+                        Debug.WriteLine("INKSTROKE IDS: " + string.Join(",", a.inkStrokesId.ToArray()));
+                        Debug.WriteLine("INKSTROKE IDX: " + string.Join(",", a.inkStrokesIndex.ToArray()));
+                        Debug.WriteLine("TOTAL STROKES: " + string.Join<InkStroke>(",", inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ToArray()));
                         // recreate polyline!
                         polyline = new Polyline()
                         {
@@ -434,6 +447,11 @@ namespace Protocol2
                 {
                     foreach (Animation a in animations.GetAnimations())
                     {
+
+                        for (int i = 0; i < a.inkStrokesId.Count; i++)
+                        {
+                            a.inkStrokesId[i] = inkCanvas.InkPresenter.StrokeContainer.GetStrokes()[a.inkStrokesIndex[i]].Id;
+                        }
                         // recreate polyline!
                         polyline = new Polyline()
                         {
@@ -806,7 +824,8 @@ namespace Protocol2
                 {
                     if (stroke.Selected)
                     {
-                        anime.GetInkStrokes().Add(stroke);
+                        anime.inkStrokes.Add(stroke);
+                        anime.inkStrokesId.Add(stroke.Id);
                         anime.inkStrokesIndex.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ToList().IndexOf(stroke));
                     }
                 }
@@ -872,16 +891,29 @@ namespace Protocol2
             //{
             //    stroke.Selected = true;
             //}
-            foreach (var strokeid in animation.inkStrokesIndex)
+            //foreach (var strokeid in animation.inkStrokesIndex)
+            //{
+            //    inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(strokeid).Selected = true;
+            //}
+            //foreach (var s in animation.inkStrokesIndex)
+            //{
+            //    if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s)))
+            //    {
+            //        strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s));
+            //    }
+            //}
+            foreach (var s in animation.inkStrokesId)
             {
-                inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(strokeid).Selected = true;
-            }
-            foreach (var s in animation.inkStrokesIndex)
-            {
-                if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s)))
+                // check if stroke still exists
+                var stroke = inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s);
+                if (stroke != null && inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(stroke))
                 {
-                    strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s));
+                    inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s).Selected = true;
+
+                    strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s));
                 }
+
+
             }
 
             if (strokesToAnimate.Count == 0)
@@ -942,22 +974,38 @@ namespace Protocol2
 
             List<Animation> allAnimations = animations.GetAnimations().ToList();
             foreach (var animation in allAnimations) 
-            {    
+            {
+                Debug.WriteLine("INKSTROKE IDS: " + string.Join(",", animation.inkStrokesId.ToArray()));
+                Debug.WriteLine("INKSTROKE IDX: " + string.Join(",", animation.inkStrokesIndex.ToArray()));
+                Debug.WriteLine("TOTAL STROKES: " + string.Join<InkStroke>(",", inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ToArray()));
                 List<InkStroke> strokesToAnimate = new List<InkStroke>();
                 foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
                 {
                     stroke.Selected = false;
                 }
-                foreach (var strokeid in animation.inkStrokesIndex)
+                //foreach (var strokeid in animation.inkStrokesIndex)
+                //{
+                //    inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(strokeid).Selected = true;
+                //}
+                //foreach (var s in animation.inkStrokesIndex)
+                //{
+                //    if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s)))
+                //    {
+                //        strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s));
+                //    }
+                //}
+                foreach (var s in animation.inkStrokesId)
                 {
-                    inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(strokeid).Selected = true;
-                }
-                foreach (var s in animation.inkStrokesIndex)
-                {
-                    if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s)))
+                    // check if stroke still exists
+                    var stroke = inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s);
+                    if (stroke != null && inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(stroke))
                     {
-                        strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s));
+                        inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s).Selected = true;
+
+                        strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s));
                     }
+
+      
                 }
 
                 if (strokesToAnimate.Count == 0)
@@ -965,7 +1013,7 @@ namespace Protocol2
                     // we can delete this current animation entry
                     animations.GetAnimations().Remove(animation);
                     canvas.Children.Remove(animation.GetPolyline());
-                    return;
+                    continue;
                 }
 
                 var delta = animation.startPoint;
