@@ -46,7 +46,7 @@ namespace Protocol2.Utils
                     this.recents.Add(new Recents() { Name = folder.Name, Path = folder.Path, Folder = folder});
 
                 }
-                catch (System.IO.FileNotFoundException fe)
+                catch (System.IO.FileNotFoundException)
                 {
                     
                     // do nothing?

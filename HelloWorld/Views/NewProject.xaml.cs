@@ -34,7 +34,7 @@ namespace Protocol2.Views
             this.InitializeComponent();
         }
 
-        private async void SaveButtonClick(object sender, RoutedEventArgs e)
+        private void SaveButtonClick(object sender, RoutedEventArgs e)
         {
             result = ContentDialogResult.Primary;
             if (!projectName.Text.Equals(""))

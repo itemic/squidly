@@ -70,7 +70,7 @@ namespace Protocol2
             
         }
 
-        private async void LoadItem(object sender, ItemClickEventArgs e)
+        private void LoadItem(object sender, ItemClickEventArgs e)
         {
             var clickedItem = e.ClickedItem as Recents;
 

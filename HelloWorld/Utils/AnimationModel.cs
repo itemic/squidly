@@ -23,6 +23,10 @@ namespace Protocol2.Utils
         [DataMember]
         public List<int> inkStrokesIndex { get; set; }
 
+        // this is going to be used until we save, at which point we will use the index
+        [DataMember]
+        public List<uint> inkStrokesId { get; set; }
+
         public Polyline polyline { get; set; }
         [DataMember]
         public string name { get; set; }
@@ -44,21 +48,20 @@ namespace Protocol2.Utils
         {
             inkStrokes = new List<InkStroke>();
             inkStrokesIndex = new List<int>();
+            inkStrokesId = new List<uint>();
             name = "Animation " + counter;
             id = counter;
             counter++;
             time = 1; //default animations are 2s
         }
 
+
         public Polyline GetPolyline()
         {
             return polyline;
         }
 
-        public List<InkStroke> GetInkStrokes()
-        {
-            return inkStrokes;
-        }
+       
 
         public void SetPolyline(Polyline p)
         {
@@ -69,15 +72,6 @@ namespace Protocol2.Utils
             
         }
 
-        public void setTime(double d)
-        {
-            time = d;
-        }
-
-        public double getInterval()
-        {
-            return time / polyline.Points.Count();
-        }
 
         
         
