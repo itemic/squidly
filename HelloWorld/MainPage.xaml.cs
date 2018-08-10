@@ -1134,6 +1134,27 @@ namespace Protocol2
         }
 
 
+        private void Rename_Animation(object sender, RoutedEventArgs e) 
+        {
+            Border animationChunk = sender as Border;
+            Animation a = animationChunk.DataContext as Animation;
+
+            int index = a.id;
+
+            var namedChanged = animations.GetAnimationAt(index);
+
+        }
+
+        private void Open_Rename_Dialog(object sender, RoutedEventArgs e)
+        {
+            ContentDialog renameDialog = new ContentDialog()
+            {
+                Title="Rename Animation",
+                Content=""
+            };
+        }
+
+
     }
 }
   
