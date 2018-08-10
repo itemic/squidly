@@ -10,7 +10,7 @@
         <SolidColorBrush x:Key="animationWindowBackground" Color="#f4fafd"/>
         <SolidColorBrush x:Key="animationBlockColor" Color="#323e53 "/>
     </Page.Resources>
-    
+
     <SplitView x:Name="splitView" IsPaneOpen="False" DisplayMode="CompactInline" CompactPaneLength="50" OpenPaneLength="250" PanePlacement="Right">
         <SplitView.Pane>
             <StackPanel Background="LightGray">
@@ -90,7 +90,7 @@
                     <AppBarButton Icon="Redo" Label="Redo" Click="Redo_Click"/>
                     <AppBarSeparator/>
                     <AppBarToggleButton x:Name="AnimationMode" Icon="SolidStar" Label="Animation Mode" Click="Animation_Mode" />
-                        <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
+                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
                 </CommandBar>
 
                 <Grid Grid.Row="1">
@@ -106,13 +106,17 @@
                                     <Canvas>
                                         <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk">
                                             <TextBlock TextAlignment="Center" Text="{Binding name}" Height="40" Width="150"/>
+                                            <Border.ContextFlyout>
+                                                <MenuFlyout>
+                                                    <MenuFlyoutItem Text="Rename" Click="Open_Rename_Dialog"/>
+                                                </MenuFlyout>
+                                            </Border.ContextFlyout>
                                         </Border>
                                     </Canvas>
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
-
                 </ScrollViewer>
             </Grid>
         </SplitView.Content>
