@@ -1147,19 +1147,19 @@ namespace Protocol2
 
         private async void Open_Rename_Dialog(object sender, RoutedEventArgs e)
         {
-            TextBox userInput = new TextBox()
-            {
-                PlaceholderText="Please enter new name here",
-            };
-            userInput.TextChanged += TextAdded;
-            ContentDialog renameDialog = new ContentDialog()
-            {
-                Title="Rename Animation",
-                Content=userInput,
-                PrimaryButtonText="Ok",
-                IsPrimaryButtonEnabled = false,
-                CloseButtonText="Cancel"
-            };
+            //TextBox userInput = new TextBox()
+            //{
+            //    PlaceholderText="Please enter new name here",
+            //};
+            //userInput.TextChanged += TextAdded;
+            //ContentDialog renameDialog = new ContentDialog()
+            //{
+            //    Title="Rename Animation",
+            //    Content=userInput,
+            //    PrimaryButtonText="Ok",
+            //    IsPrimaryButtonEnabled = false,
+            //    CloseButtonText="Cancel"
+            //};
 
             ContentDialogResult userAction = await renameDialog.ShowAsync();
 
@@ -1172,9 +1172,20 @@ namespace Protocol2
             }
         }
 
-        private void TextAdded(object sender, RoutedEventArgs e)
+        private void UserInputTextChanged(object sender, RoutedEventArgs e)
         {
+            TextBox renameTextbox = (TextBox)sender;
+            String userInput = renameTextbox.Text.Trim();
 
+            //more processing can go here, e.g. check if name exists
+
+            if (userInput.Length > 0)
+            {
+                renameDialog.IsPrimaryButtonEnabled = true;
+            } else
+            {
+                renameDialog.IsPrimaryButtonEnabled = false;
+            }
         }
 
     }

@@ -57,6 +57,7 @@
                     <RowDefinition x:Name="col3" Height="0"/>
                 </Grid.RowDefinitions>
 
+
                 <CommandBar x:Name="commandBar" RequestedTheme="Dark" DefaultLabelPosition="Right" Grid.Row="0">
                     <CommandBar.Content>
                         <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}">
@@ -118,6 +119,12 @@
                         </ListView.ItemTemplate>
                     </ListView>
                 </ScrollViewer>
+                <ContentDialog x:Name="renameDialog"
+                   Title="Rename animation"
+                   PrimaryButtonText="Ok" IsPrimaryButtonEnabled="False"
+                   CloseButtonText="Cancel">
+                    <TextBox PlaceholderText="Please enter new name here" TextChanged="UserInputTextChanged" Height="20"/>
+                </ContentDialog>
             </Grid>
         </SplitView.Content>
     </SplitView>
