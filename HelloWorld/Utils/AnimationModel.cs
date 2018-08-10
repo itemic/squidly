@@ -86,6 +86,16 @@ namespace Protocol2.Utils
             return animationRepresentation;
         }
 
+        public void setName(String newName)
+        {
+            name = newName;
+        }
+
+        public String getName()
+        {
+            return name;
+        }
+
         
         
     }

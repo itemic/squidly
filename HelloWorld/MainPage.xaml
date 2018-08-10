@@ -106,7 +106,9 @@
                                 <StackPanel Background="{StaticResource animationWindowBackground}">
                                     <Canvas>
                                         <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk">
-                                            <TextBlock TextAlignment="Center" Text="{Binding name}" Height="40" Width="150"/>
+                                            <TextBlock TextAlignment="Center" Text="{Binding name}" Height="40" Width="150">
+                                                
+                                            </TextBlock>
                                             <Border.ContextFlyout>
                                                 <MenuFlyout>
                                                     <MenuFlyoutItem Text="Rename" Click="Open_Rename_Dialog"/>
@@ -123,7 +125,7 @@
                    Title="Rename animation"
                    PrimaryButtonText="Ok" IsPrimaryButtonEnabled="False"
                    CloseButtonText="Cancel">
-                    <TextBox PlaceholderText="Please enter new name here" TextChanged="UserInputTextChanged" Height="20"/>
+                    <TextBox x:Name="renameUserInput" PlaceholderText="Please enter new name here" TextChanged="UserInputTextChanged" Height="20"/>
                 </ContentDialog>
             </Grid>
         </SplitView.Content>

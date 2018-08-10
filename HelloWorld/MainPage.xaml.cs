@@ -1067,11 +1067,10 @@ namespace Protocol2
 
         private async void Replay(object sender, RoutedEventArgs e)
         {
-            Button b = sender as Button;
-
+            FrameworkElement b = sender as FrameworkElement;
             Animation a = b.DataContext as Animation;
             int index = a.id;
-            Debug.WriteLine("works:" + index);
+            Debug.WriteLine("works:" + a);
             var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
 
              
@@ -1134,19 +1133,23 @@ namespace Protocol2
         }
 
 
-        private void Rename_Animation(object sender, RoutedEventArgs e) 
-        {
-            Border animationChunk = sender as Border;
-            Animation a = animationChunk.DataContext as Animation;
+        //private void Rename_Animation(object sender, RoutedEventArgs e) 
+        //{
+        //    Border animationChunk = sender as Border;
+        //    Animation a = animationChunk.DataContext as Animation;
 
-            int index = a.id;
+        //    int index = a.id;
 
-            var namedChanged = animations.GetAnimationAt(index);
+        //    var namedChanged = animations.GetAnimationAt(index);
 
-        }
+        //}
 
         private async void Open_Rename_Dialog(object sender, RoutedEventArgs e)
         {
+            FrameworkElement senderElement = sender as FrameworkElement;
+            Animation a = senderElement.DataContext as Animation;
+            int index = a.id;
+
             //TextBox userInput = new TextBox()
             //{
             //    PlaceholderText="Please enter new name here",
@@ -1165,9 +1168,9 @@ namespace Protocol2
 
             if (userAction == ContentDialogResult.Primary)
             {
-
-            } else
-            {
+                Debug.WriteLine(a);
+                Animation nameChange = animations.GetAnimationAt(index);
+                nameChange.setName(renameUserInput.Text);
 
             }
         }
@@ -1177,7 +1180,7 @@ namespace Protocol2
             TextBox renameTextbox = (TextBox)sender;
             String userInput = renameTextbox.Text.Trim();
 
-            //more processing can go here, e.g. check if name exists
+            //more processing can go here, e.g. no symbols
 
             if (userInput.Length > 0)
             {
