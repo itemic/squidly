@@ -1145,15 +1145,37 @@ namespace Protocol2
 
         }
 
-        private void Open_Rename_Dialog(object sender, RoutedEventArgs e)
+        private async void Open_Rename_Dialog(object sender, RoutedEventArgs e)
         {
+            TextBox userInput = new TextBox()
+            {
+                PlaceholderText="Please enter new name here",
+            };
+            userInput.TextChanged += TextAdded;
             ContentDialog renameDialog = new ContentDialog()
             {
                 Title="Rename Animation",
-                Content=""
+                Content=userInput,
+                PrimaryButtonText="Ok",
+                IsPrimaryButtonEnabled = false,
+                CloseButtonText="Cancel"
             };
+
+            ContentDialogResult userAction = await renameDialog.ShowAsync();
+
+            if (userAction == ContentDialogResult.Primary)
+            {
+
+            } else
+            {
+
+            }
         }
 
+        private void TextAdded(object sender, RoutedEventArgs e)
+        {
+
+        }
 
     }
 }
