@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
     <Page.Resources>
-        <SolidColorBrush x:Key="animationWindowBackground" Color="#f4fafd"/>
+        <SolidColorBrush x:Key="animationWindowBackground" Color="#dbe1e3"/>
         <SolidColorBrush x:Key="animationBlockColor" Color="#323e53 "/>
     </Page.Resources>
 
@@ -75,6 +75,8 @@
                     <InkCanvas x:Name="inkCanvas"/>
                     
                     <Canvas x:Name="canvas" Loaded="Canvas_Loaded"/>
+                   
+                    <Canvas x:Name="selectionCanvas"/>
                     <Canvas x:Name="toolbarCanvas">
                         <Grid x:Name="toolbarGrid">
                             <Rectangle x:Name="toolbarRect" Fill="#FFD4D4D4"/>
@@ -100,7 +102,6 @@
                             </InkToolbar>
                         </Grid>
                     </Canvas>
-                    <Canvas x:Name="selectionCanvas"/>
                 </Grid>
                 <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
                     <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False">
