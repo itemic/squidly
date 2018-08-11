@@ -48,6 +48,7 @@ namespace Protocol2
         private Rectangle boundingBox;
         private bool isBoundRect;
         public bool selectedStrokesExist = false;
+        public bool isAnimationMode = false;
 
         private Random rng = new Random();
         public CommentModel comments;
@@ -80,11 +81,13 @@ namespace Protocol2
 
             comments = new CommentModel();
             animations = new AnimationModel();
+
             Animationlist.ItemsSource = animations.GetAnimations();
+            AnimationRepresentation.ItemsSource = animations.GetAnimations();
 
 
-            PathView.Checked += AnimationToggleChecked;
-            PathView.Unchecked += AnimationToggleUnchecked;
+            AnimationMode.Checked += AnimationToggleChecked;
+            AnimationMode.Unchecked += AnimationToggleUnchecked;
             inkToolbar.Loading += InitializeInkToolbar;
             inkToolbar.ActiveToolChanged += InkToolbar_ActiveToolChanged;
             SetUpStickyNotes();
@@ -369,7 +372,7 @@ namespace Protocol2
                         StrokeDashArray = new DoubleCollection() { 5, 2 },
                     };
                     polyline.Points = a.linePoints;
-                    polyline.Opacity = PathView.IsChecked == true ? 0.3 : 0;
+                    polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
                     a.SetPolyline(polyline);
                     canvas.Children.Add(polyline);
                 }
@@ -424,7 +427,7 @@ namespace Protocol2
                             StrokeDashArray = new DoubleCollection() { 5, 2 },
                         };
                         polyline.Points = a.linePoints;
-                        polyline.Opacity = PathView.IsChecked == true ? 0.3 : 0;
+                        polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
                         a.SetPolyline(polyline);
                         canvas.Children.Add(polyline);
                     }
@@ -460,14 +463,12 @@ namespace Protocol2
                             StrokeDashArray = new DoubleCollection() { 5, 2 },
                         };
                         polyline.Points = a.linePoints;
-                        polyline.Opacity = PathView.IsChecked == true ? 0.3 : 0;
+                        polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
                         a.SetPolyline(polyline);
                         canvas.Children.Add(polyline);
                     }
                 }
             }
-
-
             base.OnNavigatedTo(e);
         }
 
@@ -958,7 +959,7 @@ namespace Protocol2
 
             }
 
-            if (PathView.IsChecked == true)
+            if (AnimationMode.IsChecked == true)
             {
                 pline.Opacity = 0.3;
 
@@ -1050,7 +1051,7 @@ namespace Protocol2
 
                 }
 
-                if (PathView.IsChecked == true)
+                if (AnimationMode.IsChecked == true)
                 {
                     pline.Opacity = 0.3;
 
@@ -1068,11 +1069,10 @@ namespace Protocol2
 
         private async void Replay(object sender, RoutedEventArgs e)
         {
-            Button b = sender as Button;
-
+            FrameworkElement b = sender as FrameworkElement;
             Animation a = b.DataContext as Animation;
             int index = a.id;
-            Debug.WriteLine("works:" + index);
+            Debug.WriteLine("works:" + a);
             var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
 
              
@@ -1102,6 +1102,98 @@ namespace Protocol2
             b.Flyout = f;
         }
 
+        private void Drag_AnimationChunk(object sender, ManipulationDeltaRoutedEventArgs e)
+        {
+            var textblock = (Border)sender;
+            var newLeft = Canvas.GetLeft(textblock) + e.Delta.Translation.X;
+            var newTop = Canvas.GetTop(textblock) + e.Delta.Translation.Y;
+
+            if (newLeft < 0)
+            {
+                newLeft = 0;
+            }
+            if (newLeft + textblock.ActualWidth > canvasWidth - 40)
+            {
+                newLeft = canvasWidth - textblock.ActualWidth - 40;
+            }
+
+            Canvas.SetLeft(textblock, newLeft);
+            Canvas.SetTop(textblock, newTop);
+        }
+
+
+        private void Animation_Mode(object sender, RoutedEventArgs e)
+        {
+            isAnimationMode = !isAnimationMode;
+            if (isAnimationMode)
+            {
+                col3.Height = new GridLength(1, GridUnitType.Star);
+            } else
+            {
+                col3.Height = new GridLength(0);
+            }
+        }
+
+
+        //private void Rename_Animation(object sender, RoutedEventArgs e) 
+        //{
+        //    Border animationChunk = sender as Border;
+        //    Animation a = animationChunk.DataContext as Animation;
+
+        //    int index = a.id;
+
+        //    var namedChanged = animations.GetAnimationAt(index);
+
+        //}
+
+        private async void Open_Rename_Dialog(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement senderElement = sender as FrameworkElement;
+            Animation a = senderElement.DataContext as Animation;
+            int index = a.id;
+
+            //TextBox userInput = new TextBox()
+            //{
+            //    PlaceholderText="Please enter new name here",
+            //};
+            //userInput.TextChanged += TextAdded;
+            //ContentDialog renameDialog = new ContentDialog()
+            //{
+            //    Title="Rename Animation",
+            //    Content=userInput,
+            //    PrimaryButtonText="Ok",
+            //    IsPrimaryButtonEnabled = false,
+            //    CloseButtonText="Cancel"
+            //};
+
+            ContentDialogResult userAction = await renameDialog.ShowAsync();
+
+            if (userAction == ContentDialogResult.Primary)
+            {
+                Animation nameChange = animations.GetAnimationAt(index);
+                nameChange.setName(renameUserInput.Text);
+                var collection = animations.GetAnimations();
+                collection[collection.IndexOf(nameChange)] = nameChange;
+
+
+            }
+        }
+
+        private void UserInputTextChanged(object sender, RoutedEventArgs e)
+        {
+            TextBox renameTextbox = (TextBox)sender;
+            String userInput = renameTextbox.Text.Trim();
+
+            //more processing can go here, e.g. no symbols
+
+            if (userInput.Length > 0)
+            {
+                renameDialog.IsPrimaryButtonEnabled = true;
+            } else
+            {
+                renameDialog.IsPrimaryButtonEnabled = false;
+            }
+        }
 
     }
 }

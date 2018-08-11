@@ -6,6 +6,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
+    <Page.Resources>
+        <SolidColorBrush x:Key="animationWindowBackground" Color="#f4fafd"/>
+        <SolidColorBrush x:Key="animationBlockColor" Color="#323e53 "/>
+    </Page.Resources>
+
     <SplitView x:Name="splitView" IsPaneOpen="False" DisplayMode="CompactInline" CompactPaneLength="50" OpenPaneLength="250" PanePlacement="Right">
         <SplitView.Pane>
             <StackPanel Background="LightGray">
@@ -37,25 +42,23 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
-                           
-                            
                         </DataTemplate>
                     </ListView.ItemTemplate>
-                    
+
                 </ListView>
 
             </StackPanel>
         </SplitView.Pane>
         <SplitView.Content>
-            <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+            <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="mainGrid">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="4*"/>
+                    <RowDefinition x:Name="col3" Height="0"/>
                 </Grid.RowDefinitions>
 
-                <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right">
+
+                <CommandBar x:Name="commandBar" RequestedTheme="Dark" DefaultLabelPosition="Right" Grid.Row="0">
                     <CommandBar.Content>
                         <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}">
                             <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" ToolTipService.ToolTip="Select Strokes"/>
@@ -68,10 +71,10 @@
                                         <StackPanel VerticalAlignment="Center" Orientation="Vertical">
                                             <TextBlock Text="Sticky Note Color"/>
                                             <StackPanel x:Name="StickyNoteStack" Orientation="Horizontal">
-                                                
-                                                
+
+
                                             </StackPanel>
-                                            
+
                                         </StackPanel>
                                     </Flyout>
                                 </InkToolbarCustomToolButton.ContextFlyout>
@@ -84,17 +87,44 @@
                     <AppBarSeparator/>
                     <AppBarButton Icon="Home" Label="Back" Click="BackToMenu"/>
                     <AppBarSeparator/>
-                    <AppBarToggleButton x:Name="PathView" Icon="OutlineStar" Label="View Paths"  />
-                    <AppBarButton Icon="SolidStar" Label="Run Animations" Click="Animate_Test"/>
+                    <AppBarToggleButton x:Name="AnimationMode" Icon="SolidStar" Label="Animation Mode" Click="Animation_Mode" />
+                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
                 </CommandBar>
-                
-                <Grid Grid.Row="2">
+
+                <Grid Grid.Row="1">
                     <InkCanvas x:Name="inkCanvas"/>
                     <Canvas x:Name="canvas" Loaded="Canvas_Loaded"/>
                     <Canvas x:Name="selectionCanvas"/>
                 </Grid>
+                <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
+                    <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Background="{StaticResource animationWindowBackground}">
+                                    <Canvas>
+                                        <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk">
+                                            <TextBlock TextAlignment="Center" Text="{Binding name}" Height="40" Width="150">
+                                                
+                                            </TextBlock>
+                                            <Border.ContextFlyout>
+                                                <MenuFlyout>
+                                                    <MenuFlyoutItem Text="Rename" Click="Open_Rename_Dialog"/>
+                                                </MenuFlyout>
+                                            </Border.ContextFlyout>
+                                        </Border>
+                                    </Canvas>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </ScrollViewer>
+                <ContentDialog x:Name="renameDialog"
+                   Title="Rename animation"
+                   PrimaryButtonText="Ok" IsPrimaryButtonEnabled="False"
+                   CloseButtonText="Cancel">
+                    <TextBox x:Name="renameUserInput" PlaceholderText="Please enter new name here" TextChanged="UserInputTextChanged" Height="20"/>
+                </ContentDialog>
             </Grid>
         </SplitView.Content>
     </SplitView>
- 
 </Page>
