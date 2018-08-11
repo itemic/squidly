@@ -849,7 +849,11 @@ namespace Protocol2
 
                 polyline.Points.Add(p.CurrentPoint.Position);
                 polyline.Opacity = 0.3;
-
+                inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= moved;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= released;
+                ClearAllHandlers();
                 Animation anime = new Animation();
                 foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
                 {
@@ -877,10 +881,7 @@ namespace Protocol2
 
                 
                 ClearSelection();
-                inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
-                inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
-                inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= moved;
-                inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= released;
+                
 
             }
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += pressed; 
