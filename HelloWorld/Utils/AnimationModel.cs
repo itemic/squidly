@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -42,6 +43,7 @@ namespace Protocol2.Utils
 
         [DataMember]
         public static int counter = 0; // temporary use
+
         public Animation()
         {
             inkStrokes = new List<InkStroke>();
@@ -101,15 +103,17 @@ namespace Protocol2.Utils
     }
 
     public class AnimationModel
-    {
-
-      
+    {  
         private ObservableCollection<Animation> animations { get; set; }
         public AnimationModel()
         {
             animations = new ObservableCollection<Animation>();
- 
         }
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+
+
         public void Add(Animation animation)
         {
             animations.Add(animation);
@@ -138,6 +142,14 @@ namespace Protocol2.Utils
             Animation anim = animations.Single(x => x.id == id);
             animations.Remove(anim);
         }
+
+        public void setAnimationName(int id, String newName)
+        {
+            Animation animation = GetAnimationAt(id);
+            animation.setName(newName);
+        }
+
+
 
     }
 }

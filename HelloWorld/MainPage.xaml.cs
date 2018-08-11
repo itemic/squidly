@@ -87,6 +87,7 @@ namespace Protocol2
             undoStack = new Stack<InkStroke>();
             comments = new CommentModel();
             animations = new AnimationModel();
+
             Animationlist.ItemsSource = animations.GetAnimations();
             AnimationRepresentation.ItemsSource = animations.GetAnimations();
 
@@ -495,8 +496,6 @@ namespace Protocol2
                     }
                 }
             }
-
-
             base.OnNavigatedTo(e);
         }
 
@@ -1168,9 +1167,11 @@ namespace Protocol2
 
             if (userAction == ContentDialogResult.Primary)
             {
-                Debug.WriteLine(a);
                 Animation nameChange = animations.GetAnimationAt(index);
                 nameChange.setName(renameUserInput.Text);
+                var collection = animations.GetAnimations();
+                collection[collection.IndexOf(nameChange)] = nameChange;
+
 
             }
         }
