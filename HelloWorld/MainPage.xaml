@@ -82,13 +82,15 @@
                         </InkToolbar>
                     </CommandBar.Content>
 
+                    <AppBarToggleButton x:Name="AnimationMode" Icon="Next" Label="Animation Mode" Click="Animation_Mode" />
+                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
+                    <AppBarSeparator/>
                     <AppBarButton Icon="Save" Label="Save" Click="SaveAll"/>
                     <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
                     <AppBarSeparator/>
-                    <AppBarButton Icon="Home" Label="Back" Click="BackToMenu"/>
-                    <AppBarSeparator/>
-                    <AppBarToggleButton x:Name="AnimationMode" Icon="SolidStar" Label="Animation Mode" Click="Animation_Mode" />
-                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
+                    <AppBarButton Icon="Home" Label="Back to Menu" Click="BackToMenu"/>
+
+                    
                 </CommandBar>
 
                 <Grid Grid.Row="1">
