@@ -1196,6 +1196,7 @@ namespace Protocol2
             //    CloseButtonText="Cancel"
             //};
 
+            renameUserInput.Text = String.Empty;
             ContentDialogResult userAction = await renameDialog.ShowAsync();
 
             if (userAction == ContentDialogResult.Primary)
