@@ -161,6 +161,11 @@ namespace Protocol2
             inkToolbar.Children.Add(eraser);
             inkToolbar.Children.Add(ballpoint);
 
+            inkToolbar.Height = 75;
+
+            toolbarGrid.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY;
+            toolbarGrid.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Grid);
+
         }
 
         private void AnimationToggleChecked(object sender, RoutedEventArgs e)
@@ -274,6 +279,31 @@ namespace Protocol2
         private void Drag_Comment(object sender, ManipulationDeltaRoutedEventArgs e)
         {
             var rectangle = (Rectangle)sender;
+            var newLeft = Canvas.GetLeft(rectangle) + e.Delta.Translation.X;
+            var newTop = Canvas.GetTop(rectangle) + e.Delta.Translation.Y;
+            if (newLeft < 0)
+            {
+                newLeft = 0;
+            }
+            if (newTop < 0)
+            {
+                newTop = 0;
+            }
+            if (newLeft + rectangle.ActualWidth > canvasWidth)
+            {
+                newLeft = canvasWidth - rectangle.ActualWidth;
+            }
+            if (newTop + rectangle.ActualHeight > canvasHeight)
+            {
+                newTop = canvasHeight - rectangle.ActualHeight;
+            }
+            Canvas.SetLeft(rectangle, newLeft);
+            Canvas.SetTop(rectangle, newTop);
+        }
+
+        private void Drag_Grid(object sender, ManipulationDeltaRoutedEventArgs e)
+        {
+            var rectangle = (Grid)sender;
             var newLeft = Canvas.GetLeft(rectangle) + e.Delta.Translation.X;
             var newTop = Canvas.GetTop(rectangle) + e.Delta.Translation.Y;
             if (newLeft < 0)
@@ -819,7 +849,11 @@ namespace Protocol2
 
                 polyline.Points.Add(p.CurrentPoint.Position);
                 polyline.Opacity = 0.3;
-
+                inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= moved;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= released;
+                ClearAllHandlers();
                 Animation anime = new Animation();
                 foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
                 {
@@ -847,10 +881,7 @@ namespace Protocol2
 
                 
                 ClearSelection();
-                inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
-                inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
-                inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= moved;
-                inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= released;
+                
 
             }
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += pressed; 
