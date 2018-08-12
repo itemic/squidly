@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
     <Page.Resources>
-        <SolidColorBrush x:Key="animationWindowBackground" Color="#f4fafd"/>
+        <SolidColorBrush x:Key="animationWindowBackground" Color="#dbe1e3"/>
         <SolidColorBrush x:Key="animationBlockColor" Color="#323e53 "/>
     </Page.Resources>
 
@@ -58,43 +58,50 @@
                 </Grid.RowDefinitions>
 
 
-                <CommandBar x:Name="commandBar" RequestedTheme="Dark" DefaultLabelPosition="Right" Grid.Row="0">
-                    <CommandBar.Content>
-                        <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}">
-                            <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" ToolTipService.ToolTip="Select Strokes"/>
-                            <InkToolbarCustomToolButton x:Name="toolButtonComment"   ToolTipService.ToolTip="Comment Mode">
-                                <FontIcon x:Name="toolButtonCommentGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE90A;" />
+                <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right" Grid.Row="0">
 
-
-                                <InkToolbarCustomToolButton.ContextFlyout>
-                                    <Flyout x:Name="StickyFlyout">
-                                        <StackPanel VerticalAlignment="Center" Orientation="Vertical">
-                                            <TextBlock Text="Sticky Note Color"/>
-                                            <StackPanel x:Name="StickyNoteStack" Orientation="Horizontal">
-
-
-                                            </StackPanel>
-
-                                        </StackPanel>
-                                    </Flyout>
-                                </InkToolbarCustomToolButton.ContextFlyout>
-                            </InkToolbarCustomToolButton>
-                        </InkToolbar>
-                    </CommandBar.Content>
-
+                    <AppBarToggleButton x:Name="AnimationMode" Icon="Next" Label="Animation Mode" Click="Animation_Mode" />
+                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
+                    <AppBarSeparator/>
                     <AppBarButton Icon="Save" Label="Save" Click="SaveAll"/>
                     <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
                     <AppBarSeparator/>
-                    <AppBarButton Icon="Home" Label="Back" Click="BackToMenu"/>
-                    <AppBarSeparator/>
-                    <AppBarToggleButton x:Name="AnimationMode" Icon="SolidStar" Label="Animation Mode" Click="Animation_Mode" />
-                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
+                    <AppBarButton Icon="Home" Label="Back to Menu" Click="BackToMenu"/>
+
+
                 </CommandBar>
 
                 <Grid Grid.Row="1">
                     <InkCanvas x:Name="inkCanvas"/>
+                    
                     <Canvas x:Name="canvas" Loaded="Canvas_Loaded"/>
+                   
                     <Canvas x:Name="selectionCanvas"/>
+                    <Canvas x:Name="toolbarCanvas">
+                        <Grid x:Name="toolbarGrid">
+                            <Rectangle x:Name="toolbarRect" Fill="#FFD4D4D4"/>
+                            <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" ToolTipService.ToolTip="Select Strokes"/>
+                                <InkToolbarCustomToolButton x:Name="toolButtonComment"   ToolTipService.ToolTip="Comment Mode">
+                                    <FontIcon x:Name="toolButtonCommentGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE90A;" />
+
+
+                                    <InkToolbarCustomToolButton.ContextFlyout>
+                                        <Flyout x:Name="StickyFlyout">
+                                            <StackPanel VerticalAlignment="Center" Orientation="Vertical">
+                                                <TextBlock Text="Sticky Note Color"/>
+                                                <StackPanel x:Name="StickyNoteStack" Orientation="Horizontal">
+
+
+                                                </StackPanel>
+
+                                            </StackPanel>
+                                        </Flyout>
+                                    </InkToolbarCustomToolButton.ContextFlyout>
+                                </InkToolbarCustomToolButton>
+                            </InkToolbar>
+                        </Grid>
+                    </Canvas>
                 </Grid>
                 <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
                     <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False">
@@ -104,7 +111,7 @@
                                     <Canvas>
                                         <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk">
                                             <TextBlock TextAlignment="Center" Text="{Binding name}" Height="40" Width="150">
-                                                
+
                                             </TextBlock>
                                             <Border.ContextFlyout>
                                                 <MenuFlyout>
