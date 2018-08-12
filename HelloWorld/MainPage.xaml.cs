@@ -61,7 +61,6 @@ namespace Protocol2
 
             canvas.RenderTransform = new TranslateTransform();
             inkCanvas.InkPresenter.InputDeviceTypes =
-
                 Windows.UI.Core.CoreInputDeviceTypes.Mouse |
                 // Uncomment the line below if you want to draw with touch
                 // When commented out, long touch to create comment
@@ -71,23 +70,85 @@ namespace Protocol2
             comments = new CommentModel();
             animations = new AnimationModel();
 
+            //tool bar set up
+            inkToolbar.Loading += InitializeInkToolbar;
+            inkToolbar.ActiveToolChanged += InkToolbar_ActiveToolChanged;
+
+            //binding animations to front end view
             Animationlist.ItemsSource = animations.GetAnimations();
             AnimationRepresentation.ItemsSource = animations.GetAnimations();
 
-
+            //animation mode set up
             AnimationMode.Checked += AnimationToggleChecked;
             AnimationMode.Unchecked += AnimationToggleUnchecked;
-            inkToolbar.Loading += InitializeInkToolbar;
-            inkToolbar.ActiveToolChanged += InkToolbar_ActiveToolChanged;
+
+            //comments set up
             SetUpStickyNotes();
             stickyColor = Colors.Goldenrod;
             toolButtonCommentGlyph.Foreground = new SolidColorBrush(stickyColor);
         }
 
-        private void Canvas_Loaded(object sender, RoutedEventArgs e)
+        /*
+         * Set up methods used in constructor above or when elements get loaded
+         * */
+        private void InitializeInkToolbar(FrameworkElement sender, object args)
         {
-            canvasWidth = canvas.ActualWidth;
-            canvasHeight = canvas.ActualHeight;
+            inkToolbar.InitialControls = InkToolbarInitialControls.None;
+            InkToolbarBallpointPenButton ballpoint = new InkToolbarBallpointPenButton();
+            InkToolbarEraserButton eraser = new InkToolbarEraserButton();
+            inkToolbar.Children.Add(eraser);
+            inkToolbar.Children.Add(ballpoint);
+
+            inkToolbar.Height = 75;
+
+            toolbarGrid.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY;
+            toolbarGrid.ManipulationDelta += new ManipulationDeltaEventHandler(DragToolbar);
+
+        }
+
+        private void DragToolbar(object sender, ManipulationDeltaRoutedEventArgs e)
+        {
+            var rectangle = (Grid)sender;
+            var newLeft = Canvas.GetLeft(rectangle) + e.Delta.Translation.X;
+            var newTop = Canvas.GetTop(rectangle) + e.Delta.Translation.Y;
+            if (newLeft < 0)
+            {
+                newLeft = 0;
+            }
+            if (newTop < 0)
+            {
+                newTop = 0;
+            }
+            if (newLeft + rectangle.ActualWidth > canvasWidth)
+            {
+                newLeft = canvasWidth - rectangle.ActualWidth;
+            }
+            if (newTop + rectangle.ActualHeight > canvasHeight)
+            {
+                newTop = canvasHeight - rectangle.ActualHeight;
+            }
+            Canvas.SetLeft(rectangle, newLeft);
+            Canvas.SetTop(rectangle, newTop);
+        }
+
+        //animation set up methods
+        private void AnimationToggleChecked(object sender, RoutedEventArgs e)
+        {
+            foreach (var animation in animations.GetAnimations())
+            {
+                var pline = animation.GetPolyline();
+                pline.Opacity = 0.3;
+            }
+        }
+
+        private void AnimationToggleUnchecked(object sender, RoutedEventArgs e)
+        {
+            foreach (var animation in animations.GetAnimations())
+            {
+                var pline = animation.GetPolyline();
+                pline.Opacity = 0;
+            }
+
         }
 
         private void SetUpStickyNotes()
@@ -142,54 +203,33 @@ namespace Protocol2
             StickyFlyout.Hide();
         }
 
-        private void InitializeInkToolbar(FrameworkElement sender, object args)
+
+        private void Canvas_Loaded(object sender, RoutedEventArgs e)
         {
-            inkToolbar.InitialControls = InkToolbarInitialControls.None;
-            InkToolbarBallpointPenButton ballpoint = new InkToolbarBallpointPenButton();
-            InkToolbarEraserButton eraser = new InkToolbarEraserButton();
-            inkToolbar.Children.Add(eraser);
-            inkToolbar.Children.Add(ballpoint);
-
-            inkToolbar.Height = 75;
-
-            toolbarGrid.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY;
-            toolbarGrid.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Grid);
-
-        }
-
-        private void AnimationToggleChecked(object sender, RoutedEventArgs e)
-        {
-            foreach (var animation in animations.GetAnimations())
-            {
-                var pline = animation.GetPolyline();
-                pline.Opacity = 0.3;
-            }
-        }
-
-        private void AnimationToggleUnchecked(object sender, RoutedEventArgs e)
-        {
-            foreach (var animation in animations.GetAnimations())
-            {
-                var pline = animation.GetPolyline();
-                pline.Opacity = 0;
-            }
-
-        }
-
-        private void CreatePopup(object sender, RightTappedRoutedEventArgs e)
-        {
-            Point point = e.GetPosition(inkCanvas);
-            
-            // enable adding comments with right click
-            inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
-
-            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
-
-            inkCanvas.RightTapped += TouchMakePopup;
-
+            canvasWidth = canvas.ActualWidth;
+            canvasHeight = canvas.ActualHeight;
         }
 
 
+        private void BackToMenu(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Home));
+        }
+
+
+        /*
+         * Comment related methods
+         * */
+
+        private void MakeComment(InkUnprocessedInput sender, PointerEventArgs args)
+        {
+            PointerPoint point = args.CurrentPoint;
+            var newComment = comments.CreateComment(point.Position.X, point.Position.Y, stickyColor);
+            var rect = DrawRectangle(newComment);
+            rect.ContextFlyout.ShowAt(rect);
+        }
+
+        // drawing a comment rectangle - comment flyout when pressed
         public Rectangle DrawRectangle(Comment comment)
         {
             Rectangle rectangle = new Rectangle {
@@ -259,13 +299,13 @@ namespace Protocol2
 
             // settings for dragging comments 
             rectangle.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY;
-            rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(Drag_Comment);
+            rectangle.ManipulationDelta += new ManipulationDeltaEventHandler(DragComment);
             canvas.Children.Add(rectangle);
 
             return rectangle;
         }
 
-        private void Drag_Comment(object sender, ManipulationDeltaRoutedEventArgs e)
+        private void DragComment(object sender, ManipulationDeltaRoutedEventArgs e)
         {
             var rectangle = (Rectangle)sender;
             var newLeft = Canvas.GetLeft(rectangle) + e.Delta.Translation.X;
@@ -290,56 +330,10 @@ namespace Protocol2
             Canvas.SetTop(rectangle, newTop);
         }
 
-        private void Drag_Grid(object sender, ManipulationDeltaRoutedEventArgs e)
-        {
-            var rectangle = (Grid)sender;
-            var newLeft = Canvas.GetLeft(rectangle) + e.Delta.Translation.X;
-            var newTop = Canvas.GetTop(rectangle) + e.Delta.Translation.Y;
-            if (newLeft < 0)
-            {
-                newLeft = 0;
-            }
-            if (newTop < 0)
-            {
-                newTop = 0;
-            }
-            if (newLeft + rectangle.ActualWidth > canvasWidth)
-            {
-                newLeft = canvasWidth - rectangle.ActualWidth;
-            }
-            if (newTop + rectangle.ActualHeight > canvasHeight)
-            {
-                newTop = canvasHeight - rectangle.ActualHeight;
-            }
-            Canvas.SetLeft(rectangle, newLeft);
-            Canvas.SetTop(rectangle, newTop);
-        }
 
-        public void MakeComment(double x, double y) 
-        {
-            
-            var newComment = comments.CreateComment(x, y, stickyColor);
-            var rect = DrawRectangle(newComment);
-            rect.ContextFlyout.ShowAt(rect);
-            
-
-        }
-
-        private void TouchMakePopup(object sender, RightTappedRoutedEventArgs args)
-        {
-            Point point = args.GetPosition(inkCanvas);
-            MakeComment(point.X, point.Y);
-
-            
-        }
-
-        private void OtherMakePopup(InkUnprocessedInput sender, PointerEventArgs args)
-        {
-            PointerPoint point = args.CurrentPoint;
-
-            MakeComment(point.Position.X, point.Position.Y);
-        }
-
+        /*
+         * Saving and loading functionality
+         * */
 
         public async void SaveAll(object sender, RoutedEventArgs e)
         {
@@ -350,9 +344,7 @@ namespace Protocol2
                 await save.CreateFolder();
             
             }
-     
             await save.SaveAll(inkCanvas, comments, animations);
-
         }
 
         public async void LoadAll(object sender, RoutedEventArgs e)
@@ -399,15 +391,6 @@ namespace Protocol2
         }
 
 
-
-
-
-        private void BackToMenu(object sender, RoutedEventArgs e)
-        {
-            this.Frame.Navigate(typeof(Home));
-        }
-
-
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             if (e.Parameter is bool && (bool)e.Parameter == true)
@@ -435,9 +418,7 @@ namespace Protocol2
                         {
                             a.inkStrokesId[i] = inkCanvas.InkPresenter.StrokeContainer.GetStrokes()[a.inkStrokesIndex[i]].Id;
                         }
-                        Debug.WriteLine("INKSTROKE IDS: " + string.Join(",", a.inkStrokesId.ToArray()));
-                        Debug.WriteLine("INKSTROKE IDX: " + string.Join(",", a.inkStrokesIndex.ToArray()));
-                        Debug.WriteLine("TOTAL STROKES: " + string.Join<InkStroke>(",", inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ToArray()));
+
                         // recreate polyline!
                         polyline = new Polyline()
                         {
@@ -492,7 +473,10 @@ namespace Protocol2
         }
 
 
-        //Listeners for the lasso selection functionality
+
+        /*
+         * Stroke selection functionality
+         * */
 
         private void UnprocessedInput_PointerPressed(InkUnprocessedInput sender, PointerEventArgs args)
         {
@@ -728,7 +712,7 @@ namespace Protocol2
             inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= UnprocessedInput_PointerMoved;
             inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= UnprocessedInput_PointerReleased;
             inkCanvas.RightTapped -= Click_Select;
-            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= OtherMakePopup;
+            inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= MakeComment;
             inkCanvas.InkPresenter.StrokeInput.StrokeStarted -= StrokeInput_StrokeStarted;
             inkCanvas.InkPresenter.StrokesErased -= InkPresenter_StrokesErased;
 
@@ -754,7 +738,7 @@ namespace Protocol2
             } else if (inkToolbar.ActiveTool == toolButtonComment)
             {
                 inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
-                inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += OtherMakePopup;
+                inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += MakeComment;
             }
         }
 
