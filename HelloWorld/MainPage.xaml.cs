@@ -3,25 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Input.Inking;
-using Windows.UI.Input.Inking.Analysis;
 using Windows.UI.Xaml.Shapes;
-using Windows.Storage.Streams;
 using Windows.UI.Input;
 using System.Diagnostics;
 using Protocol2.Utils;
 using Windows.UI;
 using Windows.UI.Core;
 using System.Threading.Tasks;
-using System.Numerics;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -32,39 +26,34 @@ namespace Protocol2
     /// </summary>
     public sealed partial class MainPage : Page
     {
-  
+        // need refactoring, dont think we need a field for this
         public Polyline polyline;
 
-        private Color stickyColor;
-
-        InkAnalyzer analyzerShape = new InkAnalyzer();
-
-        Dictionary<InkStroke, StrokeGroup> groups = new Dictionary<InkStroke, StrokeGroup>();
-
-        //Stroke selection field
+        //fields for stroke selection
         private Polyline lasso;
-        //Stroke selection area
         private Rect boundingRect;
         private Rectangle boundingBox;
         private bool isBoundRect;
         public bool selectedStrokesExist = false;
-        public bool isAnimationMode = false;
 
-        private Random rng = new Random();
+        //fields for comments
         public CommentModel comments;
-        private AnimationModel animations;
-        //private ObservableCollection<Animation> animeList;
-    
-        private Save save = null;
+        private Color stickyColor;
 
+        //fields for animation related functionality
+        public bool isAnimationMode = false;
+        private AnimationModel animations;
+    
+
+        // different mouse looks for normal and when mouse in selected box
         private CoreCursor normalCursor = Window.Current.CoreWindow.PointerCursor;
         private CoreCursor inBoundingBox = new CoreCursor(CoreCursorType.SizeAll, 0);
 
-        private InkToolbarBallpointPenButton ballpoint;
-        private InkToolbarEraserButton eraser;
-
+        //other application settings
         private double canvasWidth;
         private double canvasHeight;
+        Dictionary<InkStroke, StrokeGroup> strokeGroups = new Dictionary<InkStroke, StrokeGroup>();
+        private Save save = null;
 
         public MainPage()
         {
@@ -156,8 +145,8 @@ namespace Protocol2
         private void InitializeInkToolbar(FrameworkElement sender, object args)
         {
             inkToolbar.InitialControls = InkToolbarInitialControls.None;
-            ballpoint = new InkToolbarBallpointPenButton();
-            eraser = new InkToolbarEraserButton();
+            InkToolbarBallpointPenButton ballpoint = new InkToolbarBallpointPenButton();
+            InkToolbarEraserButton eraser = new InkToolbarEraserButton();
             inkToolbar.Children.Add(eraser);
             inkToolbar.Children.Add(ballpoint);
 
@@ -524,7 +513,7 @@ namespace Protocol2
             {
                 if (stroke.Selected)
                 {
-                    if (groups.TryGetValue(stroke, out strokeGroup))
+                    if (strokeGroups.TryGetValue(stroke, out strokeGroup))
                     {
                         strokeGroup.selectStrokesInGroup();
                         Rect groupBoundingBox = strokeGroup.findBoundingBox();
@@ -754,14 +743,14 @@ namespace Protocol2
                     selectedExists = true;
                     selectedStrokes.Add(stroke);
 
-                    if (groups.ContainsKey(stroke))
+                    if (strokeGroups.ContainsKey(stroke))
                     {
-                        groups.TryGetValue(stroke, out strokeGroup);
+                        strokeGroups.TryGetValue(stroke, out strokeGroup);
                         strokeGroup.AddStroke(stroke);
                     } else
                     {
                         strokeGroup.AddStroke(stroke);
-                        groups.Add(stroke, strokeGroup);
+                        strokeGroups.Add(stroke, strokeGroup);
                     }
                 }
             }
