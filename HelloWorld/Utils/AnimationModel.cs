@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Input.Inking;
 using Windows.UI.Xaml.Media;
@@ -42,9 +39,6 @@ namespace Protocol2.Utils
         [DataMember]
         public PointCollection linePoints { get; set; }
 
-        public Rectangle animationRepresentation;
-
-
         [DataMember]
         public static int counter = 0; // temporary use
 
@@ -59,13 +53,10 @@ namespace Protocol2.Utils
             time = 1; //default animations are 2s
         }
 
-
         public Polyline GetPolyline()
         {
             return polyline;
         }
-
-       
 
         public void SetPolyline(Polyline p)
         {
@@ -76,18 +67,12 @@ namespace Protocol2.Utils
             
         }
 
-
-        public Rectangle getRepresentation()
-        {
-            return animationRepresentation;
-        }
-
-        public void setName(String newName)
+        public void SetName(String newName)
         {
             name = newName;
         }
 
-        public String getName()
+        public String GetName()
         {
             return name;
         }
@@ -112,6 +97,7 @@ namespace Protocol2.Utils
         {
             animations.Add(animation);
         }
+
         public ObservableCollection<Animation> GetAnimations()
         {
             //Reorder();
@@ -121,6 +107,7 @@ namespace Protocol2.Utils
             }
             return animations;
         }
+
         public void Reorder()
         {
             animations = new ObservableCollection<Animation>(animations.OrderBy(x => x.id).ToList());
@@ -131,16 +118,17 @@ namespace Protocol2.Utils
             Animation anim = animations.Single(x => x.id == id);
             return anim;
         }
+
         public void RemoveAnimation(int id)
         {
             Animation anim = animations.Single(x => x.id == id);
             animations.Remove(anim);
         }
 
-        public void setAnimationName(int id, String newName)
+        public void SetAnimationName(int id, String newName)
         {
             Animation animation = GetAnimationAt(id);
-            animation.setName(newName);
+            animation.SetName(newName);
         }
 
 

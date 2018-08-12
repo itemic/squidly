@@ -282,7 +282,6 @@ namespace Protocol2
             }
         }
 
-
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             if (e.Parameter is bool && (bool)e.Parameter == true)
@@ -363,7 +362,6 @@ namespace Protocol2
             }
             base.OnNavigatedTo(e);
         }
-
 
 
         /**
@@ -645,8 +643,8 @@ namespace Protocol2
                 {
                     if (strokeGroups.TryGetValue(stroke, out strokeGroup))
                     {
-                        strokeGroup.selectStrokesInGroup();
-                        Rect groupBoundingBox = strokeGroup.findBoundingBox();
+                        strokeGroup.SelectStrokesInGroup();
+                        Rect groupBoundingBox = strokeGroup.FindBoundingBox();
 
                         if (groupBoundingBox.X < updatedBoundingBox.X)
                         {
@@ -1054,7 +1052,6 @@ namespace Protocol2
 
 
                     inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(allAnimations[0].startPoint.X - (currentPosition.X + currentPosition.Width / 2), allAnimations[0].startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
-
                 }
 
                 if (AnimationMode.IsChecked == true)
@@ -1162,7 +1159,7 @@ namespace Protocol2
 
         private void RenameAnimation(String newName, Animation animation)
         {
-            animation.setName(newName);
+            animation.SetName(newName);
         }
 
         private void UserInputTextChanged(object sender, RoutedEventArgs e)

@@ -62,6 +62,7 @@ namespace Protocol2.Utils
             await CreateFolder("DefaultProject");
         }
 
+
         public async Task SaveAll(InkCanvas inkCanvas, CommentModel comments, AnimationModel animations)
         {
             // save ink
@@ -86,10 +87,7 @@ namespace Protocol2.Utils
                     await outputStream.FlushAsync();
                 }
             }
-
             animationStream.Dispose();
-            
-
 
             // save comments
             var commentsFile = await projectFolder.CreateFileAsync("comments.txt", CreationCollisionOption.ReplaceExisting);
@@ -243,8 +241,5 @@ namespace Protocol2.Utils
                 return (T)ser.ReadObject(reader);
             }
         }
-
-        
-        
     }
 }
