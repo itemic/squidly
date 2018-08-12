@@ -25,7 +25,7 @@ namespace Protocol2
             strokes.Add(stroke);
         }
 
-        public void selectStrokesInGroup()
+        public void SelectStrokesInGroup()
         {
             foreach (var stroke in strokes)
             {
@@ -33,7 +33,7 @@ namespace Protocol2
             } 
         }
 
-        public Rect findBoundingBox()
+        public Rect FindBoundingBox()
         {
             var outermostLeftX = strokes[0].BoundingRect.X;
             var outermostRightX = strokes[0].BoundingRect.X + strokes[0].BoundingRect.Width;
@@ -72,7 +72,7 @@ namespace Protocol2
             return new Rect(outermostLeftX, outermostTopY, outermostRightX - outermostLeftX, outermostBottomY - outermostTopY);
         } 
 
-        public ReadOnlyCollection<InkStroke> getStrokes()
+        public ReadOnlyCollection<InkStroke> GetStrokes()
         {
             return new ReadOnlyCollection<InkStroke>(strokes);
         }
