@@ -60,8 +60,8 @@
 
                 <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right" Grid.Row="0">
 
-                    <AppBarToggleButton x:Name="AnimationMode" Icon="Next" Label="Animation Mode" Click="Animation_Mode" />
-                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="Animate_Test"/>
+                    <AppBarToggleButton x:Name="AnimationMode" Icon="Next" Label="Animation Mode" Click="ToggleAnimationMode" />
+                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="RunAllAnimations"/>
                     <AppBarSeparator/>
                     <AppBarButton Icon="Save" Label="Save" Click="SaveAll"/>
                     <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
@@ -109,13 +109,13 @@
                             <DataTemplate>
                                 <StackPanel Background="{StaticResource animationWindowBackground}">
                                     <Canvas>
-                                        <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="Drag_AnimationChunk">
+                                        <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="DragAnimationChunk">
                                             <TextBlock TextAlignment="Center" Text="{Binding name}" Height="40" Width="150">
 
                                             </TextBlock>
                                             <Border.ContextFlyout>
                                                 <MenuFlyout>
-                                                    <MenuFlyoutItem Text="Rename" Click="Open_Rename_Dialog"/>
+                                                    <MenuFlyoutItem Text="Rename" Click="OpenRenameAnimationDialog"/>
                                                 </MenuFlyout>
                                             </Border.ContextFlyout>
                                         </Border>

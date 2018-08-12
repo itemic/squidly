@@ -882,7 +882,12 @@ namespace Protocol2
         /**
          * Animation related methods
          **/
+        
+        /*
+         * methods to do with manipulating animations
+         **/
 
+        // play animation for single animation
         private async Task Animate(Animation animation, bool revert)
         {
             //TODO: Check if the inkstrokes of the animation still exists...
@@ -972,16 +977,14 @@ namespace Protocol2
             }
         }
 
-        
-        private async void Animate_Test(object sender, RoutedEventArgs e)
+        //run animations for all existing animations
+        //currently not using Animate method, but probably can
+        private async void RunAllAnimations(object sender, RoutedEventArgs e)
         {
 
             List<Animation> allAnimations = animations.GetAnimations().ToList();
             foreach (var animation in allAnimations) 
             {
-                Debug.WriteLine("INKSTROKE IDS: " + string.Join(",", animation.inkStrokesId.ToArray()));
-                Debug.WriteLine("INKSTROKE IDX: " + string.Join(",", animation.inkStrokesIndex.ToArray()));
-                Debug.WriteLine("TOTAL STROKES: " + string.Join<InkStroke>(",", inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ToArray()));
                 List<InkStroke> strokesToAnimate = new List<InkStroke>();
                 foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
                 {
@@ -1064,9 +1067,9 @@ namespace Protocol2
                     pline.Opacity = 0;
                 }
             }
-
         }
 
+        //replay selected animation
         private async void Replay(object sender, RoutedEventArgs e)
         {
             FrameworkElement b = sender as FrameworkElement;
@@ -1091,7 +1094,8 @@ namespace Protocol2
             animations.RemoveAnimation(index);
         }
 
-        private  void SettingsAnimation(object sender, RoutedEventArgs e)
+        //currently not doing anything
+        private void SettingsAnimation(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
 
@@ -1102,7 +1106,24 @@ namespace Protocol2
             b.Flyout = f;
         }
 
-        private void Drag_AnimationChunk(object sender, ManipulationDeltaRoutedEventArgs e)
+        /*
+         * methods for animation mode
+         * */
+
+        private void ToggleAnimationMode(object sender, RoutedEventArgs e)
+        {
+            isAnimationMode = !isAnimationMode;
+            if (isAnimationMode)
+            {
+                col3.Height = new GridLength(1, GridUnitType.Star);
+            }
+            else
+            {
+                col3.Height = new GridLength(0);
+            }
+        }
+
+        private void DragAnimationChunk(object sender, ManipulationDeltaRoutedEventArgs e)
         {
             var textblock = (Border)sender;
             var newLeft = Canvas.GetLeft(textblock) + e.Delta.Translation.X;
@@ -1121,50 +1142,11 @@ namespace Protocol2
             Canvas.SetTop(textblock, newTop);
         }
 
-
-        private void Animation_Mode(object sender, RoutedEventArgs e)
-        {
-            isAnimationMode = !isAnimationMode;
-            if (isAnimationMode)
-            {
-                col3.Height = new GridLength(1, GridUnitType.Star);
-            } else
-            {
-                col3.Height = new GridLength(0);
-            }
-        }
-
-
-        //private void Rename_Animation(object sender, RoutedEventArgs e) 
-        //{
-        //    Border animationChunk = sender as Border;
-        //    Animation a = animationChunk.DataContext as Animation;
-
-        //    int index = a.id;
-
-        //    var namedChanged = animations.GetAnimationAt(index);
-
-        //}
-
-        private async void Open_Rename_Dialog(object sender, RoutedEventArgs e)
+        private async void OpenRenameAnimationDialog(object sender, RoutedEventArgs e)
         {
             FrameworkElement senderElement = sender as FrameworkElement;
             Animation a = senderElement.DataContext as Animation;
             int index = a.id;
-
-            //TextBox userInput = new TextBox()
-            //{
-            //    PlaceholderText="Please enter new name here",
-            //};
-            //userInput.TextChanged += TextAdded;
-            //ContentDialog renameDialog = new ContentDialog()
-            //{
-            //    Title="Rename Animation",
-            //    Content=userInput,
-            //    PrimaryButtonText="Ok",
-            //    IsPrimaryButtonEnabled = false,
-            //    CloseButtonText="Cancel"
-            //};
 
             renameUserInput.Text = String.Empty;
             ContentDialogResult userAction = await renameDialog.ShowAsync();
@@ -1172,20 +1154,21 @@ namespace Protocol2
             if (userAction == ContentDialogResult.Primary)
             {
                 Animation nameChange = animations.GetAnimationAt(index);
-                nameChange.setName(renameUserInput.Text);
+                RenameAnimation(renameUserInput.Text, nameChange);
                 var collection = animations.GetAnimations();
                 collection[collection.IndexOf(nameChange)] = nameChange;
-
-
             }
+        }
+
+        private void RenameAnimation(String newName, Animation animation)
+        {
+            animation.setName(newName);
         }
 
         private void UserInputTextChanged(object sender, RoutedEventArgs e)
         {
             TextBox renameTextbox = (TextBox)sender;
             String userInput = renameTextbox.Text.Trim();
-
-            //more processing can go here, e.g. no symbols
 
             if (userInput.Length > 0)
             {
