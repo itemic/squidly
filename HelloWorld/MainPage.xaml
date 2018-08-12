@@ -14,7 +14,7 @@
     <SplitView x:Name="splitView" IsPaneOpen="False" DisplayMode="CompactInline" CompactPaneLength="50" OpenPaneLength="250" PanePlacement="Right">
         <SplitView.Pane>
             <StackPanel Background="LightGray">
-                <Button x:Name="exitActionsPanel" Content="&#xE700;" FontFamily="Segoe MDL2 Assets" Width="50" Height="50" Background="Transparent" HorizontalAlignment="Right" Click="Toggle_ActionBar_Pressed"/>
+                <Button x:Name="exitActionsPanel" Content="&#xE700;" FontFamily="Segoe MDL2 Assets" Width="50" Height="50" Background="Transparent" HorizontalAlignment="Right" Click="ToggleActionBarPressed"/>
                 <TextBlock Text="Animations" FontSize="24" FontWeight="SemiLight" Margin="15,0,0,0"/>
                 <CheckBox x:Name="resetCheckbox" Content="Reset position after animation" Margin="15,0,0,0"/>
 
