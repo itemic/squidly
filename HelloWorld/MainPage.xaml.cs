@@ -249,6 +249,7 @@ namespace Protocol2
             await save.LoadAll(inkCanvas, comments, animations);
             if (comments != null)
             {
+                polyCanvas.Children.Clear();
                 canvas.Children.Clear(); // probably better way than this...
                 Debug.WriteLine(comments.GetComments().Count);
                 foreach(Comment c in comments.GetComments())
@@ -277,7 +278,8 @@ namespace Protocol2
                     polyline.Points = a.linePoints;
                     polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
                     a.SetPolyline(polyline);
-                    canvas.Children.Add(polyline);
+                    polyCanvas.Children.Add(polyline);
+                    //canvas.Children.Add(polyline);
                 }
             }
         }
@@ -294,6 +296,7 @@ namespace Protocol2
                 await save.LoadAll(inkCanvas, comments, animations);
                 if (comments != null)
                 {
+                    polyCanvas.Children.Clear();
                     canvas.Children.Clear(); // probably better way than this...
                     Debug.WriteLine(comments.GetComments().Count);
                     foreach (Comment c in comments.GetComments())
@@ -320,7 +323,8 @@ namespace Protocol2
                         polyline.Points = a.linePoints;
                         polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
                         a.SetPolyline(polyline);
-                        canvas.Children.Add(polyline);
+                        polyCanvas.Children.Add(polyline);
+                        //canvas.Children.Add(polyline);
                     }
                 }
             }
@@ -330,6 +334,7 @@ namespace Protocol2
                 await save.LoadNew(inkCanvas, comments, animations);
                 if (comments != null)
                 {
+                    polyCanvas.Children.Clear();
                     canvas.Children.Clear(); // probably better way than this...
                     Debug.WriteLine(comments.GetComments().Count);
                     foreach (Comment c in comments.GetComments())
@@ -356,7 +361,8 @@ namespace Protocol2
                         polyline.Points = a.linePoints;
                         polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
                         a.SetPolyline(polyline);
-                        canvas.Children.Add(polyline);
+                        polyCanvas.Children.Add(polyline);
+                        //canvas.Children.Add(polyline);
                     }
                 }
             }
@@ -795,7 +801,7 @@ namespace Protocol2
                 };
 
                 polyline.Points.Add(p.CurrentPoint.Position);
-                canvas.Children.Add(polyline);
+                polyCanvas.Children.Add(polyline);
             }
 
             void moved(InkUnprocessedInput i, PointerEventArgs p)
@@ -927,7 +933,7 @@ namespace Protocol2
             {
                 // we can delete this current animation entry
                 animations.GetAnimations().Remove(animation);
-                canvas.Children.Remove(animation.GetPolyline());
+                polyCanvas.Children.Remove(animation.GetPolyline());
                 return;
             }
 
@@ -936,7 +942,6 @@ namespace Protocol2
                 var pline = animation.GetPolyline();
                 pline.Opacity = 1;
 
-            //canvas.Children.Add(animation.GetPolyline());
             Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
             
 
@@ -948,7 +953,6 @@ namespace Protocol2
             var i = -1;
             foreach (Point pt in animation.GetPolyline().Points)
             {
-                //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
                 var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
                 delta = pt;
                 await Task.Delay(TimeSpan.FromSeconds(0.001));
@@ -988,17 +992,7 @@ namespace Protocol2
                 {
                     stroke.Selected = false;
                 }
-                //foreach (var strokeid in animation.inkStrokesIndex)
-                //{
-                //    inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(strokeid).Selected = true;
-                //}
-                //foreach (var s in animation.inkStrokesIndex)
-                //{
-                //    if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s)))
-                //    {
-                //        strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s));
-                //    }
-                //}
+                
                 foreach (var s in animation.inkStrokesId)
                 {
                     // check if stroke still exists
@@ -1017,7 +1011,7 @@ namespace Protocol2
                 {
                     // we can delete this current animation entry
                     animations.GetAnimations().Remove(animation);
-                    canvas.Children.Remove(animation.GetPolyline());
+                    polyCanvas.Children.Remove(animation.GetPolyline());
                     continue;
                 }
 
@@ -1038,7 +1032,6 @@ namespace Protocol2
                 var i = -1;
                 foreach (Point pt in animation.GetPolyline().Points)
                 {
-                    //container.MoveSelected(new Point(pt.X - prevX, pt.Y - prevY));
                     var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
                     delta = pt;
                     await Task.Delay(TimeSpan.FromSeconds(0.001));
@@ -1087,7 +1080,7 @@ namespace Protocol2
             Animation a = b.DataContext as Animation;
             int index = a.id;
             Debug.WriteLine("works:" + index);
-            canvas.Children.Remove(animations.GetAnimationAt(index).GetPolyline());
+            polyCanvas.Children.Remove(animations.GetAnimationAt(index).GetPolyline());
             animations.RemoveAnimation(index);
         }
 
