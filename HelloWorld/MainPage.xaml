@@ -75,7 +75,6 @@
                     <InkCanvas x:Name="inkCanvas"/>
                     
                     <Canvas x:Name="canvas" Loaded="Canvas_Loaded"/>
-                   
                     <Canvas x:Name="selectionCanvas"/>
                     <Canvas x:Name="toolbarCanvas">
                         <Grid x:Name="toolbarGrid">
@@ -102,6 +101,8 @@
                             </InkToolbar>
                         </Grid>
                     </Canvas>
+                    <Canvas x:Name="polyCanvas" Visibility="Visible" IsHitTestVisible="False" IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
+
                 </Grid>
                 <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
                     <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False">
