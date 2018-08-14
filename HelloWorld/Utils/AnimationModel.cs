@@ -50,11 +50,12 @@ namespace Protocol2.Utils
             inkStrokes = new List<InkStroke>();
             inkStrokesIndex = new List<int>();
             inkStrokesId = new List<uint>();
-            name = "Animation " + counter;
-            nameText = new TextBlock
-            {
-                Text = name,
-            };
+            nameText = new TextBlock();
+
+            
+
+            SetName(name);
+
             id = counter;
             counter++;
             time = 1; //default animations are 2s
@@ -77,7 +78,7 @@ namespace Protocol2.Utils
         public void SetName(String newName)
         {
             name = newName;
-            nameText.Text = newName;
+            nameText.Text = newName == null ? "XD" : newName;
         }
 
         public String GetName()
