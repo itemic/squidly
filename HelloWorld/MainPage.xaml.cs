@@ -802,6 +802,9 @@ namespace Protocol2
 
                 polyline.Points.Add(p.CurrentPoint.Position);
                 polyCanvas.Children.Add(polyline);
+
+
+
             }
 
             void moved(InkUnprocessedInput i, PointerEventArgs p)
@@ -832,13 +835,20 @@ namespace Protocol2
                 }
                 anime.SetPolyline(polyline);
 
+                TextBlock tb = new TextBlock
+                {
+                    Text = anime.name,
+                };
+                Canvas.SetLeft(tb, polyline.Points[0].X);
+                Canvas.SetTop(tb, polyline.Points[0].Y);
+
+                polyCanvas.Children.Add(tb);
                 inkToolbar.ActiveTool = currentTool;
                 inkToolbar.Children.Remove(animationPen);
                 var container = inkCanvas.InkPresenter.StrokeContainer;
 
                 animations.Add(anime);
 
-                //canvas.Children.Remove(polyline); //maybe only show when flyout or something...
 
                 await Animate(anime, true);
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
@@ -900,21 +910,7 @@ namespace Protocol2
             {
                 stroke.Selected = false;
             }
-            //foreach (var stroke in animation.GetInkStrokes())
-            //{
-            //    stroke.Selected = true;
-            //}
-            //foreach (var strokeid in animation.inkStrokesIndex)
-            //{
-            //    inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(strokeid).Selected = true;
-            //}
-            //foreach (var s in animation.inkStrokesIndex)
-            //{
-            //    if (inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s)))
-            //    {
-            //        strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokes().ElementAt(s));
-            //    }
-            //}
+
             foreach (var s in animation.inkStrokesId)
             {
                 // check if stroke still exists
