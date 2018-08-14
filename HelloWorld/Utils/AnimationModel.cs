@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using Windows.Foundation;
 using Windows.UI.Input.Inking;
+using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 
@@ -26,6 +27,8 @@ namespace Protocol2.Utils
         public List<uint> inkStrokesId { get; set; }
 
         public Polyline polyline { get; set; }
+        public TextBlock nameText { get; set; }
+
         [DataMember]
         public string name { get; set; }
         [DataMember]
@@ -48,6 +51,10 @@ namespace Protocol2.Utils
             inkStrokesIndex = new List<int>();
             inkStrokesId = new List<uint>();
             name = "Animation " + counter;
+            nameText = new TextBlock
+            {
+                Text = name,
+            };
             id = counter;
             counter++;
             time = 1; //default animations are 2s
@@ -70,6 +77,7 @@ namespace Protocol2.Utils
         public void SetName(String newName)
         {
             name = newName;
+            nameText.Text = newName;
         }
 
         public String GetName()

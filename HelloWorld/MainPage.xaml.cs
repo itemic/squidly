@@ -279,7 +279,7 @@ namespace Protocol2
                     polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
                     a.SetPolyline(polyline);
                     polyCanvas.Children.Add(polyline);
-                    //canvas.Children.Add(polyline);
+                    addPolylineText(a);
                 }
             }
         }
@@ -324,6 +324,7 @@ namespace Protocol2
                         polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
                         a.SetPolyline(polyline);
                         polyCanvas.Children.Add(polyline);
+                        addPolylineText(a);
                         //canvas.Children.Add(polyline);
                     }
                 }
@@ -362,6 +363,7 @@ namespace Protocol2
                         polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
                         a.SetPolyline(polyline);
                         polyCanvas.Children.Add(polyline);
+                        addPolylineText(a);
                         //canvas.Children.Add(polyline);
                     }
                 }
@@ -834,15 +836,7 @@ namespace Protocol2
                     }
                 }
                 anime.SetPolyline(polyline);
-
-                TextBlock tb = new TextBlock
-                {
-                    Text = anime.name,
-                };
-                Canvas.SetLeft(tb, polyline.Points[0].X);
-                Canvas.SetTop(tb, polyline.Points[0].Y);
-
-                polyCanvas.Children.Add(tb);
+                addPolylineText(anime);
                 inkToolbar.ActiveTool = currentTool;
                 inkToolbar.Children.Remove(animationPen);
                 var container = inkCanvas.InkPresenter.StrokeContainer;
@@ -860,6 +854,13 @@ namespace Protocol2
             inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += released;
         }
 
+        private void addPolylineText(Animation animation)
+        {
+            
+            Canvas.SetLeft(animation.nameText, animation.polyline.Points[0].X);
+            Canvas.SetTop(animation.nameText, animation.polyline.Points[0].Y);
+            polyCanvas.Children.Add(animation.nameText);
+        }
 
         private void CombineStrokes(object sender, RoutedEventArgs e)
         {
@@ -930,6 +931,7 @@ namespace Protocol2
                 // we can delete this current animation entry
                 animations.GetAnimations().Remove(animation);
                 polyCanvas.Children.Remove(animation.GetPolyline());
+                polyCanvas.Children.Remove(animation.nameText);
                 return;
             }
 
@@ -1008,6 +1010,8 @@ namespace Protocol2
                     // we can delete this current animation entry
                     animations.GetAnimations().Remove(animation);
                     polyCanvas.Children.Remove(animation.GetPolyline());
+                    polyCanvas.Children.Remove(animation.nameText);
+
                     continue;
                 }
 
@@ -1069,7 +1073,7 @@ namespace Protocol2
                
         }
 
-        private  void DeleteAnimation(object sender, RoutedEventArgs e)
+        private void DeleteAnimation(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
 
@@ -1077,6 +1081,8 @@ namespace Protocol2
             int index = a.id;
             Debug.WriteLine("works:" + index);
             polyCanvas.Children.Remove(animations.GetAnimationAt(index).GetPolyline());
+            polyCanvas.Children.Remove(animations.GetAnimationAt(index).nameText);
+
             animations.RemoveAnimation(index);
         }
 
