@@ -792,7 +792,6 @@ namespace Protocol2
             inkToolbar.Children.Add(animationPen);
 
             void pressed(InkUnprocessedInput i, PointerEventArgs p)
-
             {
                 polyline = new Polyline()
                 {
@@ -800,7 +799,6 @@ namespace Protocol2
                     StrokeThickness = 3,
                     StrokeDashArray = new DoubleCollection() { 5, 2 },
                 };
-
                 polyline.Points.Add(p.CurrentPoint.Position);
                 polyCanvas.Children.Add(polyline);
             }
@@ -1165,8 +1163,6 @@ namespace Protocol2
 
                         strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s));
                     }
-
-
                 }
 
                 if (strokesToAnimate.Count == 0)
@@ -1184,7 +1180,6 @@ namespace Protocol2
 
                 //canvas.Children.Add(animation.GetPolyline());
                 Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
-
 
                 foreach (InkStroke stroke in strokesToAnimate)
                 {
@@ -1220,7 +1215,6 @@ namespace Protocol2
                 if (AnimationMode.IsChecked == true)
                 {
                     pline.Opacity = 0.3;
-
                 }
                 else
                 {
