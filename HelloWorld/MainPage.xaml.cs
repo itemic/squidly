@@ -16,6 +16,7 @@ using Protocol2.Utils;
 using Windows.UI;
 using Windows.UI.Core;
 using System.Threading.Tasks;
+using System.Numerics;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -840,7 +841,7 @@ namespace Protocol2
 
                 //canvas.Children.Remove(polyline); //maybe only show when flyout or something...
 
-                await Animate(anime, true);
+                await AnimateTest(anime, true);
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
 
                 ClearSelection();
@@ -939,14 +940,14 @@ namespace Protocol2
 
             var delta = animation.startPoint;
 
-                var pline = animation.GetPolyline();
-                pline.Opacity = 1;
+            var pline = animation.GetPolyline();
+            pline.Opacity = 1;
 
             Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
             
 
             inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X  - (currentPosition.X + currentPosition.Width/2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
-    
+
             // want something here so we reset the location of ink to where it should start from
             // MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
             
@@ -977,6 +978,82 @@ namespace Protocol2
             {
                 pline.Opacity = 0;
             }
+        }
+
+        private async Task AnimateTest(Animation animation, bool revert)
+        {
+            //TODO: Check if the inkstrokes of the animation still exists...
+            List<InkStroke> strokesToAnimate = new List<InkStroke>();
+            foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+            {
+                stroke.Selected = false;
+            }
+        
+            foreach (var s in animation.inkStrokesId)
+            {
+                // check if stroke still exists
+                var stroke = inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s);
+                if (stroke != null && inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(stroke))
+                {
+                    inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s).Selected = true;
+
+                    strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s));
+                }
+
+
+            }
+
+            if (strokesToAnimate.Count == 0)
+            {
+                // we can delete this current animation entry
+                animations.GetAnimations().Remove(animation);
+                polyCanvas.Children.Remove(animation.GetPolyline());
+                return;
+            }
+
+            var delta = animation.startPoint;
+
+            var pline = animation.GetPolyline();
+            pline.Opacity = 1;
+
+            Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+
+
+            //inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X  - (currentPosition.X + currentPosition.Width/2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+            foreach (InkStroke stroke in strokesToAnimate)
+            {
+                stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X), (float)(animation.startPoint.Y));
+            }
+
+            //// want something here so we reset the location of ink to where it should start from
+            //// MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
+
+            //var i = -1;
+            //foreach (Point pt in animation.GetPolyline().Points)
+            //{
+            //    var r = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(pt.X - delta.X, pt.Y - delta.Y));
+            //    delta = pt;
+            //    await Task.Delay(TimeSpan.FromSeconds(0.001));
+            //    i++;
+
+            //}
+
+            //if (revert)
+            //{
+            //    currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+            //    inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+
+            //}
+
+            //if (AnimationMode.IsChecked == true)
+            //{
+            //    pline.Opacity = 0.3;
+
+            //}
+            //else
+            //{
+            //    pline.Opacity = 0;
+            //}
         }
 
         //run animations for all existing animations
@@ -1025,7 +1102,6 @@ namespace Protocol2
 
 
                 inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
-
                 // want something here so we reset the location of ink to where it should start from
                 // MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
 

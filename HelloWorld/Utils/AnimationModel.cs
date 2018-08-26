@@ -75,10 +75,7 @@ namespace Protocol2.Utils
         public String GetName()
         {
             return name;
-        }
-
-        
-        
+        } 
     }
 
     public class AnimationModel
