@@ -1068,6 +1068,19 @@ namespace Protocol2
                
         }
 
+        private async void Query(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement b = sender as FrameworkElement;
+            Animation a = b.DataContext as Animation;
+            int index = a.id;
+            var animation = animations.GetAnimationAt(index);
+            animation.polyline.Opacity = 1;
+            animation.polyline.Stroke = new SolidColorBrush(Colors.Blue);
+            await Task.Delay(1000);
+            animation.polyline.Stroke = new SolidColorBrush(Colors.ForestGreen);
+            animation.polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
+        }
+
         private void DeleteAnimation(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;

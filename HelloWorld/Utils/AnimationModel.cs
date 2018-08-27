@@ -52,9 +52,9 @@ namespace Protocol2.Utils
             inkStrokesId = new List<uint>();
             nameText = new TextBlock();
 
-            
 
-            SetName(name);
+            name = name == null ? name : "Animation " + counter;
+            //SetName(name);
 
             id = counter;
             counter++;
@@ -78,7 +78,7 @@ namespace Protocol2.Utils
         public void SetName(String newName)
         {
             name = newName;
-            nameText.Text = newName == null ? "XD" : newName;
+            nameText.Text = newName == null ? "Untitled animation" : newName;
         }
 
         public String GetName()

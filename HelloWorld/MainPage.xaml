@@ -33,6 +33,9 @@
                                         <Button Click="Replay">
                                             <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;"/>
                                         </Button>
+                                        <Button Click="Query">
+                                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE897;"/>
+                                        </Button>
                                         <Button Click="SettingsAnimation" FontFamily="Segoe UI">
                                             <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
                                         </Button>
