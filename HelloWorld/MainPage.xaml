@@ -61,7 +61,7 @@
                 <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right" Grid.Row="0">
 
                     <AppBarToggleButton x:Name="AnimationMode" Icon="Next" Label="Animation Mode" Click="ToggleAnimationMode" />
-                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="RunAllAnimationsTest"/>
+                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="RunSimultaneousAnimations"/>
                     <AppBarSeparator/>
                     <AppBarButton Icon="Save" Label="Save" Click="SaveAll"/>
                     <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
@@ -73,7 +73,7 @@
 
                 <Grid Grid.Row="1">
                     <InkCanvas x:Name="inkCanvas"/>
-                    
+
                     <Canvas x:Name="canvas" Loaded="Canvas_Loaded"/>
                     <Canvas x:Name="selectionCanvas"/>
                     <Canvas x:Name="toolbarCanvas">
@@ -83,7 +83,6 @@
                                 <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" ToolTipService.ToolTip="Select Strokes"/>
                                 <InkToolbarCustomToolButton x:Name="toolButtonComment"   ToolTipService.ToolTip="Comment Mode">
                                     <FontIcon x:Name="toolButtonCommentGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE90A;" />
-
 
                                     <InkToolbarCustomToolButton.ContextFlyout>
                                         <Flyout x:Name="StickyFlyout">
@@ -102,18 +101,16 @@
                         </Grid>
                     </Canvas>
                     <Canvas x:Name="polyCanvas" Visibility="Visible" IsHitTestVisible="False" IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
-
                 </Grid>
-                <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
+                <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Auto">
+                    
                     <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Background="{StaticResource animationWindowBackground}">
                                     <Canvas>
                                         <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="DragAnimationChunk">
-                                            <TextBlock TextAlignment="Center" Text="{Binding name}" Height="40" Width="{Binding length}">
-
-                                            </TextBlock>
+                                            <TextBlock TextAlignment="Center" Text="{Binding name}" Height="40" Width="{Binding length}"/>
                                             <Border.ContextFlyout>
                                                 <MenuFlyout>
                                                     <MenuFlyoutItem Text="Rename" Click="OpenRenameAnimationDialog"/>
@@ -132,6 +129,9 @@
                    CloseButtonText="Cancel">
                     <TextBox x:Name="renameUserInput" PlaceholderText="Please enter new name here" TextChanged="UserInputTextChanged" Height="20"/>
                 </ContentDialog>
+                <Canvas>
+                    
+                </Canvas>
             </Grid>
         </SplitView.Content>
     </SplitView>

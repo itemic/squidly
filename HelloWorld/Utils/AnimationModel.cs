@@ -40,6 +40,8 @@ namespace Protocol2.Utils
         public PointCollection linePoints { get; set; }
         [DataMember]
         public int length { get; set; } //just number of points in the polyline
+        [DataMember]
+        public double position { get; set; }
 
         [DataMember]
         public static int counter = 0; // temporary use
@@ -79,6 +81,14 @@ namespace Protocol2.Utils
         {
             return name;
         } 
+    }
+
+    public class AnimationComparer : IComparer<Animation>
+    {
+        public int Compare(Animation x, Animation y)
+        {
+            return x.position.CompareTo(y.position);
+        }
     }
 
     public class AnimationModel
