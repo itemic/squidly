@@ -16,6 +16,7 @@ using Protocol2.Utils;
 using Windows.UI;
 using Windows.UI.Core;
 using System.Threading.Tasks;
+using Windows.UI.Xaml.Data;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -862,10 +863,18 @@ namespace Protocol2
 
         private void addPolylineText(Animation animation)
         {
-            
-            Canvas.SetLeft(animation.nameText, animation.polyline.Points[0].X);
-            Canvas.SetTop(animation.nameText, animation.polyline.Points[0].Y);
-            polyCanvas.Children.Add(animation.nameText);
+            TextBlock tb = new TextBlock();
+            tb.DataContext = animation;
+            Binding binding = new Binding { Path = new PropertyPath("name") };
+            tb.SetBinding(TextBlock.TextProperty, binding);
+            Canvas.SetLeft(tb, animation.polyline.Points[0].X);
+            Canvas.SetTop(tb, animation.polyline.Points[0].Y);
+
+
+            //Canvas.SetLeft(animation.nameText, animation.polyline.Points[0].X);
+            //Canvas.SetTop(animation.nameText, animation.polyline.Points[0].Y);
+            //polyCanvas.Children.Add(animation.nameText);
+            polyCanvas.Children.Add(tb);
         }
 
         private void CombineStrokes(object sender, RoutedEventArgs e)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -14,7 +15,7 @@ using Windows.UI.Xaml.Shapes;
 namespace Protocol2.Utils
 {
     [DataContract]
-    public class Animation
+    public class Animation: INotifyPropertyChanged
     {
         // public is only temporary!
         public List<InkStroke> inkStrokes { get; set; }
@@ -44,6 +45,8 @@ namespace Protocol2.Utils
 
         [DataMember]
         public static int counter = 0; // temporary use
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public Animation()
         {
