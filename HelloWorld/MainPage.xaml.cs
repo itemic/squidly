@@ -558,9 +558,17 @@ namespace Protocol2
             lasso.Points.Add(args.CurrentPoint.RawPosition);
 
             boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithPolyLine(lasso.Points);
-            
-            boundingRect = FindBoundingRect(inkCanvas.InkPresenter.StrokeContainer.GetStrokes());
 
+            List<InkStroke> selectedStrokes = new List<InkStroke>();
+            foreach(InkStroke stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes()) {
+                if (stroke.Selected)
+                {
+                    selectedStrokes.Add(stroke);
+                }
+            }
+            boundingRect = FindBoundingRect(selectedStrokes);
+            Debug.WriteLine("own " + FindBoundingRect(selectedStrokes));
+            Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
             isBoundRect = false;
             DrawBoundingRect();
         }
@@ -581,7 +589,16 @@ namespace Protocol2
             Point clickedPoint = args.GetPosition(inkCanvas);
             //need to adjust it so that it works for different thickness strokes
             boundingRect = inkCanvas.InkPresenter.StrokeContainer.SelectWithLine(new Point(clickedPoint.X - 1, clickedPoint.Y - 1), new Point(clickedPoint.X, clickedPoint.Y + 3));
-            boundingRect = FindBoundingRect(inkCanvas.InkPresenter.StrokeContainer.GetStrokes());
+
+            List<InkStroke> selectedStrokes = new List<InkStroke>();
+            foreach (InkStroke stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+            {
+                if (stroke.Selected)
+                {
+                    selectedStrokes.Add(stroke);
+                }
+            }
+            boundingRect = FindBoundingRect(selectedStrokes);
             DrawBoundingRect();
         }
 
@@ -635,10 +652,16 @@ namespace Protocol2
         }
 
         // check for stroke groups and update selected strokes if original stroke(s) in stroke group
-        private Rect FindBoundingRect(IReadOnlyList<InkStroke> strokes)
+        private Rect FindBoundingRect(List<InkStroke> strokes)
         {
+            foreach(InkStroke stroke in strokes)
+            {
+                stroke.Selected = true;
+            }
             StrokeGroup strokeGroup;
+            boundingRect = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
             Rect updatedBoundingBox = boundingRect;
+            Debug.WriteLine("bounding box " + updatedBoundingBox);
             var updatedLeftX = updatedBoundingBox.X;
             var updatedRightX = updatedBoundingBox.X + updatedBoundingBox.Width;
             var updatedTopY = updatedBoundingBox.Y;
@@ -646,32 +669,29 @@ namespace Protocol2
 
             foreach (var stroke in strokes)
             {
-                if (stroke.Selected)
+                if (strokeGroups.TryGetValue(stroke, out strokeGroup))
                 {
-                    if (strokeGroups.TryGetValue(stroke, out strokeGroup))
+                    strokeGroup.SelectStrokesInGroup();
+                    Rect groupBoundingBox = strokeGroup.FindBoundingBox();
+
+                    if (groupBoundingBox.X < updatedBoundingBox.X)
                     {
-                        strokeGroup.SelectStrokesInGroup();
-                        Rect groupBoundingBox = strokeGroup.FindBoundingBox();
+                        updatedLeftX = groupBoundingBox.X;
+                    }
 
-                        if (groupBoundingBox.X < updatedBoundingBox.X)
-                        {
-                            updatedLeftX = groupBoundingBox.X;
-                        }
+                    if (groupBoundingBox.Y < updatedBoundingBox.Y)
+                    {
+                        updatedTopY = groupBoundingBox.Y;
+                    }
 
-                        if (groupBoundingBox.Y < updatedBoundingBox.Y)
-                        {
-                            updatedTopY = groupBoundingBox.Y;
-                        }
+                    if (groupBoundingBox.X + groupBoundingBox.Width > updatedBoundingBox.X + updatedBoundingBox.Width)
+                    {
+                        updatedRightX = groupBoundingBox.X + groupBoundingBox.Width;
+                    }
 
-                        if (groupBoundingBox.X + groupBoundingBox.Width > updatedBoundingBox.X + updatedBoundingBox.Width)
-                        {
-                            updatedRightX = groupBoundingBox.X + groupBoundingBox.Width;
-                        }
-
-                        if (groupBoundingBox.Y + groupBoundingBox.Height > updatedBoundingBox.Y + updatedBoundingBox.Height)
-                        {
-                            updatedBottomY = groupBoundingBox.Y + groupBoundingBox.Height;
-                        }
+                    if (groupBoundingBox.Y + groupBoundingBox.Height > updatedBoundingBox.Y + updatedBoundingBox.Height)
+                    {
+                        updatedBottomY = groupBoundingBox.Y + groupBoundingBox.Height;
                     }
                 }
 
@@ -731,6 +751,7 @@ namespace Protocol2
             inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(xTranslation, yTranslation));
             Canvas.SetLeft(rectangle, newLeft);
             Canvas.SetTop(rectangle, newTop);
+            boundingRect = new Rect(newLeft, newTop, rectangle.ActualWidth, rectangle.ActualHeight);
         }
 
 
@@ -839,7 +860,7 @@ namespace Protocol2
 
                 //canvas.Children.Remove(polyline); //maybe only show when flyout or something...
 
-                await AnimateTest(anime, true);
+                await AnimateTest1(anime, true);
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
 
                 ClearSelection();
@@ -986,13 +1007,15 @@ namespace Protocol2
             {
                 stroke.Selected = false;
             }
-        
+
             foreach (var s in animation.inkStrokesId)
             {
                 // check if stroke still exists
                 var stroke = inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s);
                 if (stroke != null && inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(stroke))
                 {
+                    inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s).Selected = true;
+
                     strokesToAnimate.Add(inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s));
                 }
 
@@ -1012,18 +1035,20 @@ namespace Protocol2
             var pline = animation.GetPolyline();
             pline.Opacity = 1;
 
-            Rect currentPosition = FindBoundingRect(strokesToAnimate);
+            Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+            Debug.WriteLine(currentPosition);
 
+
+            //inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X  - (currentPosition.X + currentPosition.Width/2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
             foreach (InkStroke stroke in strokesToAnimate)
             {
-                stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2)), (float)(animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+                stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2) + stroke.PointTransform.Translation.X), (float)(animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2) + stroke.PointTransform.Translation.Y));
             }
 
             //// want something here so we reset the location of ink to where it should start from
             //// MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
 
             var i = -1;
-            //var watch = System.Diagnostics.Stopwatch.StartNew();
             foreach (Point pt in animation.GetPolyline().Points)
             {
                 foreach (InkStroke stroke in strokesToAnimate)
@@ -1033,28 +1058,116 @@ namespace Protocol2
                 delta = pt;
                 await Task.Delay(TimeSpan.FromSeconds(0.001));
                 i++;
+
             }
-            //watch.Stop();
-            //Debug.WriteLine("time = " + watch.ElapsedMilliseconds);
-            //Debug.WriteLine(animation.length);
 
             if (revert)
             {
-                currentPosition = FindBoundingRect(strokesToAnimate);
+                currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+                //inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
                 foreach (InkStroke stroke in strokesToAnimate)
                 {
-                    stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2)), (float)(animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+                    stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2) + stroke.PointTransform.Translation.X), (float)(animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2) + stroke.PointTransform.Translation.Y));
                 }
             }
 
             if (AnimationMode.IsChecked == true)
             {
                 pline.Opacity = 0.3;
+
             }
             else
             {
                 pline.Opacity = 0;
             }
+        }
+
+        private async Task AnimateTest1(Animation animation, bool revert)
+        {
+            //TODO: Check if the inkstrokes of the animation still exists...
+            List<InkStroke> strokesToAnimate = new List<InkStroke>();
+            foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+            {
+                stroke.Selected = false;
+            }
+
+            foreach (var s in animation.inkStrokesId)
+            {
+                // check if stroke still exists
+                var stroke = inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s);
+                if (stroke != null && inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(stroke))
+                {
+                    inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s).Selected = true;
+                    strokesToAnimate.Add(stroke);
+                }
+            }
+
+            if (strokesToAnimate.Count == 0)
+            {
+                // we can delete this current animation entry
+                animations.GetAnimations().Remove(animation);
+                polyCanvas.Children.Remove(animation.GetPolyline());
+                return;
+            }
+
+            var delta = animation.startPoint;
+
+            var pline = animation.GetPolyline();
+            pline.Opacity = 1;
+
+            Rect currentPosition = FindBoundingRect(strokesToAnimate);
+            Debug.WriteLine("own " + FindBoundingRect(strokesToAnimate));
+            Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
+
+            //inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X  - (currentPosition.X + currentPosition.Width/2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+            foreach (InkStroke stroke in strokesToAnimate)
+            {
+                stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2) + stroke.PointTransform.Translation.X), (float)(animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2) + stroke.PointTransform.Translation.Y));
+            }
+
+            //// want something here so we reset the location of ink to where it should start from
+            //// MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
+
+            var i = -1;
+            foreach (Point pt in animation.GetPolyline().Points)
+            {
+                foreach (InkStroke stroke in strokesToAnimate)
+                {
+                    stroke.PointTransform = Matrix3x2.CreateTranslation((float)(pt.X - delta.X + stroke.PointTransform.Translation.X), (float)(pt.Y - delta.Y + stroke.PointTransform.Translation.Y));
+                }
+                delta = pt;
+                await Task.Delay(TimeSpan.FromSeconds(0.001));
+                i++;
+
+            }
+
+            if (revert)
+            {
+                currentPosition = FindBoundingRect(strokesToAnimate);
+                Debug.WriteLine("own " + FindBoundingRect(strokesToAnimate));
+                Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
+                //inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+                foreach (InkStroke stroke in strokesToAnimate)
+                {
+                    stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2) + stroke.PointTransform.Translation.X), (float)(animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2) + stroke.PointTransform.Translation.Y));
+                }
+            }
+
+            if (AnimationMode.IsChecked == true)
+            {
+                pline.Opacity = 0.3;
+
+            }
+            else
+            {
+                pline.Opacity = 0;
+            }
+
+            foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+            {
+                stroke.Selected = false;
+            }
+
         }
 
         //run animations for all existing animations
@@ -1147,7 +1260,7 @@ namespace Protocol2
             foreach (Animation a in orderedAnimationList)
             {
                 bool revert = (bool) resetCheckbox.IsChecked;
-                await AnimateTest(a, revert);
+                await AnimateTest1(a, revert);
             }
 
         }
