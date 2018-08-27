@@ -17,6 +17,7 @@ using Windows.UI;
 using Windows.UI.Core;
 using System.Threading.Tasks;
 using System.Numerics;
+using Windows.System.Threading;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -1251,7 +1252,9 @@ namespace Protocol2
 
         private async void RunSimultaneousAnimations(object sender, RoutedEventArgs e)
         {
+            var msPerPoint = 15.638;
             SortedSet<Animation> orderedAnimationList = new SortedSet<Animation>(new AnimationComparer());
+            double previousStart = 0;
             foreach(Animation a in AnimationRepresentation.Items)
             {
                 orderedAnimationList.Add(a);
@@ -1259,8 +1262,12 @@ namespace Protocol2
 
             foreach (Animation a in orderedAnimationList)
             {
-                bool revert = (bool) resetCheckbox.IsChecked;
-                await AnimateTest1(a, revert);
+                //Task animationTask = Task.Factory.StartNew(() => AnimateTest1(a, resetCheckbox.IsChecked == true));
+                TimeSpan delay = TimeSpan.FromMilliseconds(a.position - previousStart);
+                //ThreadPoolTimer delayTimer = ThreadPoolTimer.CreateTimer(AnimateTest1(a, resetCheckbox.IsChecked == true), delay);
+                //AnimateTest1(a, resetCheckbox.IsChecked == true);
+                previousStart = a.position;
+
             }
 
         }
