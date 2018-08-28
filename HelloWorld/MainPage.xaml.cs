@@ -569,8 +569,8 @@ namespace Protocol2
                 }
             }
             boundingRect = FindBoundingRect(selectedStrokes);
-            Debug.WriteLine("own " + FindBoundingRect(selectedStrokes));
-            Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
+            //Debug.WriteLine("own " + FindBoundingRect(selectedStrokes));
+            //Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
             isBoundRect = false;
             DrawBoundingRect();
         }
@@ -656,14 +656,13 @@ namespace Protocol2
         // check for stroke groups and update selected strokes if original stroke(s) in stroke group
         private Rect FindBoundingRect(List<InkStroke> strokes)
         {
-            //foreach (InkStroke stroke in strokes)
-            //{
-            //    stroke.Selected = true;
-            //}
+            foreach (InkStroke stroke in strokes)
+            {
+                stroke.Selected = true;
+            }
             StrokeGroup strokeGroup;
-            //boundingRect = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
+            boundingRect = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
             Rect updatedBoundingBox = boundingRect;
-            Debug.WriteLine("bounding box " + updatedBoundingBox);
             var updatedLeftX = updatedBoundingBox.X;
             var updatedRightX = updatedBoundingBox.X + updatedBoundingBox.Width;
             var updatedTopY = updatedBoundingBox.Y;
@@ -1038,7 +1037,6 @@ namespace Protocol2
             pline.Opacity = 1;
 
             Rect currentPosition = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
-            Debug.WriteLine(currentPosition);
 
 
             //inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X  - (currentPosition.X + currentPosition.Width/2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
@@ -1099,7 +1097,7 @@ namespace Protocol2
                 var stroke = inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s);
                 if (stroke != null && inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(stroke))
                 {
-                    inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s).Selected = true;
+                    //inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s).Selected = true;
                     strokesToAnimate.Add(stroke);
                 }
             }
@@ -1117,9 +1115,14 @@ namespace Protocol2
             var pline = animation.GetPolyline();
             pline.Opacity = 1;
 
-            Rect currentPosition = FindBoundingRect(strokesToAnimate);
-            Debug.WriteLine("own " + FindBoundingRect(strokesToAnimate));
-            Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
+            Rect currentPosition; 
+            lock (moveSelectedLock)
+            {
+                currentPosition = FindBoundingRect(strokesToAnimate);
+            }
+            //Rect currentPosition = FindBoundingRect(strokesToAnimate);
+            Debug.WriteLine("own start" + FindBoundingRect(strokesToAnimate));
+            Debug.WriteLine("move selected start" + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
 
             //inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X  - (currentPosition.X + currentPosition.Width/2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
             foreach (InkStroke stroke in strokesToAnimate)
@@ -1147,16 +1150,11 @@ namespace Protocol2
             {
                 lock (moveSelectedLock)
                 {
-                    foreach (InkStroke stroke in strokesToAnimate)
-                    {
-                        stroke.Selected = true;
-                    }
-                    boundingRect = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+                    currentPosition = FindBoundingRect(strokesToAnimate);
                 }
-                currentPosition = FindBoundingRect(strokesToAnimate);
-                Debug.WriteLine("own " + FindBoundingRect(strokesToAnimate));
-                Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
-                //inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
+                //Debug.WriteLine("own " + FindBoundingRect(strokesToAnimate));
+                //Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
+
                 foreach (InkStroke stroke in strokesToAnimate)
                 {
                     stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2) + stroke.PointTransform.Translation.X), (float)(animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2) + stroke.PointTransform.Translation.Y));
@@ -1277,7 +1275,6 @@ namespace Protocol2
                 AnimateTest1(a, resetCheckbox.IsChecked == true);
                 await Task.Delay(TimeSpan.FromMilliseconds((a.position - previousStart) * msPerPoint));
                 //await Task.Delay(TimeSpan.FromSeconds(3));
-                Debug.WriteLine("animation position " + a.position);
                 previousStart = a.position;
 
             }
@@ -1290,7 +1287,6 @@ namespace Protocol2
             FrameworkElement b = sender as FrameworkElement;
             Animation a = b.DataContext as Animation;
             int index = a.id;
-            Debug.WriteLine("works:" + a);
             var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
 
              
@@ -1304,7 +1300,6 @@ namespace Protocol2
 
             Animation a = b.DataContext as Animation;
             int index = a.id;
-            Debug.WriteLine("works:" + index);
             polyCanvas.Children.Remove(animations.GetAnimationAt(index).GetPolyline());
             animations.RemoveAnimation(index);
         }
