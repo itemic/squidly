@@ -45,6 +45,7 @@ namespace Protocol2
         //fields for animation related functionality
         public bool isAnimationMode = false;
         private AnimationModel animations;
+        private Object moveSelectedLock = new Object();
     
 
         // different mouse looks for normal and when mouse in selected box
@@ -655,12 +656,12 @@ namespace Protocol2
         // check for stroke groups and update selected strokes if original stroke(s) in stroke group
         private Rect FindBoundingRect(List<InkStroke> strokes)
         {
-            foreach(InkStroke stroke in strokes)
-            {
-                stroke.Selected = true;
-            }
+            //foreach (InkStroke stroke in strokes)
+            //{
+            //    stroke.Selected = true;
+            //}
             StrokeGroup strokeGroup;
-            boundingRect = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
+            //boundingRect = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0,0));
             Rect updatedBoundingBox = boundingRect;
             Debug.WriteLine("bounding box " + updatedBoundingBox);
             var updatedLeftX = updatedBoundingBox.X;
@@ -1144,6 +1145,14 @@ namespace Protocol2
 
             if (revert)
             {
+                lock (moveSelectedLock)
+                {
+                    foreach (InkStroke stroke in strokesToAnimate)
+                    {
+                        stroke.Selected = true;
+                    }
+                    boundingRect = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+                }
                 currentPosition = FindBoundingRect(strokesToAnimate);
                 Debug.WriteLine("own " + FindBoundingRect(strokesToAnimate));
                 Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
@@ -1259,14 +1268,15 @@ namespace Protocol2
             {
                 orderedAnimationList.Add(a);
             }
+            Debug.WriteLine("ordered animation list " + orderedAnimationList.Count);
 
             foreach (Animation a in orderedAnimationList)
             {
                 //Task animationTask = Task.Factory.StartNew(() => AnimateTest1(a, resetCheckbox.IsChecked == true));
                 //ThreadPoolTimer delayTimer = ThreadPoolTimer.CreateTimer(AnimateTest1(a, resetCheckbox.IsChecked == true), delay);
                 AnimateTest1(a, resetCheckbox.IsChecked == true);
-                //await Task.Delay(TimeSpan.FromMilliseconds((a.position - previousStart) * msPerPoint * 1000));
-                await Task.Delay(TimeSpan.FromSeconds(3));
+                await Task.Delay(TimeSpan.FromMilliseconds((a.position - previousStart) * msPerPoint));
+                //await Task.Delay(TimeSpan.FromSeconds(3));
                 Debug.WriteLine("animation position " + a.position);
                 previousStart = a.position;
 

@@ -87,7 +87,14 @@ namespace Protocol2.Utils
     {
         public int Compare(Animation x, Animation y)
         {
-            return x.position.CompareTo(y.position);
+            int result = x.position.CompareTo(y.position);
+            if (result == 0)
+            {
+                return 1;
+            } else
+            {
+                return result;
+            }
         }
     }
 
