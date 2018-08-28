@@ -1263,9 +1263,11 @@ namespace Protocol2
             foreach (Animation a in orderedAnimationList)
             {
                 //Task animationTask = Task.Factory.StartNew(() => AnimateTest1(a, resetCheckbox.IsChecked == true));
-                TimeSpan delay = TimeSpan.FromMilliseconds(a.position - previousStart);
                 //ThreadPoolTimer delayTimer = ThreadPoolTimer.CreateTimer(AnimateTest1(a, resetCheckbox.IsChecked == true), delay);
-                //AnimateTest1(a, resetCheckbox.IsChecked == true);
+                AnimateTest1(a, resetCheckbox.IsChecked == true);
+                //await Task.Delay(TimeSpan.FromMilliseconds((a.position - previousStart) * msPerPoint * 1000));
+                await Task.Delay(TimeSpan.FromSeconds(3));
+                Debug.WriteLine("animation position " + a.position);
                 previousStart = a.position;
 
             }
