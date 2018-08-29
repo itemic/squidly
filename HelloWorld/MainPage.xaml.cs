@@ -84,6 +84,9 @@ namespace Protocol2
             //animation mode set up
             AnimationMode.Checked += AnimationToggleChecked;
             AnimationMode.Unchecked += AnimationToggleUnchecked;
+            Application.Current.Resources["AppBarToggleButtonBackgroundChecked"] = (SolidColorBrush)this.Resources["animationBlockColor"];
+            Application.Current.Resources["AppBarToggleButtonBackgroundCheckedPointerOver"] = (SolidColorBrush)this.Resources["animationBlockColor"];
+            Application.Current.Resources["AppBarToggleButtonBackgroundCheckedPressed"] = (SolidColorBrush)this.Resources["animationBlockColor"];
 
             //comments set up
             SetUpStickyNotes();
@@ -1276,7 +1279,6 @@ namespace Protocol2
             {
                 await Task.Delay(TimeSpan.FromMilliseconds((a.position - previousStart) * msPerPoint));
                 AnimateTest1(a, resetCheckbox.IsChecked == true);
-                //await Task.Delay(TimeSpan.FromSeconds(3));
                 previousStart = a.position;
 
             }

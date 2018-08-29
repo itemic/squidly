@@ -8,7 +8,7 @@
     mc:Ignorable="d">
     <Page.Resources>
         <SolidColorBrush x:Key="animationWindowBackground" Color="#dbe1e3"/>
-        <SolidColorBrush x:Key="animationBlockColor" Color="#323e53 "/>
+        <SolidColorBrush x:Key="animationBlockColor" Color="#E09F3E"/>
     </Page.Resources>
 
     <SplitView x:Name="splitView" IsPaneOpen="False" DisplayMode="CompactInline" CompactPaneLength="50" OpenPaneLength="250" PanePlacement="Right">
@@ -107,12 +107,27 @@
                     <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False">
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Background="{StaticResource animationWindowBackground}">
+                                <StackPanel Background="{StaticResource animationWindowBackground}" Height="55">
                                     <Canvas>
-                                        <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="DragAnimationChunk">
-                                            <TextBlock TextAlignment="Center" Text="{Binding name}" Height="40" Width="{Binding length}"/>
+                                        <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="DragAnimationChunk" ToolTipService.ToolTip="{Binding name}">
+                                            <StackPanel Grid.Column="1" Width="{Binding length}" >
+                                                <TextBlock Text="{Binding name}" HorizontalAlignment="Center"/>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                    <Button Click="Replay">
+                                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;"/>
+                                                    </Button>
+                                                    <Button Click="OpenRenameAnimationDialog" FontFamily="Segoe UI">
+                                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE13E;"/>
+                                                    </Button>
+                                                    <Button Click="DeleteAnimation">
+                                                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" Foreground="Crimson"/>
+                                                    </Button>
+                                                </StackPanel>
+                                            </StackPanel>
                                             <Border.ContextFlyout>
                                                 <MenuFlyout>
+                                                    <MenuFlyoutItem Text="Play" Click="Replay"/>
+                                                    <MenuFlyoutItem Text="Delete" Click="DeleteAnimation"/>
                                                     <MenuFlyoutItem Text="Rename" Click="OpenRenameAnimationDialog"/>
                                                 </MenuFlyout>
                                             </Border.ContextFlyout>
