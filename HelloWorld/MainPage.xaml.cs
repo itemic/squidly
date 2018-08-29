@@ -1300,9 +1300,9 @@ namespace Protocol2
 
         private  void DeleteAnimation(object sender, RoutedEventArgs e)
         {
-            Button b = sender as Button;
+            FrameworkElement senderElement = sender as FrameworkElement;
+            Animation a = senderElement.DataContext as Animation;
 
-            Animation a = b.DataContext as Animation;
             int index = a.id;
             polyCanvas.Children.Remove(animations.GetAnimationAt(index).GetPolyline());
             animations.RemoveAnimation(index);

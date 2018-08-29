@@ -44,9 +44,7 @@
                             </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
-
                 </ListView>
-
             </StackPanel>
         </SplitView.Pane>
         <SplitView.Content>
@@ -56,7 +54,6 @@
                     <RowDefinition Height="4*"/>
                     <RowDefinition x:Name="col3" Height="0"/>
                 </Grid.RowDefinitions>
-
 
                 <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right" Grid.Row="0">
 
@@ -102,8 +99,17 @@
                     </Canvas>
                     <Canvas x:Name="polyCanvas" Visibility="Visible" IsHitTestVisible="False" IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
                 </Grid>
-                <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Auto">
+                <Grid Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20"></RowDefinition>
+                        <RowDefinition Height="4*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                </Grid>
+
+                <Canvas Grid.Row="1">
                     
+                </Canvas>
+                <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Auto">
                     <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False">
                         <ListView.ItemTemplate>
                             <DataTemplate>
