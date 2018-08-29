@@ -1134,6 +1134,7 @@ namespace Protocol2
             //// MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
 
             var i = -1;
+            //Stopwatch stopwatch = Stopwatch.StartNew();
             foreach (Point pt in animation.GetPolyline().Points)
             {
                 foreach (InkStroke stroke in strokesToAnimate)
@@ -1143,8 +1144,10 @@ namespace Protocol2
                 delta = pt;
                 await Task.Delay(TimeSpan.FromSeconds(0.001));
                 i++;
-
             }
+            //stopwatch.Stop();
+            //Debug.WriteLine("ms " + stopwatch.ElapsedMilliseconds);
+            //Debug.WriteLine("points" + animation.length + ", " + animation.GetPolyline().Points);
 
             if (revert)
             {
@@ -1259,7 +1262,8 @@ namespace Protocol2
 
         private async void RunSimultaneousAnimations(object sender, RoutedEventArgs e)
         {
-            var msPerPoint = 15.638;
+            //15.638 on my computer
+            var msPerPoint = 16.560;
             SortedSet<Animation> orderedAnimationList = new SortedSet<Animation>(new AnimationComparer());
             double previousStart = 0;
             foreach(Animation a in AnimationRepresentation.Items)
@@ -1270,10 +1274,8 @@ namespace Protocol2
 
             foreach (Animation a in orderedAnimationList)
             {
-                //Task animationTask = Task.Factory.StartNew(() => AnimateTest1(a, resetCheckbox.IsChecked == true));
-                //ThreadPoolTimer delayTimer = ThreadPoolTimer.CreateTimer(AnimateTest1(a, resetCheckbox.IsChecked == true), delay);
-                AnimateTest1(a, resetCheckbox.IsChecked == true);
                 await Task.Delay(TimeSpan.FromMilliseconds((a.position - previousStart) * msPerPoint));
+                AnimateTest1(a, resetCheckbox.IsChecked == true);
                 //await Task.Delay(TimeSpan.FromSeconds(3));
                 previousStart = a.position;
 
