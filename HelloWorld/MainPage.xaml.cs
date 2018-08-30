@@ -157,6 +157,24 @@ namespace Protocol2
 
         }
 
+        //timeline in this case isn't in time units. It's based on the horizontal positions in the canvas. Length units of canvas have been directly mapped to time units.
+        //1 unit of length of the Canvas is around 16.5 ms.
+        private void TimeLineCanvasLoaded(object sender, RoutedEventArgs e)
+        {
+            var length = timelineCanvas.ActualWidth;
+            for (int i = 0; i < length; i=i+50)
+            {
+                TextBlock time = new TextBlock()
+                {
+                    Text = i.ToString(),
+                    FontWeight = Windows.UI.Text.FontWeights.Light,
+                    FontSize=10
+                };
+                Canvas.SetLeft(time, i);
+                timelineCanvas.Children.Add(time);
+            }
+        }
+
         private void SetUpStickyNotes()
         {
             Color[] colors = { Colors.Goldenrod, Colors.Plum, Colors.LightSkyBlue, Colors.PaleGreen };
