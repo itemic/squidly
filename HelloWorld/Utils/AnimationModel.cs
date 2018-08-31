@@ -41,7 +41,7 @@ namespace Protocol2.Utils
         [DataMember]
         public int length { get; set; } //just number of points in the polyline
         [DataMember]
-        public double position { get; set; }
+        public double position { get; set; } //position in canvas - directly proportional to time the animation runs
 
         [DataMember]
         public static int counter = 0; // temporary use

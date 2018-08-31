@@ -1017,6 +1017,9 @@ namespace Protocol2
 
         private async void RunAllAnimations(object sender, RoutedEventArgs e)
         {
+            Button runAllButton = sender as Button;
+            runAllButton.IsEnabled = false;
+            var tasks = new List<Task>();
             //15.638 on my computer
             var msPerPoint = 16.560;
             SortedSet<Animation> orderedAnimationList = new SortedSet<Animation>(new AnimationComparer());
@@ -1029,20 +1032,26 @@ namespace Protocol2
             foreach (Animation a in orderedAnimationList)
             {
                 await Task.Delay(TimeSpan.FromMilliseconds((a.position - previousStart) * msPerPoint));
-                RunAnimation(a, resetButton.IsChecked == true);
+                tasks.Add(RunAnimation(a, resetButton.IsChecked == true));
                 previousStart = a.position;
             }
+
+            await Task.WhenAll(tasks);
+            runAllButton.IsEnabled = true;
+
         }
 
         //replay selected animation
         private async void Replay(object sender, RoutedEventArgs e)
         {
             FrameworkElement b = sender as FrameworkElement;
+            Button replayButton = (Button)b;
+            replayButton.IsEnabled = false;
             Animation a = b.DataContext as Animation;
             int index = a.id;
             var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
-            Debug.WriteLine(resetButton.IsChecked);
-            await RunAnimation(replayAnimation, resetButton.IsChecked == true);     
+            await RunAnimation(replayAnimation, resetButton.IsChecked == true);
+            replayButton.IsEnabled = true;
         }
 
         private  void DeleteAnimation(object sender, RoutedEventArgs e)
