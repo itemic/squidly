@@ -56,7 +56,6 @@
                 </Grid.RowDefinitions>
 
                 <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right" Grid.Row="0">
-
                     <AppBarToggleButton x:Name="AnimationMode" Icon="Next" Label="Animation Mode" Click="ToggleAnimationMode" />
                     <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="RunSimultaneousAnimations"/>
                     <AppBarSeparator/>
@@ -64,8 +63,6 @@
                     <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
                     <AppBarSeparator/>
                     <AppBarButton Icon="Home" Label="Back to Menu" Click="BackToMenu"/>
-
-
                 </CommandBar>
 
                 <Grid Grid.Row="1">
@@ -86,26 +83,34 @@
                                             <StackPanel VerticalAlignment="Center" Orientation="Vertical">
                                                 <TextBlock Text="Sticky Note Color"/>
                                                 <StackPanel x:Name="StickyNoteStack" Orientation="Horizontal">
-
-
                                                 </StackPanel>
-
                                             </StackPanel>
                                         </Flyout>
                                     </InkToolbarCustomToolButton.ContextFlyout>
                                 </InkToolbarCustomToolButton>
                             </InkToolbar>
                         </Grid>
+                        <Grid x:Name="animationBarGrid">
+                            <Rectangle x:Name="animationBarRect" Fill="#FFD4D4D4"/>
+                            <CommandBar x:Name="animationToolBar" Loading="InitializeAnimationToolbar">
+                                <AppBarButton Icon="Play" Label="Play All" Click="RunSimultaneousAnimations"/>
+                                <AppBarSeparator/>
+                                <AppBarToggleButton Icon="RepeatAll" Label="Repeat"/>
+                                <AppBarToggleButton Label="Return to start position" FontFamily="Segoe MDL2 icons">
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB97;"/>
+                                </AppBarToggleButton>
+                            </CommandBar>
+                        </Grid>
                     </Canvas>
                     <Canvas x:Name="polyCanvas" Visibility="Visible" IsHitTestVisible="False" IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
                 </Grid>
-                
+
                 <Grid Grid.Row="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="15"></RowDefinition>
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
-
+                    
                     <Canvas Grid.Row="0" x:Name="timelineCanvas" Loaded="TimeLineCanvasLoaded">
                     </Canvas>
                     <ScrollViewer Grid.Row="1" VerticalScrollMode="Auto" HorizontalScrollMode="Auto">
