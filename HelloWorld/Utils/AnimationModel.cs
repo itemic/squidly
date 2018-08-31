@@ -31,13 +31,17 @@ namespace Protocol2.Utils
         [DataMember]
         public int id { get; set; }
         [DataMember]
-        public Point startPoint {get; set;}
+        public Point startPoint { get; set; }
         [DataMember]
         public Point endPoint { get; set; }
         [DataMember]
         private double time { get; set; }
         [DataMember]
         public PointCollection linePoints { get; set; }
+        [DataMember]
+        public int length { get; set; } //just number of points in the polyline
+        [DataMember]
+        public double position { get; set; }
 
         [DataMember]
         public static int counter = 0; // temporary use
@@ -64,7 +68,8 @@ namespace Protocol2.Utils
             startPoint = p.Points[0];
             endPoint = p.Points[p.Points.Count - 1];
             linePoints = p.Points;
-            
+
+            length = polyline.Points.Count;
         }
 
         public void SetName(String newName)
@@ -75,10 +80,22 @@ namespace Protocol2.Utils
         public String GetName()
         {
             return name;
-        }
+        } 
+    }
 
-        
-        
+    public class AnimationComparer : IComparer<Animation>
+    {
+        public int Compare(Animation x, Animation y)
+        {
+            int result = x.position.CompareTo(y.position);
+            if (result == 0)
+            {
+                return 1;
+            } else
+            {
+                return result;
+            }
+        }
     }
 
     public class AnimationModel

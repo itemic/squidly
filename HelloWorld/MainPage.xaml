@@ -8,131 +8,114 @@
     mc:Ignorable="d">
     <Page.Resources>
         <SolidColorBrush x:Key="animationWindowBackground" Color="#dbe1e3"/>
-        <SolidColorBrush x:Key="animationBlockColor" Color="#323e53 "/>
+        <SolidColorBrush x:Key="animationBlockColor" Color="#E09F3E"/>
     </Page.Resources>
 
-    <SplitView x:Name="splitView" IsPaneOpen="False" DisplayMode="CompactInline" CompactPaneLength="50" OpenPaneLength="250" PanePlacement="Right">
-        <SplitView.Pane>
-            <StackPanel Background="LightGray">
-                <Button x:Name="exitActionsPanel" Content="&#xE700;" FontFamily="Segoe MDL2 Assets" Width="50" Height="50" Background="Transparent" HorizontalAlignment="Right" Click="ToggleActionBarPressed"/>
-                <TextBlock Text="Animations" FontSize="24" FontWeight="SemiLight" Margin="15,0,0,0"/>
-                <CheckBox x:Name="resetCheckbox" Content="Reset position after animation" Margin="15,0,0,0"/>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="mainGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="4*"/>
+            <RowDefinition x:Name="col3" Height="0"/>
+        </Grid.RowDefinitions>
 
-                <ListView x:Name="Animationlist" SelectionMode="None" IsItemClickEnabled="False" CanReorderItems="True" AllowDrop="True" CanDragItems="True">
+        <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right" Grid.Row="0">
+            <AppBarToggleButton x:Name="AnimationMode" Icon="Next" Label="Animation Mode" Click="ToggleAnimationMode" />
+            <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="RunAllAnimations"/>
+            <AppBarSeparator/>
+            <AppBarButton Icon="Save" Label="Save" Click="SaveAll"/>
+            <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
+            <AppBarSeparator/>
+            <AppBarButton Icon="Home" Label="Back to Menu" Click="BackToMenu"/>
+        </CommandBar>
+
+        <Grid Grid.Row="1">
+            <InkCanvas x:Name="inkCanvas"/>
+
+            <Canvas x:Name="canvas" Loaded="Canvas_Loaded"/>
+            <Canvas x:Name="selectionCanvas"/>
+            <Canvas x:Name="toolbarCanvas">
+                <Grid x:Name="toolbarGrid">
+                    <Rectangle x:Name="toolbarRect" Fill="#FFD4D4D4"/>
+                    <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" ToolTipService.ToolTip="Select Strokes"/>
+                        <InkToolbarCustomToolButton x:Name="toolButtonComment"   ToolTipService.ToolTip="Comment Mode">
+                            <FontIcon x:Name="toolButtonCommentGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE90A;" />
+
+                            <InkToolbarCustomToolButton.ContextFlyout>
+                                <Flyout x:Name="StickyFlyout">
+                                    <StackPanel VerticalAlignment="Center" Orientation="Vertical">
+                                        <TextBlock Text="Sticky Note Color"/>
+                                        <StackPanel x:Name="StickyNoteStack" Orientation="Horizontal">
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Flyout>
+                            </InkToolbarCustomToolButton.ContextFlyout>
+                        </InkToolbarCustomToolButton>
+                    </InkToolbar>
+                </Grid>
+            </Canvas>
+            <Canvas x:Name="polyCanvas" Visibility="Visible" IsHitTestVisible="False" IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="15"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <CommandBar Grid.Row="0" x:Name="animationToolBar" Height="40" HorizontalAlignment="Center" DefaultLabelPosition="Right">
+                <AppBarButton Icon="Play" Label="Play All" Click="RunAllAnimations"/>
+                <AppBarSeparator/>
+                <AppBarToggleButton x:Name="resetButton" Label="Return to start position" FontFamily="Segoe MDL2 icons">
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB97;"/>
+                </AppBarToggleButton>
+                <AppBarToggleButton Icon="RepeatAll" Label="Repeat"/>
+            </CommandBar>
+
+            <Canvas Grid.Row="1" x:Name="timelineCanvas" Loaded="TimeLineCanvasLoaded">
+            </Canvas>
+            <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Auto">
+                <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="=" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,0,10,0"/>
-                                <StackPanel Grid.Column="1" >
-                                    <TextBlock Text="{Binding name}"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Button Click="Replay">
-                                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;"/>
-                                        </Button>
-                                        <Button Click="SettingsAnimation" FontFamily="Segoe UI">
-                                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE713;"/>
-                                        </Button>
-                                        <Button Click="DeleteAnimation">
-                                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" Foreground="Crimson"/>
-                                        </Button>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Grid>
+                            <StackPanel Background="{StaticResource animationWindowBackground}" Height="55">
+                                <Canvas>
+                                    <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="DragAnimationChunk" ToolTipService.ToolTip="{Binding name}">
+                                        <StackPanel Grid.Column="1" Width="{Binding length}" >
+                                            <TextBlock Text="{Binding name}" HorizontalAlignment="Center"/>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <Button Click="Replay">
+                                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;"/>
+                                                </Button>
+                                                <Button Click="OpenRenameAnimationDialog" FontFamily="Segoe UI">
+                                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE13E;"/>
+                                                </Button>
+                                                <Button Click="DeleteAnimation">
+                                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" Foreground="Crimson"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <Border.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuFlyoutItem Text="Play" Click="Replay"/>
+                                                <MenuFlyoutItem Text="Delete" Click="DeleteAnimation"/>
+                                                <MenuFlyoutItem Text="Rename" Click="OpenRenameAnimationDialog"/>
+                                            </MenuFlyout>
+                                        </Border.ContextFlyout>
+                                    </Border>
+                                </Canvas>
+                            </StackPanel>
                         </DataTemplate>
                     </ListView.ItemTemplate>
-
                 </ListView>
-
-            </StackPanel>
-        </SplitView.Pane>
-        <SplitView.Content>
-            <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="mainGrid">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="4*"/>
-                    <RowDefinition x:Name="col3" Height="0"/>
-                </Grid.RowDefinitions>
-
-
-                <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right" Grid.Row="0">
-
-                    <AppBarToggleButton x:Name="AnimationMode" Icon="Next" Label="Animation Mode" Click="ToggleAnimationMode" />
-                    <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="RunAllAnimations"/>
-                    <AppBarSeparator/>
-                    <AppBarButton Icon="Save" Label="Save" Click="SaveAll"/>
-                    <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
-                    <AppBarSeparator/>
-                    <AppBarButton Icon="Home" Label="Back to Menu" Click="BackToMenu"/>
-
-
-                </CommandBar>
-
-                <Grid Grid.Row="1">
-                    <InkCanvas x:Name="inkCanvas"/>
-                    
-                    <Canvas x:Name="canvas" Loaded="Canvas_Loaded"/>
-                    <Canvas x:Name="selectionCanvas"/>
-                    <Canvas x:Name="toolbarCanvas">
-                        <Grid x:Name="toolbarGrid">
-                            <Rectangle x:Name="toolbarRect" Fill="#FFD4D4D4"/>
-                            <InkToolbar x:Name="inkToolbar" TargetInkCanvas="{x:Bind inkCanvas}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <InkToolbarCustomToolButton x:Name="toolButtonLasso" Content="&#xEF20;" FontFamily="Segoe MDL2 Assets" ToolTipService.ToolTip="Select Strokes"/>
-                                <InkToolbarCustomToolButton x:Name="toolButtonComment"   ToolTipService.ToolTip="Comment Mode">
-                                    <FontIcon x:Name="toolButtonCommentGlyph" FontFamily="Segoe MDL2 Assets" Glyph="&#xE90A;" />
-
-
-                                    <InkToolbarCustomToolButton.ContextFlyout>
-                                        <Flyout x:Name="StickyFlyout">
-                                            <StackPanel VerticalAlignment="Center" Orientation="Vertical">
-                                                <TextBlock Text="Sticky Note Color"/>
-                                                <StackPanel x:Name="StickyNoteStack" Orientation="Horizontal">
-
-
-                                                </StackPanel>
-
-                                            </StackPanel>
-                                        </Flyout>
-                                    </InkToolbarCustomToolButton.ContextFlyout>
-                                </InkToolbarCustomToolButton>
-                            </InkToolbar>
-                        </Grid>
-                    </Canvas>
-                    <Canvas x:Name="polyCanvas" Visibility="Visible" IsHitTestVisible="False" IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
-
-                </Grid>
-                <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled">
-                    <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Background="{StaticResource animationWindowBackground}">
-                                    <Canvas>
-                                        <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="DragAnimationChunk">
-                                            <TextBlock TextAlignment="Center" Text="{Binding name}" Height="40" Width="150">
-
-                                            </TextBlock>
-                                            <Border.ContextFlyout>
-                                                <MenuFlyout>
-                                                    <MenuFlyoutItem Text="Rename" Click="OpenRenameAnimationDialog"/>
-                                                </MenuFlyout>
-                                            </Border.ContextFlyout>
-                                        </Border>
-                                    </Canvas>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </ScrollViewer>
-                <ContentDialog x:Name="renameDialog"
+            </ScrollViewer>
+            <ContentDialog x:Name="renameDialog"
                    Title="Rename animation"
                    PrimaryButtonText="Ok" IsPrimaryButtonEnabled="False"
                    CloseButtonText="Cancel">
-                    <TextBox x:Name="renameUserInput" PlaceholderText="Please enter new name here" TextChanged="UserInputTextChanged" Height="20"/>
-                </ContentDialog>
-            </Grid>
-        </SplitView.Content>
-    </SplitView>
+                <TextBox x:Name="renameUserInput" PlaceholderText="Please enter new name here" TextChanged="UserInputTextChanged" Height="20"/>
+            </ContentDialog>
+        </Grid>
+    </Grid>
 </Page>
