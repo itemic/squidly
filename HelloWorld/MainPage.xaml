@@ -20,7 +20,7 @@
 
         <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right" Grid.Row="0">
             <AppBarToggleButton x:Name="AnimationMode" Icon="Next" Label="Animation Mode" Click="ToggleAnimationMode" />
-            <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="RunSimultaneousAnimations"/>
+            <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="RunAllAnimations"/>
             <AppBarSeparator/>
             <AppBarButton Icon="Save" Label="Save" Click="SaveAll"/>
             <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
@@ -65,7 +65,7 @@
             </Grid.RowDefinitions>
 
             <CommandBar Grid.Row="0" x:Name="animationToolBar" Height="40" HorizontalAlignment="Center" DefaultLabelPosition="Right">
-                <AppBarButton Icon="Play" Label="Play All" Click="RunSimultaneousAnimations"/>
+                <AppBarButton Icon="Play" Label="Play All" Click="RunAllAnimations"/>
                 <AppBarSeparator/>
                 <AppBarToggleButton x:Name="resetButton" Label="Return to start position" FontFamily="Segoe MDL2 icons">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB97;"/>

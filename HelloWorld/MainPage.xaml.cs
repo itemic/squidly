@@ -876,7 +876,7 @@ namespace Protocol2
 
                 //canvas.Children.Remove(polyline); //maybe only show when flyout or something...
 
-                await AnimateTest1(anime, true);
+                await RunAnimation(anime, true);
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
 
                 ClearSelection();
@@ -927,7 +927,7 @@ namespace Protocol2
          * methods to do with manipulating animations
          **/
 
-        private async Task AnimateTest1(Animation animation, bool revert)
+        private async Task RunAnimation(Animation animation, bool revert)
         {
             //TODO: Check if the inkstrokes of the animation still exists...
             List<InkStroke> strokesToAnimate = new List<InkStroke>();
@@ -942,7 +942,6 @@ namespace Protocol2
                 var stroke = inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s);
                 if (stroke != null && inkCanvas.InkPresenter.StrokeContainer.GetStrokes().Contains(stroke))
                 {
-                    //inkCanvas.InkPresenter.StrokeContainer.GetStrokeById(s).Selected = true;
                     strokesToAnimate.Add(stroke);
                 }
             }
@@ -965,18 +964,11 @@ namespace Protocol2
             {
                 currentPosition = FindBoundingRect(strokesToAnimate);
             }
-            //Rect currentPosition = FindBoundingRect(strokesToAnimate);
-            Debug.WriteLine("own start" + FindBoundingRect(strokesToAnimate));
-            Debug.WriteLine("move selected start" + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
 
-            //inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(animation.startPoint.X  - (currentPosition.X + currentPosition.Width/2), animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2)));
             foreach (InkStroke stroke in strokesToAnimate)
             {
                 stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2) + stroke.PointTransform.Translation.X), (float)(animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2) + stroke.PointTransform.Translation.Y));
             }
-
-            //// want something here so we reset the location of ink to where it should start from
-            //// MoveStroke doesn't move it to a position relative to the canvas but rather relative to its current location!
 
             var i = -1;
             //Stopwatch stopwatch = Stopwatch.StartNew();
@@ -992,7 +984,6 @@ namespace Protocol2
             }
             //stopwatch.Stop();
             //Debug.WriteLine("ms " + stopwatch.ElapsedMilliseconds);
-            //Debug.WriteLine("points" + animation.length + ", " + animation.GetPolyline().Points);
 
             if (revert)
             {
@@ -1000,8 +991,6 @@ namespace Protocol2
                 {
                     currentPosition = FindBoundingRect(strokesToAnimate);
                 }
-                //Debug.WriteLine("own " + FindBoundingRect(strokesToAnimate));
-                //Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
 
                 foreach (InkStroke stroke in strokesToAnimate)
                 {
@@ -1026,7 +1015,7 @@ namespace Protocol2
 
         }
 
-        private async void RunSimultaneousAnimations(object sender, RoutedEventArgs e)
+        private async void RunAllAnimations(object sender, RoutedEventArgs e)
         {
             //15.638 on my computer
             var msPerPoint = 16.560;
@@ -1040,7 +1029,7 @@ namespace Protocol2
             foreach (Animation a in orderedAnimationList)
             {
                 await Task.Delay(TimeSpan.FromMilliseconds((a.position - previousStart) * msPerPoint));
-                AnimateTest1(a, resetButton.IsChecked == true);
+                RunAnimation(a, resetButton.IsChecked == true);
                 previousStart = a.position;
             }
         }
@@ -1053,7 +1042,7 @@ namespace Protocol2
             int index = a.id;
             var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
             Debug.WriteLine(resetButton.IsChecked);
-            await AnimateTest1(replayAnimation, resetButton.IsChecked == true);     
+            await RunAnimation(replayAnimation, resetButton.IsChecked == true);     
         }
 
         private  void DeleteAnimation(object sender, RoutedEventArgs e)
