@@ -90,30 +90,29 @@
                                 </InkToolbarCustomToolButton>
                             </InkToolbar>
                         </Grid>
-                        <Grid x:Name="animationBarGrid">
-                            <Rectangle x:Name="animationBarRect" Fill="#FFD4D4D4"/>
-                            <CommandBar x:Name="animationToolBar" Loading="InitializeAnimationToolbar">
-                                <AppBarButton Icon="Play" Label="Play All" Click="RunSimultaneousAnimations"/>
-                                <AppBarSeparator/>
-                                <AppBarToggleButton Icon="RepeatAll" Label="Repeat"/>
-                                <AppBarToggleButton Label="Return to start position" FontFamily="Segoe MDL2 icons">
-                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB97;"/>
-                                </AppBarToggleButton>
-                            </CommandBar>
-                        </Grid>
                     </Canvas>
                     <Canvas x:Name="polyCanvas" Visibility="Visible" IsHitTestVisible="False" IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" IsTapEnabled="False"/>
                 </Grid>
 
                 <Grid Grid.Row="2">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
                         <RowDefinition Height="15"></RowDefinition>
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
                     
-                    <Canvas Grid.Row="0" x:Name="timelineCanvas" Loaded="TimeLineCanvasLoaded">
+                    <CommandBar Grid.Row="0" x:Name="animationToolBar" Height="40" HorizontalAlignment="Center" DefaultLabelPosition="Right">
+                        <AppBarButton Icon="Play" Label="Play All" Click="RunSimultaneousAnimations"/>
+                        <AppBarSeparator/>
+                        <AppBarToggleButton x:Name="resetButton" Label="Return to start position" FontFamily="Segoe MDL2 icons">
+                            <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB97;"/>
+                        </AppBarToggleButton>
+                        <AppBarToggleButton Icon="RepeatAll" Label="Repeat"/>
+                    </CommandBar>
+                    
+                    <Canvas Grid.Row="1" x:Name="timelineCanvas" Loaded="TimeLineCanvasLoaded">
                     </Canvas>
-                    <ScrollViewer Grid.Row="1" VerticalScrollMode="Auto" HorizontalScrollMode="Auto">
+                    <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Auto">
                         <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False">
                             <ListView.ItemTemplate>
                                 <DataTemplate>

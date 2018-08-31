@@ -112,19 +112,6 @@ namespace Protocol2
 
         }
 
-        private void InitializeAnimationToolbar(FrameworkElement sender, object args)
-        {
-            animationBarGrid.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY;
-            animationBarGrid.ManipulationDelta += new ManipulationDeltaEventHandler(DragToolbar);
-
-            animationToolBar.Visibility = Visibility.Collapsed;
-            animationBarRect.Visibility = Visibility.Collapsed;
-
-            Canvas.SetLeft(animationBarGrid, toolbarCanvas.ActualWidth / 2 - animationBarRect.ActualWidth / 2);
-            Canvas.SetTop(animationBarGrid, timelineCanvas.ActualHeight - animationBarRect.ActualHeight);
-            
-        }
-
         private void DragToolbar(object sender, ManipulationDeltaRoutedEventArgs e)
         {
             var rectangle = (Grid)sender;
@@ -172,6 +159,7 @@ namespace Protocol2
 
         //timeline in this case isn't in time units. It's based on the horizontal positions in the canvas. Length units of canvas have been directly mapped to time units.
         //1 unit of length of the Canvas is around 16.5 ms.
+        //this method will also load the animation toolbar
         private void TimeLineCanvasLoaded(object sender, RoutedEventArgs e)
         {
             var length = timelineCanvas.ActualWidth;
@@ -1241,9 +1229,8 @@ namespace Protocol2
             Animation a = b.DataContext as Animation;
             int index = a.id;
             var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
-
-             
-            await AnimateTest1(replayAnimation, resetCheckbox.IsChecked == true);
+            Debug.WriteLine(resetButton.IsChecked);
+            await AnimateTest1(replayAnimation, resetButton.IsChecked == true);
                
         }
 
@@ -1278,26 +1265,11 @@ namespace Protocol2
             isAnimationMode = !isAnimationMode;
             if (isAnimationMode)
             {
-                col3.Height = new GridLength(1, GridUnitType.Star);
-
+                col3.Height = new GridLength(1.2, GridUnitType.Star);
             }
             else
             {
                 col3.Height = new GridLength(0);
-            }
-            ToggleAnimationToolbar(isAnimationMode);
-        }
-
-        private void ToggleAnimationToolbar(bool isAnimationMode)
-        {
-            if (isAnimationMode)
-            {
-                animationToolBar.Visibility = Visibility.Visible;
-                animationBarRect.Visibility = Visibility.Visible;
-            } else
-            {
-                animationToolBar.Visibility = Visibility.Collapsed;
-                animationBarRect.Visibility = Visibility.Collapsed;
             }
         }
 
