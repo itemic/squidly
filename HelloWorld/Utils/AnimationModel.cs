@@ -29,7 +29,7 @@ namespace Protocol2.Utils
 
         public Polyline polyline { get; set; }
         [DataMember]
-        public string name { get; set; }
+        private string name;
         [DataMember]
         public int id { get; set; }
         [DataMember]
@@ -80,14 +80,14 @@ namespace Protocol2.Utils
             length = polyline.Points.Count;
         }
 
-        public void SetName(String newName)
+        public String Name
         {
-            name = newName;
-        }
-
-        public String GetName()
-        {
-            return name;
+            get { return this.name; }
+            set
+            {
+                this.name = value;
+                this.OnPropertyChanged();
+            }
         }
 
         public bool IsEnabled
@@ -140,11 +140,6 @@ namespace Protocol2.Utils
 
         public ObservableCollection<Animation> GetAnimations()
         {
-            //Reorder();
-            foreach (var a in animations)
-            {
-                Debug.WriteLine(a.name);
-            }
             return animations;
         }
 
@@ -168,7 +163,7 @@ namespace Protocol2.Utils
         public void SetAnimationName(int id, String newName)
         {
             Animation animation = GetAnimationAt(id);
-            animation.SetName(newName);
+            animation.Name = newName;
         }
 
 

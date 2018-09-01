@@ -1138,14 +1138,12 @@ namespace Protocol2
             {
                 Animation nameChange = animations.GetAnimationAt(index);
                 RenameAnimation(renameUserInput.Text, nameChange);
-                var collection = animations.GetAnimations();
-                collection[collection.IndexOf(nameChange)] = nameChange;
             }
         }
 
         private void RenameAnimation(String newName, Animation animation)
         {
-            animation.SetName(newName);
+            animation.Name = newName;
         }
 
         private void UserInputTextChanged(object sender, RoutedEventArgs e)
