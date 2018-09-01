@@ -45,6 +45,7 @@ namespace Protocol2
         //fields for animation related functionality
         public bool isAnimationMode = false;
         private AnimationModel animations;
+        private bool areAllAnimationsRunning = false;
         private Object moveSelectedLock = new Object();
     
 
@@ -1017,8 +1018,8 @@ namespace Protocol2
 
         private async void RunAllAnimations(object sender, RoutedEventArgs e)
         {
-            Button runAllButton = sender as Button;
-            runAllButton.IsEnabled = false;
+            runAllAnimationsButton.IsEnabled = false;
+
             var tasks = new List<Task>();
             //15.638 on my computer
             var msPerPoint = 16.560;
@@ -1027,6 +1028,7 @@ namespace Protocol2
             foreach(Animation a in AnimationRepresentation.Items)
             {
                 orderedAnimationList.Add(a);
+                a.IsEnabled = false;
             }
 
             foreach (Animation a in orderedAnimationList)
@@ -1037,7 +1039,11 @@ namespace Protocol2
             }
 
             await Task.WhenAll(tasks);
-            runAllButton.IsEnabled = true;
+            foreach(Animation a in AnimationRepresentation.Items)
+            {
+                a.IsEnabled = true;
+            }
+            runAllAnimationsButton.IsEnabled = true;
 
         }
 
@@ -1045,13 +1051,17 @@ namespace Protocol2
         private async void Replay(object sender, RoutedEventArgs e)
         {
             FrameworkElement b = sender as FrameworkElement;
-            Button replayButton = (Button)b;
-            replayButton.IsEnabled = false;
             Animation a = b.DataContext as Animation;
+
+            runAllAnimationsButton.IsEnabled = false;
+            a.IsEnabled = false;
+
             int index = a.id;
             var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
             await RunAnimation(replayAnimation, resetButton.IsChecked == true);
-            replayButton.IsEnabled = true;
+
+            runAllAnimationsButton.IsEnabled = true;
+            a.IsEnabled = true;
         }
 
         private  void DeleteAnimation(object sender, RoutedEventArgs e)
