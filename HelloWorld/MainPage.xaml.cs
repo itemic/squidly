@@ -420,7 +420,7 @@ namespace Protocol2
 
         private void ClearAllHandlers()
         {
-            ClearSelection();
+            selectionCanvas.Children.Clear(); //removes bounding box from GUI
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= UnprocessedInput_PointerPressed;
             inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= UnprocessedInput_PointerMoved;
             inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= UnprocessedInput_PointerReleased;
@@ -595,13 +595,11 @@ namespace Protocol2
         //handle new ink or erase strokes to clean up Selection UI 
         private void StrokeInput_StrokeStarted(InkStrokeInput sender, PointerEventArgs args)
         {
-            Debug.WriteLine("clearing selection new stroke");
             ClearSelection();
         }
 
         private void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
         {
-            Debug.WriteLine("clearing selection erased");
             ClearSelection();
         }
 
