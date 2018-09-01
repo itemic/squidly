@@ -420,6 +420,7 @@ namespace Protocol2
 
         private void ClearAllHandlers()
         {
+            ClearSelection();
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= UnprocessedInput_PointerPressed;
             inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= UnprocessedInput_PointerMoved;
             inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= UnprocessedInput_PointerReleased;
@@ -594,11 +595,13 @@ namespace Protocol2
         //handle new ink or erase strokes to clean up Selection UI 
         private void StrokeInput_StrokeStarted(InkStrokeInput sender, PointerEventArgs args)
         {
+            Debug.WriteLine("clearing selection new stroke");
             ClearSelection();
         }
 
         private void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
         {
+            Debug.WriteLine("clearing selection erased");
             ClearSelection();
         }
 
@@ -932,10 +935,7 @@ namespace Protocol2
         {
             //TODO: Check if the inkstrokes of the animation still exists...
             List<InkStroke> strokesToAnimate = new List<InkStroke>();
-            foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
-            {
-                stroke.Selected = false;
-            }
+            ClearSelection();
 
             foreach (var s in animation.inkStrokesId)
             {
