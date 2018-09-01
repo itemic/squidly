@@ -19,8 +19,7 @@
         </Grid.RowDefinitions>
 
         <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right" Grid.Row="0">
-            <AppBarToggleButton x:Name="AnimationMode" Icon="Next" Label="Animation Mode" Click="ToggleAnimationMode" />
-            <AppBarButton Icon="OutlineStar" Label="Run Animations" Click="RunAllAnimations"/>
+            <AppBarToggleButton x:Name="AnimationMode" Icon="OutlineStar" Label="Animation Mode" Click="ToggleAnimationMode" />
             <AppBarSeparator/>
             <AppBarButton Icon="Save" Label="Save" Click="SaveAll"/>
             <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
@@ -65,7 +64,7 @@
             </Grid.RowDefinitions>
 
             <CommandBar Grid.Row="0" x:Name="animationToolBar" Height="40" HorizontalAlignment="Center" DefaultLabelPosition="Right">
-                <AppBarButton Icon="Play" Label="Play All" Click="RunAllAnimations"/>
+                <AppBarButton x:Name="runAllAnimationsButton" Icon="Play" Label="Play All" Click="RunAllAnimations"/>
                 <AppBarSeparator/>
                 <AppBarToggleButton x:Name="resetButton" Label="Return to start position" FontFamily="Segoe MDL2 icons">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB97;"/>
@@ -83,9 +82,9 @@
                                 <Canvas>
                                     <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="DragAnimationChunk" ToolTipService.ToolTip="{Binding name}">
                                         <StackPanel Grid.Column="1" Width="{Binding length}" >
-                                            <TextBlock Text="{Binding name}" HorizontalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Name}" HorizontalAlignment="Center"/>
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <Button Click="Replay">
+                                                <Button IsEnabled="{Binding IsEnabled}" Click="Replay">
                                                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;"/>
                                                 </Button>
                                                 <Button Click="OpenRenameAnimationDialog" FontFamily="Segoe UI">
