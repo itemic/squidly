@@ -9,13 +9,14 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using Windows.Foundation;
 using Windows.UI.Input.Inking;
+using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 
 namespace Protocol2.Utils
 {
     [DataContract]
-    public class Animation : INotifyPropertyChanged
+    public class Animation: INotifyPropertyChanged
     {
         // public is only temporary!
         public List<InkStroke> inkStrokes { get; set; }
@@ -28,6 +29,8 @@ namespace Protocol2.Utils
         public List<uint> inkStrokesId { get; set; }
 
         public Polyline polyline { get; set; }
+        public TextBlock nameText { get; set; }
+
         [DataMember]
         private string name;
         [DataMember]
@@ -48,7 +51,7 @@ namespace Protocol2.Utils
         [DataMember]
         public static int counter = 0; // temporary use
 
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
+        public event PropertyChangedEventHandler PropertyChanged;
 
         private bool isEnabled;
     
@@ -58,7 +61,12 @@ namespace Protocol2.Utils
             inkStrokes = new List<InkStroke>();
             inkStrokesIndex = new List<int>();
             inkStrokesId = new List<uint>();
-            name = "Animation " + counter;
+            nameText = new TextBlock();
+
+
+            name = name == null || name == "" ? "Animation " + counter : name;
+            //SetName(name);
+
             id = counter;
             counter++;
             time = 1; //default animations are 2s
@@ -92,6 +100,7 @@ namespace Protocol2.Utils
 
         public bool IsEnabled
         {
+
             get { return this.isEnabled; }
             set
             {

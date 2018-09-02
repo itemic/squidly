@@ -75,12 +75,13 @@
             <Canvas Grid.Row="1" x:Name="timelineCanvas" Loaded="TimeLineCanvasLoaded">
             </Canvas>
             <ScrollViewer Grid.Row="2" VerticalScrollMode="Auto" HorizontalScrollMode="Auto">
-                <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None" IsItemClickEnabled="False">
+                <ListView x:Name="AnimationRepresentation" Background="{StaticResource animationWindowBackground}" SelectionMode="None"  IsItemClickEnabled="False">
                     <ListView.ItemTemplate>
                         <DataTemplate>
+
                             <StackPanel Background="{StaticResource animationWindowBackground}" Height="55">
                                 <Canvas>
-                                    <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" ManipulationDelta="DragAnimationChunk" ToolTipService.ToolTip="{Binding name}">
+                                    <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" PointerEntered="Query" PointerExited="QueryStop" ManipulationDelta="DragAnimationChunk" ToolTipService.ToolTip="{Binding name}">
                                         <StackPanel Grid.Column="1" Width="{Binding length}" >
                                             <TextBlock Text="{Binding Name}" HorizontalAlignment="Center"/>
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
