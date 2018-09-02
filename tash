@@ -1,62 +1,0 @@
-[1mdiff --git a/HelloWorld/MainPage.xaml.cs b/HelloWorld/MainPage.xaml.cs[m
-[1mindex 76fc71a..e920328 100644[m
-[1m--- a/HelloWorld/MainPage.xaml.cs[m
-[1m+++ b/HelloWorld/MainPage.xaml.cs[m
-[36m@@ -59,6 +59,7 @@[m [mnamespace Protocol2[m
-         private double canvasHeight;[m
-         Dictionary<InkStroke, StrokeGroup> strokeGroups = new Dictionary<InkStroke, StrokeGroup>();[m
-         private Save save = null;[m
-[32m+[m[32m        private InkToolbarCustomToolButton animationPen;[m[41m[m
- [m
-         public MainPage()[m
-         {[m
-[36m@@ -88,6 +89,11 @@[m [mnamespace Protocol2[m
-             Application.Current.Resources["AppBarToggleButtonBackgroundChecked"] = (SolidColorBrush)this.Resources["animationBlockColor"];[m
-             Application.Current.Resources["AppBarToggleButtonBackgroundCheckedPointerOver"] = (SolidColorBrush)this.Resources["animationBlockColor"];[m
-             Application.Current.Resources["AppBarToggleButtonBackgroundCheckedPressed"] = (SolidColorBrush)this.Resources["animationBlockColor"];[m
-[32m+[m[32m            // set up animation pen[m[41m[m
-[32m+[m[32m            animationPen = new InkToolbarCustomToolButton();[m[41m[m
-[32m+[m[32m            Symbol icon = (Symbol)0xE735;[m[41m[m
-[32m+[m[41m[m
-[32m+[m[41m[m
- [m
-             //comments set up[m
-             SetUpStickyNotes();[m
-[36m@@ -339,7 +345,10 @@[m [mnamespace Protocol2[m
-         // changing mode in tool bar[m
-         private void InkToolbar_ActiveToolChanged(InkToolbar sender, object args)[m
-         {[m
-[31m-            ClearAllHandlers();[m
-[32m+[m[32m            if (sender.ActiveTool != animationPen)[m[41m[m
-[32m+[m[32m            {[m[41m[m
-[32m+[m[32m                ClearAllHandlers();[m[41m[m
-[32m+[m[32m            }[m[41m[m
-             if (inkToolbar.ActiveTool == toolButtonLasso)[m
-             {[m
-                 inkCanvas.RightTapped += ClickSelect;[m
-[36m@@ -771,7 +780,6 @@[m [mnamespace Protocol2[m
-             selectionCanvas.Visibility = Visibility.Collapsed;[m
-             inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;[m
-             var currentTool = inkToolbar.ActiveTool;[m
-[31m-            var animationPen = new InkToolbarCustomToolButton();[m
-             inkToolbar.ActiveTool = animationPen;[m
-             inkToolbar.Children.Add(animationPen);[m
- [m
-[36m@@ -1024,7 +1032,7 @@[m [mnamespace Protocol2[m
- [m
-  [m
- [m
-[31m-        private async void Query(object sender, PointerRoutedEventArgs e)[m
-[32m+[m[32m        private void Query(object sender, PointerRoutedEventArgs e)[m[41m[m
-         {[m
-             FrameworkElement b = sender as FrameworkElement;[m
-             Animation a = b.DataContext as Animation;[m
-[36m@@ -1033,7 +1041,7 @@[m [mnamespace Protocol2[m
-             animation.polyline.Stroke = new SolidColorBrush(Colors.Crimson);            [m
-         }[m
- [m
-[31m-        private async void QueryStop(object sender, PointerRoutedEventArgs e)[m
-[32m+[m[32m        private void QueryStop(object sender, PointerRoutedEventArgs e)[m[41m[m
-         {[m
-             FrameworkElement b = sender as FrameworkElement;[m
-             Animation a = b.DataContext as Animation;[m
