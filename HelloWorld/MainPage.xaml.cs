@@ -293,7 +293,7 @@ namespace Protocol2
                     polyline = new Polyline()
                     {
                         Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
-                        StrokeThickness = 3,
+                        StrokeThickness = 1.5,
                         StrokeDashArray = new DoubleCollection() { 5, 2 },
                     };
                     polyline.Points = a.linePoints;
@@ -339,7 +339,7 @@ namespace Protocol2
                         polyline = new Polyline()
                         {
                             Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
-                            StrokeThickness = 3,
+                            StrokeThickness = 1.5,
                             StrokeDashArray = new DoubleCollection() { 5, 2 },
                         };
                         polyline.Points = a.linePoints;
@@ -379,7 +379,7 @@ namespace Protocol2
                         polyline = new Polyline()
                         {
                             Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
-                            StrokeThickness = 3,
+                            StrokeThickness = 1.5,
                             StrokeDashArray = new DoubleCollection() { 5, 2 },
                         };
                         polyline.Points = a.linePoints;
@@ -842,7 +842,7 @@ namespace Protocol2
                 polyline = new Polyline()
                 {
                     Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
-                    StrokeThickness = 3,
+                    StrokeThickness = 1.5,
                     StrokeDashArray = new DoubleCollection() { 5, 2 },
                 };
                 polyline.Points.Add(p.CurrentPoint.Position);
@@ -1068,17 +1068,24 @@ namespace Protocol2
             await RunAnimation(replayAnimation, resetButton.IsChecked == true);     
         }
 
-        private async void Query(object sender, RoutedEventArgs e)
+ 
+
+        private async void Query(object sender, PointerRoutedEventArgs e)
         {
             FrameworkElement b = sender as FrameworkElement;
             Animation a = b.DataContext as Animation;
             int index = a.id;
             var animation = animations.GetAnimationAt(index);
-            animation.polyline.Opacity = 1;
-            animation.polyline.Stroke = new SolidColorBrush(Colors.Blue);
-            await Task.Delay(1000);
+            animation.polyline.Stroke = new SolidColorBrush(Colors.Crimson);            
+        }
+
+        private async void QueryStop(object sender, PointerRoutedEventArgs e)
+        {
+            FrameworkElement b = sender as FrameworkElement;
+            Animation a = b.DataContext as Animation;
+            int index = a.id;
+            var animation = animations.GetAnimationAt(index);
             animation.polyline.Stroke = new SolidColorBrush(Colors.ForestGreen);
-            animation.polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
         }
 
         private void DeleteAnimation(object sender, RoutedEventArgs e)
