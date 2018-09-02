@@ -46,6 +46,7 @@ namespace Protocol2
         //fields for animation related functionality
         public bool isAnimationMode = false;
         private AnimationModel animations;
+        private bool areAllAnimationsRunning = false;
         private Object moveSelectedLock = new Object();
     
 
@@ -1040,6 +1041,9 @@ namespace Protocol2
 
         private async void RunAllAnimations(object sender, RoutedEventArgs e)
         {
+            runAllAnimationsButton.IsEnabled = false;
+
+            var tasks = new List<Task>();
             //15.638 on my computer
             var msPerPoint = 16.560;
             SortedSet<Animation> orderedAnimationList = new SortedSet<Animation>(new AnimationComparer());
@@ -1047,14 +1051,23 @@ namespace Protocol2
             foreach(Animation a in AnimationRepresentation.Items)
             {
                 orderedAnimationList.Add(a);
+                a.IsEnabled = false;
             }
 
             foreach (Animation a in orderedAnimationList)
             {
                 await Task.Delay(TimeSpan.FromMilliseconds((a.position - previousStart) * msPerPoint));
-                RunAnimation(a, resetButton.IsChecked == true);
+                tasks.Add(RunAnimation(a, resetButton.IsChecked == true));
                 previousStart = a.position;
             }
+
+            await Task.WhenAll(tasks);
+            foreach(Animation a in AnimationRepresentation.Items)
+            {
+                a.IsEnabled = true;
+            }
+            runAllAnimationsButton.IsEnabled = true;
+
         }
 
         //replay selected animation
@@ -1062,10 +1075,16 @@ namespace Protocol2
         {
             FrameworkElement b = sender as FrameworkElement;
             Animation a = b.DataContext as Animation;
+
+            runAllAnimationsButton.IsEnabled = false;
+            a.IsEnabled = false;
+
             int index = a.id;
             var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
-            Debug.WriteLine(resetButton.IsChecked);
-            await RunAnimation(replayAnimation, resetButton.IsChecked == true);     
+            await RunAnimation(replayAnimation, resetButton.IsChecked == true);
+
+            runAllAnimationsButton.IsEnabled = true;
+            a.IsEnabled = true;
         }
 
  
@@ -1164,14 +1183,12 @@ namespace Protocol2
             {
                 Animation nameChange = animations.GetAnimationAt(index);
                 RenameAnimation(renameUserInput.Text, nameChange);
-                var collection = animations.GetAnimations();
-                collection[collection.IndexOf(nameChange)] = nameChange;
             }
         }
 
         private void RenameAnimation(String newName, Animation animation)
         {
-            animation.SetName(newName);
+            animation.Name = newName;
         }
 
         private void UserInputTextChanged(object sender, RoutedEventArgs e)

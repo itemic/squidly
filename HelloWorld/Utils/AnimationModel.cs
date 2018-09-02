@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using Windows.Foundation;
 using Windows.UI.Input.Inking;
@@ -31,7 +32,7 @@ namespace Protocol2.Utils
         public TextBlock nameText { get; set; }
 
         [DataMember]
-        public string name { get; set; }
+        private string name;
         [DataMember]
         public int id { get; set; }
         [DataMember]
@@ -45,12 +46,15 @@ namespace Protocol2.Utils
         [DataMember]
         public int length { get; set; } //just number of points in the polyline
         [DataMember]
-        public double position { get; set; }
+        public double position { get; set; } //position in canvas - directly proportional to time the animation runs
 
         [DataMember]
         public static int counter = 0; // temporary use
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        private bool isEnabled;
+    
 
         public Animation()
         {
@@ -60,12 +64,13 @@ namespace Protocol2.Utils
             nameText = new TextBlock();
 
 
-            name = name == null ? name : "Animation " + counter;
+            name = name == null || name == "" ? "Animation " + counter : name;
             //SetName(name);
 
             id = counter;
             counter++;
             time = 1; //default animations are 2s
+            isEnabled = true;
         }
 
         public Polyline GetPolyline()
@@ -83,16 +88,32 @@ namespace Protocol2.Utils
             length = polyline.Points.Count;
         }
 
-        public void SetName(String newName)
+        public String Name
         {
-            name = newName;
-            nameText.Text = newName == null ? "Untitled animation" : newName;
+            get { return this.name; }
+            set
+            {
+                this.name = value;
+                this.OnPropertyChanged();
+            }
         }
 
-        public String GetName()
+        public bool IsEnabled
         {
-            return name;
-        } 
+
+            get { return this.isEnabled; }
+            set
+            {
+                this.isEnabled = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            // Raise the PropertyChanged event, passing the name of the property whose value has changed.
+            this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
     public class AnimationComparer : IComparer<Animation>
@@ -118,7 +139,6 @@ namespace Protocol2.Utils
             animations = new ObservableCollection<Animation>();
         }
 
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
 
 
 
@@ -129,11 +149,6 @@ namespace Protocol2.Utils
 
         public ObservableCollection<Animation> GetAnimations()
         {
-            //Reorder();
-            foreach (var a in animations)
-            {
-                Debug.WriteLine(a.name);
-            }
             return animations;
         }
 
@@ -157,7 +172,7 @@ namespace Protocol2.Utils
         public void SetAnimationName(int id, String newName)
         {
             Animation animation = GetAnimationAt(id);
-            animation.SetName(newName);
+            animation.Name = newName;
         }
 
 
