@@ -54,6 +54,8 @@ namespace Protocol2.Utils
         public event PropertyChangedEventHandler PropertyChanged;
 
         private bool isEnabled;
+
+        public bool isActive;
     
 
         public Animation()

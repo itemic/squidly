@@ -65,6 +65,14 @@ namespace Protocol2.Utils
 
         public async Task SaveAll(InkCanvas inkCanvas, CommentModel comments, AnimationModel animations)
         {
+
+            // delete everything first
+            var files = await projectFolder.GetFilesAsync();
+            foreach (StorageFile file in files)
+            {
+                await file.DeleteAsync(StorageDeleteOption.Default);
+            }
+
             // save ink
             var inkFile = await projectFolder.CreateFileAsync("InkFile.gif", CreationCollisionOption.ReplaceExisting);
             using (IRandomAccessStream streamX = await inkFile.OpenAsync(FileAccessMode.ReadWrite))
