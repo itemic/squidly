@@ -83,7 +83,7 @@
 
                             <StackPanel Background="{StaticResource animationWindowBackground}" Height="55">
                                 <Canvas>
-                                    <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" PointerEntered="Query" PointerExited="QueryStop" ManipulationDelta="DragAnimationChunk" ToolTipService.ToolTip="{Binding name}">
+                                    <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" PointerEntered="Query" PointerExited="QueryStop" ManipulationDelta="DragAnimationChunk" ToolTipService.ToolTip="{Binding name}" Canvas.Left="{Binding position}">
                                         <StackPanel Grid.Column="1" Width="{Binding length}" >
                                             <TextBlock Text="{Binding Name}" HorizontalAlignment="Center"/>
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

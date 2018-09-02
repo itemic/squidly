@@ -1031,7 +1031,6 @@ namespace Protocol2
             pline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
             animation.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
 
-
             foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
             {
                 stroke.Selected = false;
