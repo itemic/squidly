@@ -161,13 +161,14 @@ namespace Protocol2.Utils
 
         public Animation GetAnimationAt(int id)
         {
-            Animation anim = animations.Single(x => x.id == id);
+            Animation anim = animations.SingleOrDefault(x => x.id == id);
             return anim;
         }
 
         public void RemoveAnimation(int id)
         {
-            Animation anim = animations.Single(x => x.id == id);
+            Animation anim = animations.SingleOrDefault(x => x.id == id);
+
             animations.Remove(anim);
         }
 

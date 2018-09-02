@@ -1064,18 +1064,25 @@ namespace Protocol2
             Animation a = b.DataContext as Animation;
             int index = a.id;
             var animation = animations.GetAnimationAt(index);
-            animation.polyline.Stroke = new SolidColorBrush(Colors.ForestGreen);
 
-            if (animation.isActive)
+            if (animation != null)
             {
-                animation.polyline.Opacity = 1;
-            } else if (togglePath.IsChecked == true)
-            {
-                animation.polyline.Opacity = 0.5;
-            } else
-            {
-                animation.polyline.Opacity = 0;
+                animation.polyline.Stroke = new SolidColorBrush(Colors.ForestGreen);
+
+                if (animation.isActive)
+                {
+                    animation.polyline.Opacity = 1;
+                }
+                else if (togglePath.IsChecked == true)
+                {
+                    animation.polyline.Opacity = 0.5;
+                }
+                else
+                {
+                    animation.polyline.Opacity = 0;
+                }
             }
+            
         }
 
         private void DeleteAnimation(object sender, RoutedEventArgs e)
@@ -1084,10 +1091,15 @@ namespace Protocol2
             Animation a = senderElement.DataContext as Animation;
 
             int index = a.id;
-            polyCanvas.Children.Remove(animations.GetAnimationAt(index).GetPolyline());
-            polyCanvas.Children.Remove(animations.GetAnimationAt(index).nameText);
+            var anime = animations.GetAnimationAt(index);
 
-            animations.RemoveAnimation(index);
+            if (anime != null)
+            {
+                polyCanvas.Children.Remove(anime.GetPolyline());
+
+                animations.RemoveAnimation(index);
+            }
+            
         }
 
         //currently not doing anything
