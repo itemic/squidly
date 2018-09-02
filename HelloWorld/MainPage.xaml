@@ -15,12 +15,10 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="4*"/>
-            <RowDefinition x:Name="col3" Height="0"/>
+            <RowDefinition x:Name="col3" Height="1.2*"/>
         </Grid.RowDefinitions>
 
         <CommandBar x:Name="commandBar" RequestedTheme="Light" DefaultLabelPosition="Right" Grid.Row="0">
-            <AppBarToggleButton x:Name="AnimationMode" Icon="OutlineStar" Label="Animation Mode" Click="ToggleAnimationMode" />
-            <AppBarSeparator/>
             <AppBarButton Icon="Save" Label="Save" Click="SaveAll"/>
             <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
             <AppBarSeparator/>
@@ -66,7 +64,11 @@
             <CommandBar Grid.Row="0" x:Name="animationToolBar" Height="40" HorizontalAlignment="Center" DefaultLabelPosition="Right">
                 <AppBarButton x:Name="runAllAnimationsButton" Icon="Play" Label="Play All" Click="RunAllAnimations"/>
                 <AppBarSeparator/>
-                <AppBarToggleButton x:Name="resetButton" Label="Return to start position" FontFamily="Segoe MDL2 icons">
+                <AppBarToggleButton x:Name="togglePath" Label="Show paths">
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF128;"/>
+                </AppBarToggleButton>
+                <AppBarSeparator/>
+                <AppBarToggleButton x:Name="resetButton" Label="Return to start position">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB97;"/>
                 </AppBarToggleButton>
                 <AppBarToggleButton Icon="RepeatAll" Label="Repeat"/>
@@ -97,7 +99,7 @@
                                         </StackPanel>
                                         <Border.ContextFlyout>
                                             <MenuFlyout>
-                                                <MenuFlyoutItem Text="Play" Click="Replay"/>
+                                                <MenuFlyoutItem Text="Play" Click="Replay" IsEnabled="{Binding IsEnabled}"/>
                                                 <MenuFlyoutItem Text="Delete" Click="DeleteAnimation"/>
                                                 <MenuFlyoutItem Text="Rename" Click="OpenRenameAnimationDialog"/>
                                             </MenuFlyout>
