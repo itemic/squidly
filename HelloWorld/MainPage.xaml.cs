@@ -260,24 +260,18 @@ namespace Protocol2
             await save.SaveAll(inkCanvas, comments, animations);
         }
 
-        public async void LoadAll(object sender, RoutedEventArgs e)
+        public void SaveHelper()
         {
-            if (save == null)
-            {
-                save = new Save();
-            }
-
-            await save.LoadAll(inkCanvas, comments, animations);
             if (comments != null)
             {
                 polyCanvas.Children.Clear();
                 canvas.Children.Clear(); // probably better way than this...
                 Debug.WriteLine(comments.GetComments().Count);
-                foreach(Comment c in comments.GetComments())
+                foreach (Comment c in comments.GetComments())
                 {
                     DrawRectangle(c);
                 }
-                
+
             }
             if (animations != null)
             {
@@ -307,6 +301,17 @@ namespace Protocol2
             }
         }
 
+        public async void LoadAll(object sender, RoutedEventArgs e)
+        {
+            if (save == null)
+            {
+                save = new Save();
+            }
+
+            await save.LoadAll(inkCanvas, comments, animations);
+            SaveHelper();
+        }
+
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             if (e.Parameter is bool && (bool)e.Parameter == true)
@@ -317,83 +322,13 @@ namespace Protocol2
                 }
 
                 await save.LoadAll(inkCanvas, comments, animations);
-                if (comments != null)
-                {
-                    polyCanvas.Children.Clear();
-                    canvas.Children.Clear(); // probably better way than this...
-                    Debug.WriteLine(comments.GetComments().Count);
-                    foreach (Comment c in comments.GetComments())
-                    {
-                        DrawRectangle(c);
-                    }
-                }
-                if (animations != null)
-                {
-                    foreach (Animation a in animations.GetAnimations())
-                    {
-                        for (int i = 0; i < a.inkStrokesId.Count; i++)
-                        {
-                            a.inkStrokesId[i] = inkCanvas.InkPresenter.StrokeContainer.GetStrokes()[a.inkStrokesIndex[i]].Id;
-                        }
-
-                        // recreate polyline!
-                        polyline = new Polyline()
-                        {
-                            Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
-                            StrokeThickness = 1.5,
-                            StrokeDashArray = new DoubleCollection() { 5, 2 },
-                        };
-                        polyline.Points = a.linePoints;
-                        polyline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-                        a.SetPolyline(polyline);
-                        polyCanvas.Children.Add(polyline);
-                        a.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-                        addPolylineText(a);
-                        //canvas.Children.Add(polyline);
-                    }
-                }
-            }
-            else if (e.Parameter is Save)
+            } else if (e.Parameter is Save)
             {
                 save = e.Parameter as Save;
                 await save.LoadNew(inkCanvas, comments, animations);
-                if (comments != null)
-                {
-                    polyCanvas.Children.Clear();
-                    canvas.Children.Clear(); // probably better way than this...
-                    Debug.WriteLine(comments.GetComments().Count);
-                    foreach (Comment c in comments.GetComments())
-                    {
-                        DrawRectangle(c);
-                    }
-                }
-                if (animations != null)
-                {
-                    foreach (Animation a in animations.GetAnimations())
-                    {
-
-                        for (int i = 0; i < a.inkStrokesId.Count; i++)
-                        {
-                            a.inkStrokesId[i] = inkCanvas.InkPresenter.StrokeContainer.GetStrokes()[a.inkStrokesIndex[i]].Id;
-                        }
-                        // recreate polyline!
-                        polyline = new Polyline()
-                        {
-                            Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
-                            StrokeThickness = 1.5,
-                            StrokeDashArray = new DoubleCollection() { 5, 2 },
-                        };
-                        polyline.Points = a.linePoints;
-                        polyline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-                        a.SetPolyline(polyline);
-                        polyCanvas.Children.Add(polyline);
-                        a.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-
-                        addPolylineText(a);
-                        //canvas.Children.Add(polyline);
-                    }
-                }
             }
+
+            SaveHelper();
             base.OnNavigatedTo(e);
         }
 
