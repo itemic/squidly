@@ -986,9 +986,11 @@ namespace Protocol2
                     stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2) + stroke.PointTransform.Translation.X), (float)(animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2) + stroke.PointTransform.Translation.Y));
                 }
             }
+
             pline.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
             animation.nameText.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
             animation.isActive = false;
+
 
             foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
             {

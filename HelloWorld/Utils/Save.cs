@@ -187,7 +187,6 @@ namespace Protocol2.Utils
                             {
                                 Animation a = Deserialize<Animation>(component);
                                 animationModel.Add(a);
-                                Debug.WriteLine(animationModel.GetAnimations().Count);
                             }
                         }
                     }
