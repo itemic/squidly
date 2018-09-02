@@ -83,8 +83,8 @@ namespace Protocol2
             AnimationRepresentation.ItemsSource = animations.GetAnimations();
 
             //animation mode set up
-            AnimationMode.Checked += AnimationToggleChecked;
-            AnimationMode.Unchecked += AnimationToggleUnchecked;
+            togglePath.Checked += TogglePathChecked;
+            togglePath.Unchecked += TogglePathUnchecked;
             Application.Current.Resources["AppBarToggleButtonBackgroundChecked"] = (SolidColorBrush)this.Resources["animationBlockColor"];
             Application.Current.Resources["AppBarToggleButtonBackgroundCheckedPointerOver"] = (SolidColorBrush)this.Resources["animationBlockColor"];
             Application.Current.Resources["AppBarToggleButtonBackgroundCheckedPressed"] = (SolidColorBrush)this.Resources["animationBlockColor"];
@@ -139,7 +139,7 @@ namespace Protocol2
         }
 
         //animation set up methods
-        private void AnimationToggleChecked(object sender, RoutedEventArgs e)
+        private void TogglePathChecked(object sender, RoutedEventArgs e)
         {
             foreach (var animation in animations.GetAnimations())
             {
@@ -149,7 +149,7 @@ namespace Protocol2
             }
         }
 
-        private void AnimationToggleUnchecked(object sender, RoutedEventArgs e)
+        private void TogglePathUnchecked(object sender, RoutedEventArgs e)
         {
             foreach (var animation in animations.GetAnimations())
             {
@@ -157,7 +157,6 @@ namespace Protocol2
                 pline.Opacity = 0;
                 animation.nameText.Opacity = 0;
             }
-
         }
 
         //timeline in this case isn't in time units. It's based on the horizontal positions in the canvas. Length units of canvas have been directly mapped to time units.
@@ -298,8 +297,9 @@ namespace Protocol2
                         StrokeDashArray = new DoubleCollection() { 5, 2 },
                     };
                     polyline.Points = a.linePoints;
-                    polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
-                    a.nameText.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
+
+                    polyline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
+                    a.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
                     a.SetPolyline(polyline);
                     polyCanvas.Children.Add(polyline);
                     addPolylineText(a);
@@ -344,10 +344,10 @@ namespace Protocol2
                             StrokeDashArray = new DoubleCollection() { 5, 2 },
                         };
                         polyline.Points = a.linePoints;
-                        polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
+                        polyline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
                         a.SetPolyline(polyline);
                         polyCanvas.Children.Add(polyline);
-                        a.nameText.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
+                        a.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
                         addPolylineText(a);
                         //canvas.Children.Add(polyline);
                     }
@@ -384,10 +384,10 @@ namespace Protocol2
                             StrokeDashArray = new DoubleCollection() { 5, 2 },
                         };
                         polyline.Points = a.linePoints;
-                        polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
+                        polyline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
                         a.SetPolyline(polyline);
                         polyCanvas.Children.Add(polyline);
-                        a.nameText.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
+                        a.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
 
                         addPolylineText(a);
                         //canvas.Children.Add(polyline);
@@ -429,6 +429,7 @@ namespace Protocol2
 
         private void ClearAllHandlers()
         {
+            selectionCanvas.Children.Clear(); //removes bounding box from GUI
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= UnprocessedInput_PointerPressed;
             inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= UnprocessedInput_PointerMoved;
             inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= UnprocessedInput_PointerReleased;
@@ -830,6 +831,7 @@ namespace Protocol2
         //selected strokes context menu functionality
         private void DrawPathSelectedStrokes(Object sender, RoutedEventArgs e)
         {
+            runAllAnimationsButton.IsEnabled = false;
             //TODO We still want the canvas we just want to hide it.
             selectionCanvas.Visibility = Visibility.Collapsed;
             inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
@@ -892,6 +894,7 @@ namespace Protocol2
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
 
                 ClearSelection();
+                runAllAnimationsButton.IsEnabled = true;
             }
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += pressed;
             inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += moved;
@@ -958,10 +961,7 @@ namespace Protocol2
         {
             //TODO: Check if the inkstrokes of the animation still exists...
             List<InkStroke> strokesToAnimate = new List<InkStroke>();
-            foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
-            {
-                stroke.Selected = false;
-            }
+            ClearSelection();
 
             foreach (var s in animation.inkStrokesId)
             {
@@ -1028,8 +1028,8 @@ namespace Protocol2
                     stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2) + stroke.PointTransform.Translation.X), (float)(animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2) + stroke.PointTransform.Translation.Y));
                 }
             }
-            pline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
-            animation.nameText.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
+            pline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
+            animation.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
 
 
             foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
@@ -1134,19 +1134,6 @@ namespace Protocol2
         /*
          * methods for animation mode
          * */
-
-        private void ToggleAnimationMode(object sender, RoutedEventArgs e)
-        {
-            isAnimationMode = !isAnimationMode;
-            if (isAnimationMode)
-            {
-                col3.Height = new GridLength(1.2, GridUnitType.Star);
-            }
-            else
-            {
-                col3.Height = new GridLength(0);
-            }
-        }
 
         private void DragAnimationChunk(object sender, ManipulationDeltaRoutedEventArgs e)
         {
