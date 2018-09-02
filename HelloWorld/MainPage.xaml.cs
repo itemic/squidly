@@ -59,6 +59,7 @@ namespace Protocol2
         private double canvasHeight;
         Dictionary<InkStroke, StrokeGroup> strokeGroups = new Dictionary<InkStroke, StrokeGroup>();
         private Save save = null;
+        private InkToolbarCustomToolButton animationPen;
 
         public MainPage()
         {
@@ -88,6 +89,14 @@ namespace Protocol2
             Application.Current.Resources["AppBarToggleButtonBackgroundChecked"] = (SolidColorBrush)this.Resources["animationBlockColor"];
             Application.Current.Resources["AppBarToggleButtonBackgroundCheckedPointerOver"] = (SolidColorBrush)this.Resources["animationBlockColor"];
             Application.Current.Resources["AppBarToggleButtonBackgroundCheckedPressed"] = (SolidColorBrush)this.Resources["animationBlockColor"];
+
+            // animation pen set up
+            animationPen = new InkToolbarCustomToolButton();
+            animationPen.Content = new FontIcon
+            {
+                FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                Glyph = "\uE735",
+            };
 
             //comments set up
             SetUpStickyNotes();
@@ -144,8 +153,8 @@ namespace Protocol2
             foreach (var animation in animations.GetAnimations())
             {
                 var pline = animation.GetPolyline();
-                pline.Opacity = 0.3;
-                animation.nameText.Opacity = 0.3;
+                pline.Opacity = 0.5;
+                animation.nameText.Opacity = 0.5;
             }
         }
 
@@ -260,24 +269,18 @@ namespace Protocol2
             await save.SaveAll(inkCanvas, comments, animations);
         }
 
-        public async void LoadAll(object sender, RoutedEventArgs e)
+        public void SaveHelper()
         {
-            if (save == null)
-            {
-                save = new Save();
-            }
-
-            await save.LoadAll(inkCanvas, comments, animations);
             if (comments != null)
             {
                 polyCanvas.Children.Clear();
                 canvas.Children.Clear(); // probably better way than this...
                 Debug.WriteLine(comments.GetComments().Count);
-                foreach(Comment c in comments.GetComments())
+                foreach (Comment c in comments.GetComments())
                 {
                     DrawRectangle(c);
                 }
-                
+
             }
             if (animations != null)
             {
@@ -298,13 +301,24 @@ namespace Protocol2
                     };
                     polyline.Points = a.linePoints;
 
-                    polyline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-                    a.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
+                    polyline.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
+                    a.nameText.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
                     a.SetPolyline(polyline);
                     polyCanvas.Children.Add(polyline);
                     addPolylineText(a);
                 }
             }
+        }
+
+        public async void LoadAll(object sender, RoutedEventArgs e)
+        {
+            if (save == null)
+            {
+                save = new Save();
+            }
+
+            await save.LoadAll(inkCanvas, comments, animations);
+            SaveHelper();
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -317,83 +331,13 @@ namespace Protocol2
                 }
 
                 await save.LoadAll(inkCanvas, comments, animations);
-                if (comments != null)
-                {
-                    polyCanvas.Children.Clear();
-                    canvas.Children.Clear(); // probably better way than this...
-                    Debug.WriteLine(comments.GetComments().Count);
-                    foreach (Comment c in comments.GetComments())
-                    {
-                        DrawRectangle(c);
-                    }
-                }
-                if (animations != null)
-                {
-                    foreach (Animation a in animations.GetAnimations())
-                    {
-                        for (int i = 0; i < a.inkStrokesId.Count; i++)
-                        {
-                            a.inkStrokesId[i] = inkCanvas.InkPresenter.StrokeContainer.GetStrokes()[a.inkStrokesIndex[i]].Id;
-                        }
-
-                        // recreate polyline!
-                        polyline = new Polyline()
-                        {
-                            Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
-                            StrokeThickness = 1.5,
-                            StrokeDashArray = new DoubleCollection() { 5, 2 },
-                        };
-                        polyline.Points = a.linePoints;
-                        polyline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-                        a.SetPolyline(polyline);
-                        polyCanvas.Children.Add(polyline);
-                        a.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-                        addPolylineText(a);
-                        //canvas.Children.Add(polyline);
-                    }
-                }
-            }
-            else if (e.Parameter is Save)
+            } else if (e.Parameter is Save)
             {
                 save = e.Parameter as Save;
                 await save.LoadNew(inkCanvas, comments, animations);
-                if (comments != null)
-                {
-                    polyCanvas.Children.Clear();
-                    canvas.Children.Clear(); // probably better way than this...
-                    Debug.WriteLine(comments.GetComments().Count);
-                    foreach (Comment c in comments.GetComments())
-                    {
-                        DrawRectangle(c);
-                    }
-                }
-                if (animations != null)
-                {
-                    foreach (Animation a in animations.GetAnimations())
-                    {
-
-                        for (int i = 0; i < a.inkStrokesId.Count; i++)
-                        {
-                            a.inkStrokesId[i] = inkCanvas.InkPresenter.StrokeContainer.GetStrokes()[a.inkStrokesIndex[i]].Id;
-                        }
-                        // recreate polyline!
-                        polyline = new Polyline()
-                        {
-                            Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
-                            StrokeThickness = 1.5,
-                            StrokeDashArray = new DoubleCollection() { 5, 2 },
-                        };
-                        polyline.Points = a.linePoints;
-                        polyline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-                        a.SetPolyline(polyline);
-                        polyCanvas.Children.Add(polyline);
-                        a.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-
-                        addPolylineText(a);
-                        //canvas.Children.Add(polyline);
-                    }
-                }
             }
+
+            SaveHelper();
             base.OnNavigatedTo(e);
         }
 
@@ -405,6 +349,12 @@ namespace Protocol2
         private void InkToolbar_ActiveToolChanged(InkToolbar sender, object args)
         {
             ClearAllHandlers();
+
+            if (inkToolbar.Children.Contains(animationPen))
+            {
+                inkToolbar.Children.Remove(animationPen);
+            }
+
             if (inkToolbar.ActiveTool == toolButtonLasso)
             {
                 inkCanvas.RightTapped += ClickSelect;
@@ -461,6 +411,8 @@ namespace Protocol2
                 Opacity = comment.opacity,
                 RenderTransform = new RotateTransform { Angle = comment.angle }
             };
+
+            rectangle.DataContext = comment;
             Canvas.SetLeft(rectangle, comment.left);
             Canvas.SetTop(rectangle, comment.top);
 
@@ -550,6 +502,12 @@ namespace Protocol2
             }
             Canvas.SetLeft(rectangle, newLeft);
             Canvas.SetTop(rectangle, newTop);
+
+            Comment c = (Comment)rectangle.DataContext;
+            c.left = newLeft;
+            c.top = newTop;
+
+            
         }
 
 
@@ -595,8 +553,6 @@ namespace Protocol2
                 }
             }
             boundingRect = FindBoundingRect(selectedStrokes);
-            //Debug.WriteLine("own " + FindBoundingRect(selectedStrokes));
-            //Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
             isBoundRect = false;
             DrawBoundingRect();
         }
@@ -836,7 +792,8 @@ namespace Protocol2
             selectionCanvas.Visibility = Visibility.Collapsed;
             inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
             var currentTool = inkToolbar.ActiveTool;
-            var animationPen = new InkToolbarCustomToolButton();
+
+
             inkToolbar.ActiveTool = animationPen;
             inkToolbar.Children.Add(animationPen);
 
@@ -865,7 +822,7 @@ namespace Protocol2
             async void released(InkUnprocessedInput i, PointerEventArgs p)
             {
                 polyline.Points.Add(p.CurrentPoint.Position);
-                polyline.Opacity = 0.3;
+                polyline.Opacity = 0.5;
                 inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
                 inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
                 inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= moved;
@@ -984,9 +941,10 @@ namespace Protocol2
 
             var delta = animation.startPoint;
 
-                var pline = animation.GetPolyline();
-                pline.Opacity = 1;
-                animation.nameText.Opacity = 1;
+            var pline = animation.GetPolyline();
+            pline.Opacity = 1;
+            animation.isActive = true;
+            animation.nameText.Opacity = 1;
 
 
 
@@ -1028,8 +986,11 @@ namespace Protocol2
                     stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2) + stroke.PointTransform.Translation.X), (float)(animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2) + stroke.PointTransform.Translation.Y));
                 }
             }
-            pline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-            animation.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
+
+            pline.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
+            animation.nameText.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
+            animation.isActive = false;
+
 
             foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
             {
@@ -1094,7 +1055,9 @@ namespace Protocol2
             Animation a = b.DataContext as Animation;
             int index = a.id;
             var animation = animations.GetAnimationAt(index);
-            animation.polyline.Stroke = new SolidColorBrush(Colors.Crimson);            
+            animation.polyline.Stroke = new SolidColorBrush(Colors.Crimson);
+            animation.polyline.Opacity = 1.0;
+            
         }
 
         private async void QueryStop(object sender, PointerRoutedEventArgs e)
@@ -1103,7 +1066,25 @@ namespace Protocol2
             Animation a = b.DataContext as Animation;
             int index = a.id;
             var animation = animations.GetAnimationAt(index);
-            animation.polyline.Stroke = new SolidColorBrush(Colors.ForestGreen);
+
+            if (animation != null)
+            {
+                animation.polyline.Stroke = new SolidColorBrush(Colors.ForestGreen);
+
+                if (animation.isActive)
+                {
+                    animation.polyline.Opacity = 1;
+                }
+                else if (togglePath.IsChecked == true)
+                {
+                    animation.polyline.Opacity = 0.5;
+                }
+                else
+                {
+                    animation.polyline.Opacity = 0;
+                }
+            }
+            
         }
 
         private void DeleteAnimation(object sender, RoutedEventArgs e)
@@ -1112,10 +1093,15 @@ namespace Protocol2
             Animation a = senderElement.DataContext as Animation;
 
             int index = a.id;
-            polyCanvas.Children.Remove(animations.GetAnimationAt(index).GetPolyline());
-            polyCanvas.Children.Remove(animations.GetAnimationAt(index).nameText);
+            var anime = animations.GetAnimationAt(index);
 
-            animations.RemoveAnimation(index);
+            if (anime != null)
+            {
+                polyCanvas.Children.Remove(anime.GetPolyline());
+
+                animations.RemoveAnimation(index);
+            }
+            
         }
 
         //currently not doing anything
