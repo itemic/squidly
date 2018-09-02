@@ -411,6 +411,8 @@ namespace Protocol2
                 Opacity = comment.opacity,
                 RenderTransform = new RotateTransform { Angle = comment.angle }
             };
+
+            rectangle.DataContext = comment;
             Canvas.SetLeft(rectangle, comment.left);
             Canvas.SetTop(rectangle, comment.top);
 
@@ -500,6 +502,12 @@ namespace Protocol2
             }
             Canvas.SetLeft(rectangle, newLeft);
             Canvas.SetTop(rectangle, newTop);
+
+            Comment c = (Comment)rectangle.DataContext;
+            c.left = newLeft;
+            c.top = newTop;
+
+            
         }
 
 
