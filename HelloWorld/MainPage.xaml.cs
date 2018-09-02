@@ -153,8 +153,8 @@ namespace Protocol2
             foreach (var animation in animations.GetAnimations())
             {
                 var pline = animation.GetPolyline();
-                pline.Opacity = 0.3;
-                animation.nameText.Opacity = 0.3;
+                pline.Opacity = 0.5;
+                animation.nameText.Opacity = 0.5;
             }
         }
 
@@ -301,8 +301,8 @@ namespace Protocol2
                     };
                     polyline.Points = a.linePoints;
 
-                    polyline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-                    a.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
+                    polyline.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
+                    a.nameText.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
                     a.SetPolyline(polyline);
                     polyCanvas.Children.Add(polyline);
                     addPolylineText(a);
@@ -545,8 +545,6 @@ namespace Protocol2
                 }
             }
             boundingRect = FindBoundingRect(selectedStrokes);
-            //Debug.WriteLine("own " + FindBoundingRect(selectedStrokes));
-            //Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
             isBoundRect = false;
             DrawBoundingRect();
         }
@@ -816,7 +814,7 @@ namespace Protocol2
             async void released(InkUnprocessedInput i, PointerEventArgs p)
             {
                 polyline.Points.Add(p.CurrentPoint.Position);
-                polyline.Opacity = 0.3;
+                polyline.Opacity = 0.5;
                 inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
                 inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
                 inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= moved;
@@ -935,9 +933,10 @@ namespace Protocol2
 
             var delta = animation.startPoint;
 
-                var pline = animation.GetPolyline();
-                pline.Opacity = 1;
-                animation.nameText.Opacity = 1;
+            var pline = animation.GetPolyline();
+            pline.Opacity = 1;
+            animation.isActive = true;
+            animation.nameText.Opacity = 1;
 
 
 
@@ -979,9 +978,9 @@ namespace Protocol2
                     stroke.PointTransform = Matrix3x2.CreateTranslation((float)(animation.startPoint.X - (currentPosition.X + currentPosition.Width / 2) + stroke.PointTransform.Translation.X), (float)(animation.startPoint.Y - (currentPosition.Y + currentPosition.Height / 2) + stroke.PointTransform.Translation.Y));
                 }
             }
-            pline.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-            animation.nameText.Opacity = togglePath.IsChecked == true ? 0.3 : 0;
-
+            pline.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
+            animation.nameText.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
+            animation.isActive = false;
 
             foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
             {
@@ -1046,7 +1045,9 @@ namespace Protocol2
             Animation a = b.DataContext as Animation;
             int index = a.id;
             var animation = animations.GetAnimationAt(index);
-            animation.polyline.Stroke = new SolidColorBrush(Colors.Crimson);            
+            animation.polyline.Stroke = new SolidColorBrush(Colors.Crimson);
+            animation.polyline.Opacity = 1.0;
+            
         }
 
         private async void QueryStop(object sender, PointerRoutedEventArgs e)
@@ -1056,6 +1057,17 @@ namespace Protocol2
             int index = a.id;
             var animation = animations.GetAnimationAt(index);
             animation.polyline.Stroke = new SolidColorBrush(Colors.ForestGreen);
+
+            if (animation.isActive)
+            {
+                animation.polyline.Opacity = 1;
+            } else if (togglePath.IsChecked == true)
+            {
+                animation.polyline.Opacity = 0.5;
+            } else
+            {
+                animation.polyline.Opacity = 0;
+            }
         }
 
         private void DeleteAnimation(object sender, RoutedEventArgs e)
