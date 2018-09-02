@@ -59,6 +59,7 @@ namespace Protocol2
         private double canvasHeight;
         Dictionary<InkStroke, StrokeGroup> strokeGroups = new Dictionary<InkStroke, StrokeGroup>();
         private Save save = null;
+        private InkToolbarCustomToolButton animationPen;
 
         public MainPage()
         {
@@ -88,6 +89,14 @@ namespace Protocol2
             Application.Current.Resources["AppBarToggleButtonBackgroundChecked"] = (SolidColorBrush)this.Resources["animationBlockColor"];
             Application.Current.Resources["AppBarToggleButtonBackgroundCheckedPointerOver"] = (SolidColorBrush)this.Resources["animationBlockColor"];
             Application.Current.Resources["AppBarToggleButtonBackgroundCheckedPressed"] = (SolidColorBrush)this.Resources["animationBlockColor"];
+
+            // animation pen set up
+            animationPen = new InkToolbarCustomToolButton();
+            animationPen.Content = new FontIcon
+            {
+                FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                Glyph = "\uE735",
+            };
 
             //comments set up
             SetUpStickyNotes();
@@ -340,6 +349,12 @@ namespace Protocol2
         private void InkToolbar_ActiveToolChanged(InkToolbar sender, object args)
         {
             ClearAllHandlers();
+
+            if (inkToolbar.Children.Contains(animationPen))
+            {
+                inkToolbar.Children.Remove(animationPen);
+            }
+
             if (inkToolbar.ActiveTool == toolButtonLasso)
             {
                 inkCanvas.RightTapped += ClickSelect;
@@ -771,7 +786,8 @@ namespace Protocol2
             selectionCanvas.Visibility = Visibility.Collapsed;
             inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
             var currentTool = inkToolbar.ActiveTool;
-            var animationPen = new InkToolbarCustomToolButton();
+
+
             inkToolbar.ActiveTool = animationPen;
             inkToolbar.Children.Add(animationPen);
 
