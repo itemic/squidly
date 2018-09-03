@@ -12,7 +12,7 @@ using Windows.UI.Input.Inking;
 using Windows.UI.Xaml.Shapes;
 using Windows.UI.Input;
 using System.Diagnostics;
-using Protocol2.Utils;
+using Squidly.Utils;
 using Windows.UI;
 using Windows.UI.Core;
 using System.Threading.Tasks;
@@ -21,7 +21,7 @@ using Windows.System.Threading;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-namespace Protocol2
+namespace Squidly
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.

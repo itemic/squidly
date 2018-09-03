@@ -10,7 +10,7 @@ using Windows.UI.Input.Inking;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 
-namespace Protocol2.Utils
+namespace Squidly.Utils
 {
     [DataContract]
     public class Animation

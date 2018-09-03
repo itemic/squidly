@@ -2,7 +2,7 @@
 using Windows.UI;
 using Windows.UI.Input.Inking;
 
-namespace Protocol2.Utils
+namespace Squidly.Utils
 {
     [DataContract]
     public class Comment

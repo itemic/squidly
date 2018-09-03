@@ -1,11 +1,11 @@
 ﻿<Page
-    x:Class="Protocol2.Home"
+    x:Class="Squidly.Home"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Protocol2"
+    xmlns:local="using:Squidly"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local1="using:Protocol2.Utils"
+    xmlns:local1="using:Squidly.Utils"
     mc:Ignorable="d" Margin="0,0,0,-4">
     <Grid Margin="50,50,50,50">
         <Grid.RowDefinitions>
@@ -14,7 +14,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" Text="Protocol 2" Style="{StaticResource HeaderTextBlockStyle}"/>
+        <TextBlock Grid.Row="0" Text="Squidly" Style="{StaticResource HeaderTextBlockStyle}"/>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -29,7 +29,7 @@
                     <FontIcon Grid.Column="0" FontFamily="Segoe MDL2 Assets" FontSize="32" Glyph="&#xE7C3;" Margin="10,10,10,10" />
                     <StackPanel Grid.Column="1">
                         <TextBlock Text="New Project" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <TextBlock Text="Create a new Protocol 2 prototype." Style="{StaticResource BodyTextBlockStyle}" TextWrapping="Wrap"/>
+                        <TextBlock Text="Create a new Squidly prototype." Style="{StaticResource BodyTextBlockStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
                     
                 </Grid>
@@ -43,7 +43,7 @@
                     <FontIcon Grid.Column="0" FontFamily="Segoe MDL2 Assets" FontSize="32" Glyph="&#xE8DA;" Margin="10,10,10,10" />
                     <StackPanel Grid.Column="1">
                         <TextBlock Text="Open Project" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <TextBlock Text="Open an existing Protocol 2 prototype." Style="{StaticResource BodyTextBlockStyle}" TextWrapping="Wrap"/>
+                        <TextBlock Text="Open an existing Squidly prototype." Style="{StaticResource BodyTextBlockStyle}" TextWrapping="Wrap"/>
                     </StackPanel>
 
                 </Grid>
