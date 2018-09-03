@@ -65,6 +65,14 @@ namespace Squidly.Utils
 
         public async Task SaveAll(InkCanvas inkCanvas, CommentModel comments, AnimationModel animations)
         {
+
+            // delete everything first
+            var files = await projectFolder.GetFilesAsync();
+            foreach (StorageFile file in files)
+            {
+                await file.DeleteAsync(StorageDeleteOption.Default);
+            }
+
             // save ink
             var inkFile = await projectFolder.CreateFileAsync("InkFile.gif", CreationCollisionOption.ReplaceExisting);
             using (IRandomAccessStream streamX = await inkFile.OpenAsync(FileAccessMode.ReadWrite))
@@ -179,32 +187,33 @@ namespace Squidly.Utils
                             {
                                 Animation a = Deserialize<Animation>(component);
                                 animationModel.Add(a);
-                                Debug.WriteLine(animationModel.GetAnimations().Count);
                             }
                         }
                     }
                 }
-
-                foreach (StorageFile file in files)
-                {
-                    if (file.Name.StartsWith("CommentInk"))
+               
+                    foreach (StorageFile file in files)
                     {
-                        IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
-                        using (var inputStream = stream.GetInputStreamAt(0))
+                        if (file.Name.StartsWith("CommentInk"))
                         {
-                            // first get the # of the ink
-                            Regex re = new Regex(@"\d+");
-                            Match m = re.Match(file.Name);
-                            int inkPos = int.Parse(m.Value); // we will need to have better error handling
+                            IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
+                            using (var inputStream = stream.GetInputStreamAt(0))
+                            {
+                                // first get the # of the ink
+                                Regex re = new Regex(@"\d+");
+                                Match m = re.Match(file.Name);
+                                int inkPos = int.Parse(m.Value); // we will need to have better error handling
 
-                            // then set it
-                            commentModel.GetComments()[inkPos].ic = new Windows.UI.Input.Inking.InkStrokeContainer();
+                                // then set it
+                                commentModel.GetComments()[inkPos].ic = new Windows.UI.Input.Inking.InkStrokeContainer();
 
-                            await commentModel.GetComments()[inkPos].ic.LoadAsync(inputStream);
+                                await commentModel.GetComments()[inkPos].ic.LoadAsync(inputStream);
 
+                            }
                         }
                     }
-                }
+                
+                
 
 
             }

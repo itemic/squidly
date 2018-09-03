@@ -16,6 +16,7 @@ using Squidly.Utils;
 using Windows.UI;
 using Windows.UI.Core;
 using System.Threading.Tasks;
+using Windows.UI.Xaml.Data;
 using System.Numerics;
 using Windows.System.Threading;
 
@@ -45,6 +46,7 @@ namespace Squidly
         //fields for animation related functionality
         public bool isAnimationMode = false;
         private AnimationModel animations;
+        private bool areAllAnimationsRunning = false;
         private Object moveSelectedLock = new Object();
     
 
@@ -57,6 +59,7 @@ namespace Squidly
         private double canvasHeight;
         Dictionary<InkStroke, StrokeGroup> strokeGroups = new Dictionary<InkStroke, StrokeGroup>();
         private Save save = null;
+        private InkToolbarCustomToolButton animationPen;
 
         public MainPage()
         {
@@ -81,11 +84,19 @@ namespace Squidly
             AnimationRepresentation.ItemsSource = animations.GetAnimations();
 
             //animation mode set up
-            AnimationMode.Checked += AnimationToggleChecked;
-            AnimationMode.Unchecked += AnimationToggleUnchecked;
+            togglePath.Checked += TogglePathChecked;
+            togglePath.Unchecked += TogglePathUnchecked;
             Application.Current.Resources["AppBarToggleButtonBackgroundChecked"] = (SolidColorBrush)this.Resources["animationBlockColor"];
             Application.Current.Resources["AppBarToggleButtonBackgroundCheckedPointerOver"] = (SolidColorBrush)this.Resources["animationBlockColor"];
             Application.Current.Resources["AppBarToggleButtonBackgroundCheckedPressed"] = (SolidColorBrush)this.Resources["animationBlockColor"];
+
+            // animation pen set up
+            animationPen = new InkToolbarCustomToolButton();
+            animationPen.Content = new FontIcon
+            {
+                FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                Glyph = "\uE735",
+            };
 
             //comments set up
             SetUpStickyNotes();
@@ -137,23 +148,24 @@ namespace Squidly
         }
 
         //animation set up methods
-        private void AnimationToggleChecked(object sender, RoutedEventArgs e)
+        private void TogglePathChecked(object sender, RoutedEventArgs e)
         {
             foreach (var animation in animations.GetAnimations())
             {
                 var pline = animation.GetPolyline();
-                pline.Opacity = 0.3;
+                pline.Opacity = 0.5;
+                animation.nameText.Opacity = 0.5;
             }
         }
 
-        private void AnimationToggleUnchecked(object sender, RoutedEventArgs e)
+        private void TogglePathUnchecked(object sender, RoutedEventArgs e)
         {
             foreach (var animation in animations.GetAnimations())
             {
                 var pline = animation.GetPolyline();
                 pline.Opacity = 0;
+                animation.nameText.Opacity = 0;
             }
-
         }
 
         //timeline in this case isn't in time units. It's based on the horizontal positions in the canvas. Length units of canvas have been directly mapped to time units.
@@ -257,24 +269,18 @@ namespace Squidly
             await save.SaveAll(inkCanvas, comments, animations);
         }
 
-        public async void LoadAll(object sender, RoutedEventArgs e)
+        public void SaveHelper()
         {
-            if (save == null)
-            {
-                save = new Save();
-            }
-
-            await save.LoadAll(inkCanvas, comments, animations);
             if (comments != null)
             {
                 polyCanvas.Children.Clear();
                 canvas.Children.Clear(); // probably better way than this...
                 Debug.WriteLine(comments.GetComments().Count);
-                foreach(Comment c in comments.GetComments())
+                foreach (Comment c in comments.GetComments())
                 {
                     DrawRectangle(c);
                 }
-                
+
             }
             if (animations != null)
             {
@@ -290,16 +296,29 @@ namespace Squidly
                     polyline = new Polyline()
                     {
                         Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
-                        StrokeThickness = 3,
+                        StrokeThickness = 1.5,
                         StrokeDashArray = new DoubleCollection() { 5, 2 },
                     };
                     polyline.Points = a.linePoints;
-                    polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
+
+                    polyline.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
+                    a.nameText.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
                     a.SetPolyline(polyline);
                     polyCanvas.Children.Add(polyline);
-                    //canvas.Children.Add(polyline);
+                    addPolylineText(a);
                 }
             }
+        }
+
+        public async void LoadAll(object sender, RoutedEventArgs e)
+        {
+            if (save == null)
+            {
+                save = new Save();
+            }
+
+            await save.LoadAll(inkCanvas, comments, animations);
+            SaveHelper();
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -312,78 +331,13 @@ namespace Squidly
                 }
 
                 await save.LoadAll(inkCanvas, comments, animations);
-                if (comments != null)
-                {
-                    polyCanvas.Children.Clear();
-                    canvas.Children.Clear(); // probably better way than this...
-                    Debug.WriteLine(comments.GetComments().Count);
-                    foreach (Comment c in comments.GetComments())
-                    {
-                        DrawRectangle(c);
-                    }
-                }
-                if (animations != null)
-                {
-                    foreach (Animation a in animations.GetAnimations())
-                    {
-                        for (int i = 0; i < a.inkStrokesId.Count; i++)
-                        {
-                            a.inkStrokesId[i] = inkCanvas.InkPresenter.StrokeContainer.GetStrokes()[a.inkStrokesIndex[i]].Id;
-                        }
-
-                        // recreate polyline!
-                        polyline = new Polyline()
-                        {
-                            Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
-                            StrokeThickness = 3,
-                            StrokeDashArray = new DoubleCollection() { 5, 2 },
-                        };
-                        polyline.Points = a.linePoints;
-                        polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
-                        a.SetPolyline(polyline);
-                        polyCanvas.Children.Add(polyline);
-                        //canvas.Children.Add(polyline);
-                    }
-                }
-            }
-            else if (e.Parameter is Save)
+            } else if (e.Parameter is Save)
             {
                 save = e.Parameter as Save;
                 await save.LoadNew(inkCanvas, comments, animations);
-                if (comments != null)
-                {
-                    polyCanvas.Children.Clear();
-                    canvas.Children.Clear(); // probably better way than this...
-                    Debug.WriteLine(comments.GetComments().Count);
-                    foreach (Comment c in comments.GetComments())
-                    {
-                        DrawRectangle(c);
-                    }
-                }
-                if (animations != null)
-                {
-                    foreach (Animation a in animations.GetAnimations())
-                    {
-
-                        for (int i = 0; i < a.inkStrokesId.Count; i++)
-                        {
-                            a.inkStrokesId[i] = inkCanvas.InkPresenter.StrokeContainer.GetStrokes()[a.inkStrokesIndex[i]].Id;
-                        }
-                        // recreate polyline!
-                        polyline = new Polyline()
-                        {
-                            Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
-                            StrokeThickness = 3,
-                            StrokeDashArray = new DoubleCollection() { 5, 2 },
-                        };
-                        polyline.Points = a.linePoints;
-                        polyline.Opacity = AnimationMode.IsChecked == true ? 0.3 : 0;
-                        a.SetPolyline(polyline);
-                        polyCanvas.Children.Add(polyline);
-                        //canvas.Children.Add(polyline);
-                    }
-                }
             }
+
+            SaveHelper();
             base.OnNavigatedTo(e);
         }
 
@@ -395,6 +349,12 @@ namespace Squidly
         private void InkToolbar_ActiveToolChanged(InkToolbar sender, object args)
         {
             ClearAllHandlers();
+
+            if (inkToolbar.Children.Contains(animationPen))
+            {
+                inkToolbar.Children.Remove(animationPen);
+            }
+
             if (inkToolbar.ActiveTool == toolButtonLasso)
             {
                 inkCanvas.RightTapped += ClickSelect;
@@ -419,6 +379,7 @@ namespace Squidly
 
         private void ClearAllHandlers()
         {
+            selectionCanvas.Children.Clear(); //removes bounding box from GUI
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= UnprocessedInput_PointerPressed;
             inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= UnprocessedInput_PointerMoved;
             inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= UnprocessedInput_PointerReleased;
@@ -450,6 +411,8 @@ namespace Squidly
                 Opacity = comment.opacity,
                 RenderTransform = new RotateTransform { Angle = comment.angle }
             };
+
+            rectangle.DataContext = comment;
             Canvas.SetLeft(rectangle, comment.left);
             Canvas.SetTop(rectangle, comment.top);
 
@@ -539,6 +502,12 @@ namespace Squidly
             }
             Canvas.SetLeft(rectangle, newLeft);
             Canvas.SetTop(rectangle, newTop);
+
+            Comment c = (Comment)rectangle.DataContext;
+            c.left = newLeft;
+            c.top = newTop;
+
+            
         }
 
 
@@ -584,8 +553,6 @@ namespace Squidly
                 }
             }
             boundingRect = FindBoundingRect(selectedStrokes);
-            //Debug.WriteLine("own " + FindBoundingRect(selectedStrokes));
-            //Debug.WriteLine("move selected " + inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0)));
             isBoundRect = false;
             DrawBoundingRect();
         }
@@ -820,11 +787,13 @@ namespace Squidly
         //selected strokes context menu functionality
         private void DrawPathSelectedStrokes(Object sender, RoutedEventArgs e)
         {
+            runAllAnimationsButton.IsEnabled = false;
             //TODO We still want the canvas we just want to hide it.
             selectionCanvas.Visibility = Visibility.Collapsed;
             inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
             var currentTool = inkToolbar.ActiveTool;
-            var animationPen = new InkToolbarCustomToolButton();
+
+
             inkToolbar.ActiveTool = animationPen;
             inkToolbar.Children.Add(animationPen);
 
@@ -833,11 +802,14 @@ namespace Squidly
                 polyline = new Polyline()
                 {
                     Stroke = new SolidColorBrush(Windows.UI.Colors.ForestGreen),
-                    StrokeThickness = 3,
+                    StrokeThickness = 1.5,
                     StrokeDashArray = new DoubleCollection() { 5, 2 },
                 };
                 polyline.Points.Add(p.CurrentPoint.Position);
                 polyCanvas.Children.Add(polyline);
+
+
+
             }
 
             void moved(InkUnprocessedInput i, PointerEventArgs p)
@@ -850,7 +822,7 @@ namespace Squidly
             async void released(InkUnprocessedInput i, PointerEventArgs p)
             {
                 polyline.Points.Add(p.CurrentPoint.Position);
-                polyline.Opacity = 0.3;
+                polyline.Opacity = 0.5;
                 inkCanvas.InkPresenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.AllowProcessing;
                 inkCanvas.InkPresenter.UnprocessedInput.PointerPressed -= pressed;
                 inkCanvas.InkPresenter.UnprocessedInput.PointerMoved -= moved;
@@ -867,25 +839,40 @@ namespace Squidly
                     }
                 }
                 anime.SetPolyline(polyline);
-
+                addPolylineText(anime);
                 inkToolbar.ActiveTool = currentTool;
                 inkToolbar.Children.Remove(animationPen);
                 var container = inkCanvas.InkPresenter.StrokeContainer;
 
                 animations.Add(anime);
 
-                //canvas.Children.Remove(polyline); //maybe only show when flyout or something...
 
                 await RunAnimation(anime, true);
                 selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
 
                 ClearSelection();
+                runAllAnimationsButton.IsEnabled = true;
             }
             inkCanvas.InkPresenter.UnprocessedInput.PointerPressed += pressed;
             inkCanvas.InkPresenter.UnprocessedInput.PointerMoved += moved;
             inkCanvas.InkPresenter.UnprocessedInput.PointerReleased += released;
         }
 
+        private void addPolylineText(Animation animation)
+        {
+            TextBlock tb = new TextBlock();
+            tb.DataContext = animation;
+            Binding binding = new Binding { Path = new PropertyPath("name") };
+            tb.SetBinding(TextBlock.TextProperty, binding);
+            Canvas.SetLeft(tb, animation.polyline.Points[0].X);
+            Canvas.SetTop(tb, animation.polyline.Points[0].Y);
+
+
+            //Canvas.SetLeft(animation.nameText, animation.polyline.Points[0].X);
+            //Canvas.SetTop(animation.nameText, animation.polyline.Points[0].Y);
+            //polyCanvas.Children.Add(animation.nameText);
+            polyCanvas.Children.Add(tb);
+        }
 
         private void CombineStrokes(object sender, RoutedEventArgs e)
         {
@@ -931,10 +918,7 @@ namespace Squidly
         {
             //TODO: Check if the inkstrokes of the animation still exists...
             List<InkStroke> strokesToAnimate = new List<InkStroke>();
-            foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
-            {
-                stroke.Selected = false;
-            }
+            ClearSelection();
 
             foreach (var s in animation.inkStrokesId)
             {
@@ -951,6 +935,7 @@ namespace Squidly
                 // we can delete this current animation entry
                 animations.GetAnimations().Remove(animation);
                 polyCanvas.Children.Remove(animation.GetPolyline());
+                polyCanvas.Children.Remove(animation.nameText);
                 return;
             }
 
@@ -958,6 +943,10 @@ namespace Squidly
 
             var pline = animation.GetPolyline();
             pline.Opacity = 1;
+            animation.isActive = true;
+            animation.nameText.Opacity = 1;
+
+
 
             Rect currentPosition; 
             lock (moveSelectedLock)
@@ -998,15 +987,10 @@ namespace Squidly
                 }
             }
 
-            if (AnimationMode.IsChecked == true)
-            {
-                pline.Opacity = 0.3;
+            pline.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
+            animation.nameText.Opacity = togglePath.IsChecked == true ? 0.5 : 0;
+            animation.isActive = false;
 
-            }
-            else
-            {
-                pline.Opacity = 0;
-            }
 
             foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
             {
@@ -1017,6 +1001,9 @@ namespace Squidly
 
         private async void RunAllAnimations(object sender, RoutedEventArgs e)
         {
+            runAllAnimationsButton.IsEnabled = false;
+
+            var tasks = new List<Task>();
             //15.638 on my computer
             var msPerPoint = 16.560;
             SortedSet<Animation> orderedAnimationList = new SortedSet<Animation>(new AnimationComparer());
@@ -1024,14 +1011,23 @@ namespace Squidly
             foreach(Animation a in AnimationRepresentation.Items)
             {
                 orderedAnimationList.Add(a);
+                a.IsEnabled = false;
             }
 
             foreach (Animation a in orderedAnimationList)
             {
                 await Task.Delay(TimeSpan.FromMilliseconds((a.position - previousStart) * msPerPoint));
-                RunAnimation(a, resetButton.IsChecked == true);
+                tasks.Add(RunAnimation(a, resetButton.IsChecked == true));
                 previousStart = a.position;
             }
+
+            await Task.WhenAll(tasks);
+            foreach(Animation a in AnimationRepresentation.Items)
+            {
+                a.IsEnabled = true;
+            }
+            runAllAnimationsButton.IsEnabled = true;
+
         }
 
         //replay selected animation
@@ -1039,20 +1035,73 @@ namespace Squidly
         {
             FrameworkElement b = sender as FrameworkElement;
             Animation a = b.DataContext as Animation;
+
+            runAllAnimationsButton.IsEnabled = false;
+            a.IsEnabled = false;
+
             int index = a.id;
             var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
-            Debug.WriteLine(resetButton.IsChecked);
-            await RunAnimation(replayAnimation, resetButton.IsChecked == true);     
+            await RunAnimation(replayAnimation, resetButton.IsChecked == true);
+
+            runAllAnimationsButton.IsEnabled = true;
+            a.IsEnabled = true;
         }
 
-        private  void DeleteAnimation(object sender, RoutedEventArgs e)
+ 
+
+        private async void Query(object sender, PointerRoutedEventArgs e)
+        {
+            FrameworkElement b = sender as FrameworkElement;
+            Animation a = b.DataContext as Animation;
+            int index = a.id;
+            var animation = animations.GetAnimationAt(index);
+            animation.polyline.Stroke = new SolidColorBrush(Colors.Crimson);
+            animation.polyline.Opacity = 1.0;
+            
+        }
+
+        private async void QueryStop(object sender, PointerRoutedEventArgs e)
+        {
+            FrameworkElement b = sender as FrameworkElement;
+            Animation a = b.DataContext as Animation;
+            int index = a.id;
+            var animation = animations.GetAnimationAt(index);
+
+            if (animation != null)
+            {
+                animation.polyline.Stroke = new SolidColorBrush(Colors.ForestGreen);
+
+                if (animation.isActive)
+                {
+                    animation.polyline.Opacity = 1;
+                }
+                else if (togglePath.IsChecked == true)
+                {
+                    animation.polyline.Opacity = 0.5;
+                }
+                else
+                {
+                    animation.polyline.Opacity = 0;
+                }
+            }
+            
+        }
+
+        private void DeleteAnimation(object sender, RoutedEventArgs e)
         {
             FrameworkElement senderElement = sender as FrameworkElement;
             Animation a = senderElement.DataContext as Animation;
 
             int index = a.id;
-            polyCanvas.Children.Remove(animations.GetAnimationAt(index).GetPolyline());
-            animations.RemoveAnimation(index);
+            var anime = animations.GetAnimationAt(index);
+
+            if (anime != null)
+            {
+                polyCanvas.Children.Remove(anime.GetPolyline());
+
+                animations.RemoveAnimation(index);
+            }
+            
         }
 
         //currently not doing anything
@@ -1070,19 +1119,6 @@ namespace Squidly
         /*
          * methods for animation mode
          * */
-
-        private void ToggleAnimationMode(object sender, RoutedEventArgs e)
-        {
-            isAnimationMode = !isAnimationMode;
-            if (isAnimationMode)
-            {
-                col3.Height = new GridLength(1.2, GridUnitType.Star);
-            }
-            else
-            {
-                col3.Height = new GridLength(0);
-            }
-        }
 
         private void DragAnimationChunk(object sender, ManipulationDeltaRoutedEventArgs e)
         {
@@ -1119,14 +1155,12 @@ namespace Squidly
             {
                 Animation nameChange = animations.GetAnimationAt(index);
                 RenameAnimation(renameUserInput.Text, nameChange);
-                var collection = animations.GetAnimations();
-                collection[collection.IndexOf(nameChange)] = nameChange;
             }
         }
 
         private void RenameAnimation(String newName, Animation animation)
         {
-            animation.SetName(newName);
+            animation.Name = newName;
         }
 
         private void UserInputTextChanged(object sender, RoutedEventArgs e)
