@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Input.Inking;
 
-namespace Protocol2
+namespace Squidly
 {
     class StrokeGroup
     {

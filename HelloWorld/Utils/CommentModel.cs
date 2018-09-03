@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.UI;
 
-namespace Protocol2.Utils
+namespace Squidly.Utils
 {
     public class CommentModel
     {

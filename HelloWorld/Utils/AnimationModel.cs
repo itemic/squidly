@@ -13,7 +13,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 
-namespace Protocol2.Utils
+namespace Squidly.Utils
 {
     [DataContract]
     public class Animation: INotifyPropertyChanged

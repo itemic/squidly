@@ -1,8 +1,8 @@
 ﻿<Application
-    x:Class="Protocol2.App"
+    x:Class="Squidly.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Protocol2"
+    xmlns:local="using:Squidly"
     RequestedTheme="Light">
 
 
