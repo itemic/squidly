@@ -797,6 +797,33 @@ namespace Squidly
         //selected strokes context menu functionality
         private void DeleteSelectedStrokes(object sender, RoutedEventArgs e)
         {
+            List<Animation> animationsToRemove = new List<Animation>();
+
+            foreach (var inkstroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+            {
+                if (inkstroke.Selected)
+                {
+                    var id = inkstroke.Id;
+                    foreach (Animation a in animations.GetAnimations())
+                    {
+                        foreach (uint stroke in a.inkStrokesId)
+                        {
+                            if (stroke == id)
+                            {
+                                animationsToRemove.Add(a);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+            }
+            foreach (Animation a in animationsToRemove)
+            {
+                animations.GetAnimations().Remove(a);
+                polyCanvas.Children.Remove(a.GetPolyline());
+                polyCanvas.Children.Remove(a.nameText);
+            }
             inkCanvas.InkPresenter.StrokeContainer.DeleteSelected();
             ClearDrawnBoundingRect();
             ClearSelection();
