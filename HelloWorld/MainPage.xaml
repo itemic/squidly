@@ -23,6 +23,14 @@
             <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
             <AppBarSeparator/>
             <AppBarButton Icon="Home" Label="Back to Menu" Click="BackToMenu"/>
+            <AppBarSeparator/>
+            <AppBarButton Icon="Document" Label="Project Goals">
+                <AppBarButton.Flyout>
+                    <Flyout>
+                        <TextBlock Text="WOW"/>
+                    </Flyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
         </CommandBar>
 
         <Grid Grid.Row="1">
