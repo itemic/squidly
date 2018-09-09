@@ -76,10 +76,12 @@ namespace Squidly
             comments = new CommentModel();
             animations = new AnimationModel();
 
+            inkCanvas.InkPresenter.StrokesErased += RemovedStrokes;
+
             //tool bar set up
             inkToolbar.Loading += InitializeInkToolbar;
             inkToolbar.ActiveToolChanged += InkToolbar_ActiveToolChanged;
-
+            
             //binding animations to front end view
             AnimationRepresentation.ItemsSource = animations.GetAnimations();
 
@@ -563,9 +565,41 @@ namespace Squidly
             ClearSelection();
         }
 
+        private void RemovedStrokes(InkPresenter sender, InkStrokesErasedEventArgs args)
+        {
+            List<Animation> animationsToRemove = new List<Animation>();
+            // look for strokes that have animations
+            foreach (var inkstroke in args.Strokes)
+            {
+                var id = inkstroke.Id;
+                foreach (Animation a in animations.GetAnimations())
+                {
+                    foreach (uint stroke in a.inkStrokesId)
+                    {
+                        if (stroke == id)
+                        {
+                            // delete the entire animation if constituent stroke killed
+                            animationsToRemove.Add(a);
+                            Debug.WriteLine("removing...");
+                            break;
+
+                        }
+                    }
+                }
+            }
+
+            foreach (Animation a in animationsToRemove)
+            {
+                animations.GetAnimations().Remove(a);
+                polyCanvas.Children.Remove(a.GetPolyline());
+                polyCanvas.Children.Remove(a.nameText);
+            }
+        }
+
         private void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
         {
             ClearSelection();
+            
         }
 
         private void ClickSelect(object sender, RightTappedRoutedEventArgs args)
