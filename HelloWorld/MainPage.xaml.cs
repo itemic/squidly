@@ -73,6 +73,13 @@ namespace Squidly
                 // Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
+            goalsInkCanvas.InkPresenter.InputDeviceTypes =
+                Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+                // Uncomment the line below if you want to draw with touch
+                // When commented out, long touch to create comment
+                // Windows.UI.Core.CoreInputDeviceTypes.Touch |
+                Windows.UI.Core.CoreInputDeviceTypes.Pen;
+
             comments = new CommentModel();
             animations = new AnimationModel();
 
@@ -268,7 +275,7 @@ namespace Squidly
                 await save.CreateFolder();
             
             }
-            await save.SaveAll(inkCanvas, comments, animations);
+            await save.SaveAll(inkCanvas, goalsInkCanvas, comments, animations);
         }
 
         public void SaveHelper()
@@ -319,7 +326,7 @@ namespace Squidly
                 save = new Save();
             }
 
-            await save.LoadAll(inkCanvas, comments, animations);
+            await save.LoadAll(inkCanvas, goalsInkCanvas, comments, animations);
             SaveHelper();
         }
 
@@ -332,11 +339,11 @@ namespace Squidly
                     save = new Save();
                 }
 
-                await save.LoadAll(inkCanvas, comments, animations);
+                await save.LoadAll(inkCanvas, goalsInkCanvas, comments, animations);
             } else if (e.Parameter is Save)
             {
                 save = e.Parameter as Save;
-                await save.LoadNew(inkCanvas, comments, animations);
+                await save.LoadNew(inkCanvas, goalsInkCanvas, comments, animations);
             }
 
             SaveHelper();

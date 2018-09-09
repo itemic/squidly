@@ -63,7 +63,7 @@ namespace Squidly.Utils
         }
 
 
-        public async Task SaveAll(InkCanvas inkCanvas, CommentModel comments, AnimationModel animations)
+        public async Task SaveAll(InkCanvas inkCanvas, InkCanvas goals, CommentModel comments, AnimationModel animations)
         {
 
             // delete everything first
@@ -78,6 +78,13 @@ namespace Squidly.Utils
             using (IRandomAccessStream streamX = await inkFile.OpenAsync(FileAccessMode.ReadWrite))
             {
                 await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(streamX);
+            }
+
+            // save goals
+            var goalsFile = await projectFolder.CreateFileAsync("GoalsFile.gif", CreationCollisionOption.ReplaceExisting);
+            using (IRandomAccessStream streamX = await goalsFile.OpenAsync(FileAccessMode.ReadWrite))
+            {
+                await goals.InkPresenter.StrokeContainer.SaveAsync(streamX);
             }
 
             // save animations
@@ -148,7 +155,7 @@ namespace Squidly.Utils
             }
         }
 
-        public async Task LoadNew(InkCanvas inkCanvas, CommentModel commentModel, AnimationModel animationModel)
+        public async Task LoadNew(InkCanvas inkCanvas, InkCanvas goals, CommentModel commentModel, AnimationModel animationModel)
         {
             if (projectFolder != null)
             {
@@ -163,8 +170,15 @@ namespace Squidly.Utils
                             await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
                         }
                         stream.Dispose();
-                    }
-                    else if (file.Name.Equals("comments.txt"))
+                    } else if (file.Name.Equals("GoalsFile.gif"))
+                    {
+                        IRandomAccessStream stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read);
+                        using (var inputStream = stream.GetInputStreamAt(0))
+                        {
+                            await goals.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                        }
+                        stream.Dispose();
+                    } else if (file.Name.Equals("comments.txt"))
                     {
                         string text = await FileIO.ReadTextAsync(file);
                         string[] components = text.Split('\n');
@@ -219,7 +233,7 @@ namespace Squidly.Utils
             }
         }
 
-        public async Task LoadAll(InkCanvas inkCanvas, CommentModel commentModel, AnimationModel animationModel)
+        public async Task LoadAll(InkCanvas inkCanvas, InkCanvas goals, CommentModel commentModel, AnimationModel animationModel)
         {
             commentModel.GetComments().Clear();
             animationModel.GetAnimations().Clear();
@@ -229,7 +243,7 @@ namespace Squidly.Utils
 
             projectFolder = await folderPicker.PickSingleFolderAsync();
 
-            await LoadNew(inkCanvas, commentModel, animationModel);
+            await LoadNew(inkCanvas, goals, commentModel, animationModel);
             
         }
         

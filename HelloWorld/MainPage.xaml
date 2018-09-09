@@ -26,8 +26,14 @@
             <AppBarSeparator/>
             <AppBarButton Icon="Document" Label="Project Goals">
                 <AppBarButton.Flyout>
-                    <Flyout>
-                        <TextBlock Text="WOW"/>
+                    <Flyout LightDismissOverlayMode="On">
+                        <StackPanel>
+                            <TextBlock Text="Project Goals" FontSize="32"/>
+                            <Grid Background="GhostWhite">
+                                <InkCanvas x:Name="goalsInkCanvas" Height="400" Width="400"/>
+                            </Grid>
+                            <InkToolbar x:Name="goalsInkToolbar" TargetInkCanvas="{x:Bind goalsInkCanvas}" HorizontalAlignment="Center"/>
+                        </StackPanel>
                     </Flyout>
                 </AppBarButton.Flyout>
             </AppBarButton>
