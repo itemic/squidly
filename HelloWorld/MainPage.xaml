@@ -82,7 +82,7 @@
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF128;"/>
                 </AppBarToggleButton>
                 <AppBarSeparator/>
-                <AppBarToggleButton x:Name="resetButton" Label="Return to start position">
+                <AppBarToggleButton x:Name="resetButton" Label="Reset positions after animation">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB97;"/>
                 </AppBarToggleButton>
                 <AppBarToggleButton Icon="RepeatAll" Label="Repeat"/>
