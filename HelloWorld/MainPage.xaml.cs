@@ -18,6 +18,7 @@ using Windows.UI.Core;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Data;
 using System.Numerics;
+using Windows.UI.Popups;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -1171,11 +1172,18 @@ namespace Squidly
             TextBox renameTextbox = (TextBox)sender;
             String userInput = renameTextbox.Text.Trim();
 
-            if (userInput.Length > 0)
+            if (userInput.Length > 0 && !animations.DoesNameExist(userInput))
             {
+                renameTextbox.BorderBrush = new SolidColorBrush(Colors.Green);
                 renameDialog.IsPrimaryButtonEnabled = true;
-            } else
+            } else if (animations.DoesNameExist(userInput))
             {
+                renameTextbox.BorderBrush = new SolidColorBrush(Colors.Red);
+                renameDialog.IsPrimaryButtonEnabled = false;
+            }
+            else
+            {
+                renameTextbox.BorderBrush = new SolidColorBrush(Colors.Red);
                 renameDialog.IsPrimaryButtonEnabled = false;
             }
         }

@@ -141,9 +141,6 @@ namespace Squidly.Utils
             animations = new ObservableCollection<Animation>();
         }
 
-
-
-
         public void Add(Animation animation)
         {
             animations.Add(animation);
@@ -178,7 +175,16 @@ namespace Squidly.Utils
             animation.Name = newName;
         }
 
-
-
+        public bool DoesNameExist(String name)
+        {
+            foreach(Animation a in animations)
+            {
+                if (a.Name == name)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
