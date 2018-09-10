@@ -18,7 +18,6 @@ using Windows.UI.Core;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Data;
 using System.Numerics;
-using Windows.System.Threading;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -679,6 +678,10 @@ namespace Squidly
                 }
 
                 updatedBoundingBox = new Rect(updatedLeftX, updatedTopY, updatedRightX - updatedLeftX, updatedBottomY - updatedTopY);
+            }
+            foreach (InkStroke stroke in strokes)
+            {
+                stroke.Selected = false;
             }
             return updatedBoundingBox;
         }
