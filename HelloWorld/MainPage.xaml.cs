@@ -805,9 +805,6 @@ namespace Squidly
                 };
                 polyline.Points.Add(p.CurrentPoint.Position);
                 polyCanvas.Children.Add(polyline);
-
-
-
             }
 
             void moved(InkUnprocessedInput i, PointerEventArgs p)
@@ -827,6 +824,7 @@ namespace Squidly
                 inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= released;
                 ClearAllHandlers();
                 Animation anime = new Animation();
+                anime.IsEnabled = false;
                 foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
                 {
                     if (stroke.Selected)
@@ -1156,7 +1154,7 @@ namespace Squidly
             if (userAction == ContentDialogResult.Primary)
             {
                 Animation nameChange = animations.GetAnimationAt(index);
-                RenameAnimation(renameUserInput.Text, nameChange);
+                RenameAnimation(renameUserInput.Text.Trim(), nameChange);
             }
         }
 
@@ -1168,6 +1166,7 @@ namespace Squidly
         private void UserInputTextChanged(object sender, RoutedEventArgs e)
         {
             TextBox renameTextbox = (TextBox)sender;
+            userInputError.Text = "";
             String userInput = renameTextbox.Text.Trim();
 
             if (userInput.Length > 0 && !animations.DoesNameExist(userInput))
@@ -1178,11 +1177,13 @@ namespace Squidly
             {
                 renameTextbox.BorderBrush = new SolidColorBrush(Colors.Red);
                 renameDialog.IsPrimaryButtonEnabled = false;
+                userInputError.Text = "Name already exists";
             }
             else
             {
                 renameTextbox.BorderBrush = new SolidColorBrush(Colors.Red);
                 renameDialog.IsPrimaryButtonEnabled = false;
+                userInputError.Text = "Please enter valid characters";
             }
         }
 

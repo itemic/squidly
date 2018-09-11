@@ -116,7 +116,10 @@
                    Title="Rename animation"
                    PrimaryButtonText="Ok" IsPrimaryButtonEnabled="False"
                    CloseButtonText="Cancel">
-                <TextBox x:Name="renameUserInput" PlaceholderText="Please enter new name here" TextChanged="UserInputTextChanged" Height="20"/>
+                <StackPanel>
+                    <TextBox x:Name="renameUserInput" PlaceholderText="Please enter new name here" TextChanged="UserInputTextChanged" Height="20"/>
+                    <TextBlock x:Name="userInputError" Text="" Foreground="Red"/>
+                </StackPanel>
             </ContentDialog>
         </Grid>
     </Grid>
