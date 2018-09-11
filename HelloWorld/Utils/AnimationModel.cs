@@ -102,7 +102,6 @@ namespace Squidly.Utils
 
         public bool IsEnabled
         {
-
             get { return this.isEnabled; }
             set
             {

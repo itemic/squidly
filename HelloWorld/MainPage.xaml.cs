@@ -46,6 +46,7 @@ namespace Squidly
         public bool isAnimationMode = false;
         private AnimationModel animations;
         private Object moveSelectedLock = new Object();
+        private int animationsRunningCount = 0;
     
 
         // different mouse looks for normal and when mouse in selected box
@@ -824,7 +825,6 @@ namespace Squidly
                 inkCanvas.InkPresenter.UnprocessedInput.PointerReleased -= released;
                 ClearAllHandlers();
                 Animation anime = new Animation();
-                anime.IsEnabled = false;
                 foreach (var stroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
                 {
                     if (stroke.Selected)
@@ -839,12 +839,10 @@ namespace Squidly
                 inkToolbar.ActiveTool = currentTool;
                 inkToolbar.Children.Remove(animationPen);
                 var container = inkCanvas.InkPresenter.StrokeContainer;
-
                 animations.Add(anime);
 
-
                 await RunAnimation(anime, true);
-                selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
+                selectionCanvas.Visibility = Visibility.Visible;
 
                 ClearSelection();
                 runAllAnimationsButton.IsEnabled = true;
@@ -912,7 +910,7 @@ namespace Squidly
 
         private async Task RunAnimation(Animation animation, bool revert)
         {
-            //TODO: Check if the inkstrokes of the animation still exists...
+            animationsRunningCount++;
             List<InkStroke> strokesToAnimate = new List<InkStroke>();
             ClearSelection();
 
@@ -993,6 +991,8 @@ namespace Squidly
                 stroke.Selected = false;
             }
 
+            animationsRunningCount--;
+
         }
 
         private Rect FindCurrentPositionForAnimation(List<InkStroke> strokes)
@@ -1038,8 +1038,9 @@ namespace Squidly
             {
                 a.IsEnabled = true;
             }
-            runAllAnimationsButton.IsEnabled = true;
 
+            runAllAnimationsButton.IsEnabled = animationsRunningCount == 0;
+  
         }
 
         //replay selected animation
@@ -1052,10 +1053,10 @@ namespace Squidly
             a.IsEnabled = false;
 
             int index = a.id;
-            var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
+            var replayAnimation = animations.GetAnimationAt(index);
             await RunAnimation(replayAnimation, resetButton.IsChecked == true);
 
-            runAllAnimationsButton.IsEnabled = true;
+            runAllAnimationsButton.IsEnabled = animationsRunningCount == 0;
             a.IsEnabled = true;
         }
 
