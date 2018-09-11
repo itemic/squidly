@@ -179,7 +179,7 @@ namespace Squidly.Utils
         {
             foreach(Animation a in animations)
             {
-                if (a.Name == name)
+                if (a.Name.Equals(name))
                 {
                     return true;
                 }

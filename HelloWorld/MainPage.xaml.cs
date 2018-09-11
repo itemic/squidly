@@ -18,7 +18,6 @@ using Windows.UI.Core;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Data;
 using System.Numerics;
-using Windows.UI.Popups;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -46,7 +45,6 @@ namespace Squidly
         //fields for animation related functionality
         public bool isAnimationMode = false;
         private AnimationModel animations;
-        private bool areAllAnimationsRunning = false;
         private Object moveSelectedLock = new Object();
     
 
@@ -680,10 +678,6 @@ namespace Squidly
 
                 updatedBoundingBox = new Rect(updatedLeftX, updatedTopY, updatedRightX - updatedLeftX, updatedBottomY - updatedTopY);
             }
-            foreach (InkStroke stroke in strokes)
-            {
-                stroke.Selected = false;
-            }
             return updatedBoundingBox;
         }
 
@@ -955,7 +949,7 @@ namespace Squidly
             Rect currentPosition; 
             lock (moveSelectedLock)
             {
-                currentPosition = FindBoundingRect(strokesToAnimate);
+                currentPosition = FindCurrentPositionForAnimation(strokesToAnimate);
             }
 
             foreach (InkStroke stroke in strokesToAnimate)
@@ -982,7 +976,7 @@ namespace Squidly
             {
                 lock (moveSelectedLock)
                 {
-                    currentPosition = FindBoundingRect(strokesToAnimate);
+                    currentPosition = FindCurrentPositionForAnimation(strokesToAnimate);
                 }
 
                 foreach (InkStroke stroke in strokesToAnimate)
@@ -1001,6 +995,22 @@ namespace Squidly
                 stroke.Selected = false;
             }
 
+        }
+
+        private Rect FindCurrentPositionForAnimation(List<InkStroke> strokes)
+        {
+            foreach (InkStroke stroke in strokes)
+            {
+                stroke.Selected = true;
+            }
+            boundingRect = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+            
+            foreach (InkStroke stroke in strokes)
+            {
+                Debug.WriteLine("hi there");
+                stroke.Selected = false;
+            }
+            return boundingRect;
         }
 
         private async void RunAllAnimations(object sender, RoutedEventArgs e)
@@ -1106,18 +1116,6 @@ namespace Squidly
                 animations.RemoveAnimation(index);
             }
             
-        }
-
-        //currently not doing anything
-        private void SettingsAnimation(object sender, RoutedEventArgs e)
-        {
-            Button b = sender as Button;
-
-            Animation a = b.DataContext as Animation;
-            int index = a.id;
-
-            Flyout f = new Flyout();
-            b.Flyout = f;
         }
 
         /*
