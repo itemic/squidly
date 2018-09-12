@@ -257,7 +257,7 @@ namespace Squidly
             toastText.Text = message;
             Flyout.ShowAttachedFlyout(animationToolBar);
 
-            await Task.Delay(3000);
+            await Task.Delay(2300);
             var flyout = Flyout.GetAttachedFlyout(animationToolBar);
             flyout.Hide();
             

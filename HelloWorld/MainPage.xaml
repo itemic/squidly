@@ -77,13 +77,16 @@
                     <Flyout>
                         <Flyout.FlyoutPresenterStyle>
                             <Style TargetType="FlyoutPresenter">
-                                <Setter Property="Background" Value="#1976d2"/>
+                                <Setter Property="Background" Value="Transparent"/>
                                 <Setter Property="Foreground" Value="White"/>
-                                <Setter Property="BorderBrush" Value="#1976d2"/>
-                                
+                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+
                             </Style>
                         </Flyout.FlyoutPresenterStyle>
-                        <TextBlock x:Name="toastText" Text="" HorizontalAlignment="Center" />
+                        <Border BorderBrush="#43a047" CornerRadius="3" Height="37" Width="160" Background="#43a047">
+                            <TextBlock x:Name="toastText" Text="" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"/>
+                        </Border>
                     </Flyout>
                 </FlyoutBase.AttachedFlyout>
             </CommandBar>
