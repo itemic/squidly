@@ -252,6 +252,17 @@ namespace Squidly
             this.Frame.Navigate(typeof(Home));
         }
 
+        private async void ShowToast(String message)
+        {
+            toastText.Text = message;
+            Flyout.ShowAttachedFlyout(animationToolBar);
+
+            await Task.Delay(3000);
+            var flyout = Flyout.GetAttachedFlyout(animationToolBar);
+            flyout.Hide();
+            
+        }
+
         /*
          * Saving and loading functionality
          * */
@@ -266,6 +277,7 @@ namespace Squidly
             
             }
             await save.SaveAll(inkCanvas, comments, animations);
+            ShowToast("Saved!");
         }
 
         public void SaveHelper()

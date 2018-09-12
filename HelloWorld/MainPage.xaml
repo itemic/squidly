@@ -72,6 +72,17 @@
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB97;"/>
                 </AppBarToggleButton>
                 <AppBarToggleButton Icon="RepeatAll" Label="Repeat"/>
+                <FlyoutBase.AttachedFlyout>
+                    <Flyout>
+                        <Flyout.FlyoutPresenterStyle>
+                            <Style TargetType="FlyoutPresenter">
+                                <Setter Property="Height" Value="20"/>
+                                <Setter Property="Width" Value="20"/>
+                            </Style>
+                        </Flyout.FlyoutPresenterStyle>
+                        <TextBlock x:Name="toastText" Text="" HorizontalAlignment="Center"/>
+                    </Flyout>
+                </FlyoutBase.AttachedFlyout>
             </CommandBar>
 
             <Canvas Grid.Row="1" x:Name="timelineCanvas" Loaded="TimeLineCanvasLoaded">
