@@ -18,7 +18,6 @@ using Windows.UI.Core;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Data;
 using System.Numerics;
-using Windows.UI.Popups;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -46,8 +45,8 @@ namespace Squidly
         //fields for animation related functionality
         public bool isAnimationMode = false;
         private AnimationModel animations;
-        private bool areAllAnimationsRunning = false;
         private Object moveSelectedLock = new Object();
+        private int animationsRunningCount = 0;
     
 
         // different mouse looks for normal and when mouse in selected box
@@ -721,10 +720,6 @@ namespace Squidly
 
                 updatedBoundingBox = new Rect(updatedLeftX, updatedTopY, updatedRightX - updatedLeftX, updatedBottomY - updatedTopY);
             }
-            foreach (InkStroke stroke in strokes)
-            {
-                stroke.Selected = false;
-            }
             return updatedBoundingBox;
         }
 
@@ -879,9 +874,6 @@ namespace Squidly
                 };
                 polyline.Points.Add(p.CurrentPoint.Position);
                 polyCanvas.Children.Add(polyline);
-
-
-
             }
 
             void moved(InkUnprocessedInput i, PointerEventArgs p)
@@ -915,12 +907,10 @@ namespace Squidly
                 inkToolbar.ActiveTool = currentTool;
                 inkToolbar.Children.Remove(animationPen);
                 var container = inkCanvas.InkPresenter.StrokeContainer;
-
                 animations.Add(anime);
 
-
                 await RunAnimation(anime, true);
-                selectionCanvas.Visibility = Visibility.Visible; // this is actually a workaround, we just want to hide the current selection box
+                selectionCanvas.Visibility = Visibility.Visible;
 
                 ClearSelection();
                 runAllAnimationsButton.IsEnabled = true;
@@ -988,7 +978,7 @@ namespace Squidly
 
         private async Task RunAnimation(Animation animation, bool revert)
         {
-            //TODO: Check if the inkstrokes of the animation still exists...
+            animationsRunningCount++;
             List<InkStroke> strokesToAnimate = new List<InkStroke>();
             ClearSelection();
 
@@ -1023,7 +1013,7 @@ namespace Squidly
             Rect currentPosition; 
             lock (moveSelectedLock)
             {
-                currentPosition = FindBoundingRect(strokesToAnimate);
+                currentPosition = FindCurrentPositionForAnimation(strokesToAnimate);
             }
 
             foreach (InkStroke stroke in strokesToAnimate)
@@ -1050,7 +1040,7 @@ namespace Squidly
             {
                 lock (moveSelectedLock)
                 {
-                    currentPosition = FindBoundingRect(strokesToAnimate);
+                    currentPosition = FindCurrentPositionForAnimation(strokesToAnimate);
                 }
 
                 foreach (InkStroke stroke in strokesToAnimate)
@@ -1069,6 +1059,24 @@ namespace Squidly
                 stroke.Selected = false;
             }
 
+            animationsRunningCount--;
+
+        }
+
+        private Rect FindCurrentPositionForAnimation(List<InkStroke> strokes)
+        {
+            foreach (InkStroke stroke in strokes)
+            {
+                stroke.Selected = true;
+            }
+            boundingRect = inkCanvas.InkPresenter.StrokeContainer.MoveSelected(new Point(0, 0));
+            
+            foreach (InkStroke stroke in strokes)
+            {
+                Debug.WriteLine("hi there");
+                stroke.Selected = false;
+            }
+            return boundingRect;
         }
 
         private async void RunAllAnimations(object sender, RoutedEventArgs e)
@@ -1098,8 +1106,9 @@ namespace Squidly
             {
                 a.IsEnabled = true;
             }
-            runAllAnimationsButton.IsEnabled = true;
 
+            runAllAnimationsButton.IsEnabled = animationsRunningCount == 0;
+  
         }
 
         //replay selected animation
@@ -1112,10 +1121,10 @@ namespace Squidly
             a.IsEnabled = false;
 
             int index = a.id;
-            var replayAnimation = animations.GetAnimationAt(index); // won't work once we start deleting
+            var replayAnimation = animations.GetAnimationAt(index);
             await RunAnimation(replayAnimation, resetButton.IsChecked == true);
 
-            runAllAnimationsButton.IsEnabled = true;
+            runAllAnimationsButton.IsEnabled = animationsRunningCount == 0;
             a.IsEnabled = true;
         }
 
@@ -1176,18 +1185,6 @@ namespace Squidly
             
         }
 
-        //currently not doing anything
-        private void SettingsAnimation(object sender, RoutedEventArgs e)
-        {
-            Button b = sender as Button;
-
-            Animation a = b.DataContext as Animation;
-            int index = a.id;
-
-            Flyout f = new Flyout();
-            b.Flyout = f;
-        }
-
         /*
          * methods for animation mode
          * */
@@ -1226,7 +1223,7 @@ namespace Squidly
             if (userAction == ContentDialogResult.Primary)
             {
                 Animation nameChange = animations.GetAnimationAt(index);
-                RenameAnimation(renameUserInput.Text, nameChange);
+                RenameAnimation(renameUserInput.Text.Trim(), nameChange);
             }
         }
 
@@ -1238,6 +1235,7 @@ namespace Squidly
         private void UserInputTextChanged(object sender, RoutedEventArgs e)
         {
             TextBox renameTextbox = (TextBox)sender;
+            userInputError.Text = "";
             String userInput = renameTextbox.Text.Trim();
 
             if (userInput.Length > 0 && !animations.DoesNameExist(userInput))
@@ -1248,11 +1246,13 @@ namespace Squidly
             {
                 renameTextbox.BorderBrush = new SolidColorBrush(Colors.Red);
                 renameDialog.IsPrimaryButtonEnabled = false;
+                userInputError.Text = "Name already exists";
             }
             else
             {
                 renameTextbox.BorderBrush = new SolidColorBrush(Colors.Red);
                 renameDialog.IsPrimaryButtonEnabled = false;
+                userInputError.Text = "Please enter valid characters";
             }
         }
 

@@ -97,7 +97,7 @@
 
                             <StackPanel Background="{StaticResource animationWindowBackground}" Height="55">
                                 <Canvas>
-                                    <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" PointerEntered="Query" PointerExited="QueryStop" ManipulationDelta="DragAnimationChunk" ToolTipService.ToolTip="{Binding name}" Canvas.Left="{Binding position}">
+                                    <Border Background="{StaticResource animationBlockColor}" ManipulationMode="TranslateX" PointerEntered="Query" PointerExited="QueryStop" ManipulationDelta="DragAnimationChunk" ToolTipService.ToolTip="{Binding Name}" Canvas.Left="{Binding position}">
                                         <StackPanel Grid.Column="1" Width="{Binding length}" >
                                             <TextBlock Text="{Binding Name}" HorizontalAlignment="Center"/>
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -130,7 +130,10 @@
                    Title="Rename animation"
                    PrimaryButtonText="Ok" IsPrimaryButtonEnabled="False"
                    CloseButtonText="Cancel">
-                <TextBox x:Name="renameUserInput" PlaceholderText="Please enter new name here" TextChanged="UserInputTextChanged" Height="20"/>
+                <StackPanel>
+                    <TextBox x:Name="renameUserInput" PlaceholderText="Please enter new name here" TextChanged="UserInputTextChanged" Height="20"/>
+                    <TextBlock x:Name="userInputError" Text="" Foreground="Red"/>
+                </StackPanel>
             </ContentDialog>
         </Grid>
     </Grid>
