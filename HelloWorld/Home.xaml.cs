@@ -62,12 +62,15 @@ namespace Squidly
 
             var project = await folderPicker.PickSingleFolderAsync();
 
-            Save save = new Save();
-            save.SetFolder(project);
+            if (project != null)
+            {
+                Save save = new Save();
+                save.SetFolder(project);
 
 
-            this.Frame.Navigate(typeof(MainPage), save);
-            
+                this.Frame.Navigate(typeof(MainPage), save);
+            }
+
         }
 
         private void LoadItem(object sender, ItemClickEventArgs e)

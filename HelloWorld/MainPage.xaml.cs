@@ -72,13 +72,22 @@ namespace Squidly
                 // Windows.UI.Core.CoreInputDeviceTypes.Touch |
                 Windows.UI.Core.CoreInputDeviceTypes.Pen;
 
+            goalsInkCanvas.InkPresenter.InputDeviceTypes =
+                Windows.UI.Core.CoreInputDeviceTypes.Mouse |
+                // Uncomment the line below if you want to draw with touch
+                // When commented out, long touch to create comment
+                // Windows.UI.Core.CoreInputDeviceTypes.Touch |
+                Windows.UI.Core.CoreInputDeviceTypes.Pen;
+
             comments = new CommentModel();
             animations = new AnimationModel();
+
+            inkCanvas.InkPresenter.StrokesErased += RemovedStrokes;
 
             //tool bar set up
             inkToolbar.Loading += InitializeInkToolbar;
             inkToolbar.ActiveToolChanged += InkToolbar_ActiveToolChanged;
-
+            
             //binding animations to front end view
             AnimationRepresentation.ItemsSource = animations.GetAnimations();
 
@@ -276,8 +285,10 @@ namespace Squidly
                 await save.CreateFolder();
             
             }
-            await save.SaveAll(inkCanvas, comments, animations);
+
+            await save.SaveAll(inkCanvas, goalsInkCanvas, comments, animations);
             DisplayToast("Work saved");
+
         }
 
         public void SaveHelper()
@@ -328,7 +339,7 @@ namespace Squidly
                 save = new Save();
             }
 
-            await save.LoadAll(inkCanvas, comments, animations);
+            await save.LoadAll(inkCanvas, goalsInkCanvas, comments, animations);
             SaveHelper();
         }
 
@@ -341,11 +352,11 @@ namespace Squidly
                     save = new Save();
                 }
 
-                await save.LoadAll(inkCanvas, comments, animations);
+                await save.LoadAll(inkCanvas, goalsInkCanvas, comments, animations);
             } else if (e.Parameter is Save)
             {
                 save = e.Parameter as Save;
-                await save.LoadNew(inkCanvas, comments, animations);
+                await save.LoadNew(inkCanvas, goalsInkCanvas, comments, animations);
             }
 
             SaveHelper();
@@ -574,9 +585,41 @@ namespace Squidly
             ClearSelection();
         }
 
+        private void RemovedStrokes(InkPresenter sender, InkStrokesErasedEventArgs args)
+        {
+            List<Animation> animationsToRemove = new List<Animation>();
+            // look for strokes that have animations
+            foreach (var inkstroke in args.Strokes)
+            {
+                var id = inkstroke.Id;
+                foreach (Animation a in animations.GetAnimations())
+                {
+                    foreach (uint stroke in a.inkStrokesId)
+                    {
+                        if (stroke == id)
+                        {
+                            // delete the entire animation if constituent stroke killed
+                            animationsToRemove.Add(a);
+                            Debug.WriteLine("removing...");
+                            break;
+
+                        }
+                    }
+                }
+            }
+
+            foreach (Animation a in animationsToRemove)
+            {
+                animations.GetAnimations().Remove(a);
+                polyCanvas.Children.Remove(a.GetPolyline());
+                polyCanvas.Children.Remove(a.nameText);
+            }
+        }
+
         private void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
         {
             ClearSelection();
+            
         }
 
         private void ClickSelect(object sender, RightTappedRoutedEventArgs args)
@@ -774,6 +817,33 @@ namespace Squidly
         //selected strokes context menu functionality
         private void DeleteSelectedStrokes(object sender, RoutedEventArgs e)
         {
+            List<Animation> animationsToRemove = new List<Animation>();
+
+            foreach (var inkstroke in inkCanvas.InkPresenter.StrokeContainer.GetStrokes())
+            {
+                if (inkstroke.Selected)
+                {
+                    var id = inkstroke.Id;
+                    foreach (Animation a in animations.GetAnimations())
+                    {
+                        foreach (uint stroke in a.inkStrokesId)
+                        {
+                            if (stroke == id)
+                            {
+                                animationsToRemove.Add(a);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+            }
+            foreach (Animation a in animationsToRemove)
+            {
+                animations.GetAnimations().Remove(a);
+                polyCanvas.Children.Remove(a.GetPolyline());
+                polyCanvas.Children.Remove(a.nameText);
+            }
             inkCanvas.InkPresenter.StrokeContainer.DeleteSelected();
             ClearDrawnBoundingRect();
             ClearSelection();

@@ -24,6 +24,20 @@
             <AppBarButton Icon="OpenFile" Label="Load" Click="LoadAll"/>
             <AppBarSeparator/>
             <AppBarButton Icon="Home" Label="Back to Menu" Click="BackToMenu"/>
+            <AppBarSeparator/>
+            <AppBarButton Icon="Document" Label="Project Goals">
+                <AppBarButton.Flyout>
+                    <Flyout LightDismissOverlayMode="On">
+                        <StackPanel>
+                            <TextBlock Text="Project Goals" FontSize="32"/>
+                            <Grid Background="GhostWhite">
+                                <InkCanvas x:Name="goalsInkCanvas" Height="400" Width="400"/>
+                            </Grid>
+                            <InkToolbar x:Name="goalsInkToolbar" TargetInkCanvas="{x:Bind goalsInkCanvas}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Flyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
         </CommandBar>
 
         <Grid Grid.Row="1">
