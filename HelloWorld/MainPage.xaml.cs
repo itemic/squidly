@@ -252,7 +252,7 @@ namespace Squidly
             this.Frame.Navigate(typeof(Home));
         }
 
-        private async void ShowToast(String message)
+        private async void DisplayToast(String message)
         {
             toastText.Text = message;
             Flyout.ShowAttachedFlyout(animationToolBar);
@@ -277,7 +277,7 @@ namespace Squidly
             
             }
             await save.SaveAll(inkCanvas, comments, animations);
-            ShowToast("Saved!");
+            DisplayToast("Work saved");
         }
 
         public void SaveHelper()
@@ -909,6 +909,8 @@ namespace Squidly
             {
                 ClearSelection();
             }
+
+            DisplayToast("Strokes grouped");
         }
 
 

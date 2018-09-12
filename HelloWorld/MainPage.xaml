@@ -9,6 +9,7 @@
     <Page.Resources>
         <SolidColorBrush x:Key="animationWindowBackground" Color="#dbe1e3"/>
         <SolidColorBrush x:Key="animationBlockColor" Color="#E09F3E"/>
+        <SolidColorBrush x:Key="windowsBlue" Color="#0050c7"/>
     </Page.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="mainGrid">
@@ -76,11 +77,13 @@
                     <Flyout>
                         <Flyout.FlyoutPresenterStyle>
                             <Style TargetType="FlyoutPresenter">
-                                <Setter Property="Height" Value="20"/>
-                                <Setter Property="Width" Value="20"/>
+                                <Setter Property="Background" Value="#1976d2"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="BorderBrush" Value="#1976d2"/>
+                                
                             </Style>
                         </Flyout.FlyoutPresenterStyle>
-                        <TextBlock x:Name="toastText" Text="" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="toastText" Text="" HorizontalAlignment="Center" />
                     </Flyout>
                 </FlyoutBase.AttachedFlyout>
             </CommandBar>
