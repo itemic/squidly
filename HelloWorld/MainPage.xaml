@@ -9,6 +9,7 @@
     <Page.Resources>
         <SolidColorBrush x:Key="animationWindowBackground" Color="#dbe1e3"/>
         <SolidColorBrush x:Key="animationBlockColor" Color="#E09F3E"/>
+        <SolidColorBrush x:Key="windowsBlue" Color="#0050c7"/>
     </Page.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" x:Name="mainGrid">
@@ -86,6 +87,22 @@
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB97;"/>
                 </AppBarToggleButton>
                 <AppBarToggleButton Icon="RepeatAll" Label="Repeat"/>
+                <FlyoutBase.AttachedFlyout>
+                    <Flyout>
+                        <Flyout.FlyoutPresenterStyle>
+                            <Style TargetType="FlyoutPresenter">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+
+                            </Style>
+                        </Flyout.FlyoutPresenterStyle>
+                        <Border BorderBrush="#43a047" CornerRadius="3" Height="37" Width="160" Background="#43a047">
+                            <TextBlock x:Name="toastText" Text="" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"/>
+                        </Border>
+                    </Flyout>
+                </FlyoutBase.AttachedFlyout>
             </CommandBar>
 
             <Canvas Grid.Row="1" x:Name="timelineCanvas" Loaded="TimeLineCanvasLoaded">

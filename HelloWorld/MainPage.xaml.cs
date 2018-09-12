@@ -261,6 +261,17 @@ namespace Squidly
             this.Frame.Navigate(typeof(Home));
         }
 
+        private async void DisplayToast(String message)
+        {
+            toastText.Text = message;
+            Flyout.ShowAttachedFlyout(animationToolBar);
+
+            await Task.Delay(2300);
+            var flyout = Flyout.GetAttachedFlyout(animationToolBar);
+            flyout.Hide();
+            
+        }
+
         /*
          * Saving and loading functionality
          * */
@@ -274,7 +285,10 @@ namespace Squidly
                 await save.CreateFolder();
             
             }
+
             await save.SaveAll(inkCanvas, goalsInkCanvas, comments, animations);
+            DisplayToast("Work saved");
+
         }
 
         public void SaveHelper()
@@ -965,6 +979,8 @@ namespace Squidly
             {
                 ClearSelection();
             }
+
+            DisplayToast("Strokes grouped");
         }
 
 
